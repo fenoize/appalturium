@@ -97,7 +97,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
               <Building2 className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-foreground">ClimaTech</h1>
+              <h1 className="text-lg font-semibold text-foreground">ALTURIUM</h1>
               <p className="text-xs text-muted-foreground">Sistema Logístico</p>
             </div>
           </div>

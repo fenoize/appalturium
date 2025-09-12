@@ -31,7 +31,7 @@ const Index = () => {
         <main className="flex-1 p-6 space-y-6">
           {/* Welcome Section */}
           <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
-            <h1 className="text-3xl font-bold mb-2">¡Bienvenido al Sistema ClimaTech!</h1>
+            <h1 className="text-3xl font-bold mb-2">¡Bienvenido al Sistema ALTURIUM!</h1>
             <p className="text-primary-foreground/80">
               Gestiona eficientemente tu negocio de climatización y energía fotovoltaica
             </p>
