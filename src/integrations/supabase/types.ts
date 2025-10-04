@@ -14,16 +14,231 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clientes: {
+        Row: {
+          apellidos: string | null
+          created_at: string | null
+          email: string | null
+          etiquetas: string[] | null
+          giro: string | null
+          id: string
+          nombres: string | null
+          notas: string | null
+          razon_social: string | null
+          rut: string
+          telefono: string | null
+          tipo: Database["public"]["Enums"]["tipo_cliente"]
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          apellidos?: string | null
+          created_at?: string | null
+          email?: string | null
+          etiquetas?: string[] | null
+          giro?: string | null
+          id?: string
+          nombres?: string | null
+          notas?: string | null
+          razon_social?: string | null
+          rut: string
+          telefono?: string | null
+          tipo: Database["public"]["Enums"]["tipo_cliente"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          apellidos?: string | null
+          created_at?: string | null
+          email?: string | null
+          etiquetas?: string[] | null
+          giro?: string | null
+          id?: string
+          nombres?: string | null
+          notas?: string | null
+          razon_social?: string | null
+          rut?: string
+          telefono?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_cliente"]
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      contactos: {
+        Row: {
+          cliente_id: string
+          created_at: string | null
+          email: string | null
+          es_principal: boolean | null
+          id: string
+          nombre: string
+          notas: string | null
+          rol_contextual: string | null
+          telefono: string | null
+          tipo_contacto_empresa:
+            | Database["public"]["Enums"]["tipo_contacto_empresa"]
+            | null
+          tipo_contacto_persona:
+            | Database["public"]["Enums"]["tipo_contacto_persona"]
+            | null
+          ubicacion_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string | null
+          email?: string | null
+          es_principal?: boolean | null
+          id?: string
+          nombre: string
+          notas?: string | null
+          rol_contextual?: string | null
+          telefono?: string | null
+          tipo_contacto_empresa?:
+            | Database["public"]["Enums"]["tipo_contacto_empresa"]
+            | null
+          tipo_contacto_persona?:
+            | Database["public"]["Enums"]["tipo_contacto_persona"]
+            | null
+          ubicacion_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string | null
+          email?: string | null
+          es_principal?: boolean | null
+          id?: string
+          nombre?: string
+          notas?: string | null
+          rol_contextual?: string | null
+          telefono?: string | null
+          tipo_contacto_empresa?:
+            | Database["public"]["Enums"]["tipo_contacto_empresa"]
+            | null
+          tipo_contacto_persona?:
+            | Database["public"]["Enums"]["tipo_contacto_persona"]
+            | null
+          ubicacion_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contactos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contactos_ubicacion_id_fkey"
+            columns: ["ubicacion_id"]
+            isOneToOne: false
+            referencedRelation: "ubicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ubicaciones: {
+        Row: {
+          alias: string
+          ciudad: string
+          cliente_id: string
+          comuna: string
+          created_at: string | null
+          direccion: string
+          id: string
+          lat: number | null
+          lng: number | null
+          por_defecto: boolean | null
+          region: string
+          tipo: Database["public"]["Enums"]["tipo_ubicacion"]
+          updated_at: string | null
+        }
+        Insert: {
+          alias: string
+          ciudad: string
+          cliente_id: string
+          comuna: string
+          created_at?: string | null
+          direccion: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          por_defecto?: boolean | null
+          region: string
+          tipo: Database["public"]["Enums"]["tipo_ubicacion"]
+          updated_at?: string | null
+        }
+        Update: {
+          alias?: string
+          ciudad?: string
+          cliente_id?: string
+          comuna?: string
+          created_at?: string | null
+          direccion?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          por_defecto?: boolean | null
+          region?: string
+          tipo?: Database["public"]["Enums"]["tipo_ubicacion"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ubicaciones_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "supervisor" | "cliente"
+      tipo_cliente: "empresa" | "persona"
+      tipo_contacto_empresa:
+        | "administrador_sucursal"
+        | "encargado_proyecto"
+        | "otro"
+      tipo_contacto_persona: "pareja" | "hijo" | "secundario" | "otro"
+      tipo_ubicacion: "sucursal" | "domicilio"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +365,16 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "supervisor", "cliente"],
+      tipo_cliente: ["empresa", "persona"],
+      tipo_contacto_empresa: [
+        "administrador_sucursal",
+        "encargado_proyecto",
+        "otro",
+      ],
+      tipo_contacto_persona: ["pareja", "hijo", "secundario", "otro"],
+      tipo_ubicacion: ["sucursal", "domicilio"],
+    },
   },
 } as const
