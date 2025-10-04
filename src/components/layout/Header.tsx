@@ -1,9 +1,32 @@
-import { Bell, Search, User } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Bell, Search, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 
 export function Header() {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [userEmail, setUserEmail] = useState<string>("");
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUserEmail(session?.user?.email || "");
+    });
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    toast({
+      title: "Sesión cerrada",
+      description: "Has cerrado sesión exitosamente",
+    });
+    navigate("/auth");
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/60">
       <div className="flex h-16 items-center justify-between px-6">
@@ -37,9 +60,14 @@ export function Header() {
               <User className="w-4 h-4 text-primary-foreground" />
             </div>
             <div className="hidden sm:block text-left">
-              <p className="text-sm font-medium">Admin</p>
-              <p className="text-xs text-muted-foreground">Administrador</p>
+              <p className="text-sm font-medium">{userEmail.split('@')[0]}</p>
+              <p className="text-xs text-muted-foreground">{userEmail}</p>
             </div>
+          </Button>
+
+          {/* Logout */}
+          <Button variant="ghost" size="sm" onClick={handleSignOut}>
+            <LogOut className="w-5 h-5" />
           </Button>
         </div>
       </div>
