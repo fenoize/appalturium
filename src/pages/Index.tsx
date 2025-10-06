@@ -1,6 +1,3 @@
-import { useState } from "react";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { MetricCard } from "@/components/dashboard/MetricCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
@@ -16,19 +13,8 @@ import {
 } from "lucide-react";
 
 const Index = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
   return (
-    <div className="flex min-h-screen bg-background">
-      <Sidebar 
-        collapsed={sidebarCollapsed} 
-        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} 
-      />
-      
-      <div className="flex-1 flex flex-col">
-        <Header />
-        
-        <main className="flex-1 p-6 space-y-6">
+    <div className="space-y-6">
           {/* Welcome Section */}
           <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
             <h1 className="text-3xl font-bold mb-2">¡Bienvenido al Sistema ALTURIUM!</h1>
@@ -101,8 +87,6 @@ const Index = () => {
             <div>
               <QuickActions />
             </div>
-          </div>
-        </main>
       </div>
     </div>
   );
