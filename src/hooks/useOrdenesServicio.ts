@@ -34,6 +34,7 @@ interface FiltrosOT {
   estado?: string;
   prioridad?: string;
   cliente_id?: string;
+  tipo_trabajo?: string;
   busqueda?: string;
 }
 
@@ -58,6 +59,9 @@ export function useOrdenesServicio(filtros?: FiltrosOT) {
       }
       if (filtros?.cliente_id) {
         query = query.eq("cliente_id", filtros.cliente_id);
+      }
+      if (filtros?.tipo_trabajo) {
+        query = query.eq("tipo_trabajo", filtros.tipo_trabajo);
       }
       if (filtros?.busqueda) {
         query = query.or(`numero.ilike.%${filtros.busqueda}%,descripcion.ilike.%${filtros.busqueda}%`);

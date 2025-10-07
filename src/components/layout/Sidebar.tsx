@@ -35,6 +35,11 @@ const navigationItems = [
     href: "/ordenes-servicio" 
   },
   { 
+    title: "Calendario", 
+    icon: Calendar, 
+    href: "/calendario" 
+  },
+  { 
     title: "Inventario", 
     icon: Package, 
     href: "/inventario" 
