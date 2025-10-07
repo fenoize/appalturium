@@ -12,6 +12,8 @@ import Configuracion from "./pages/Configuracion";
 import Auth from "./pages/Auth";
 import Clientes from "./pages/Clientes";
 import ClienteNuevo from "./pages/ClienteNuevo";
+import OrdenesServicio from "./pages/OrdenesServicio";
+import OrdenServicioNueva from "./pages/OrdenServicioNueva";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -43,6 +45,8 @@ const App = () => {
                           <Route path="/" element={<Index />} />
                           <Route path="/clientes" element={<Clientes />} />
                           <Route path="/clientes/nuevo" element={<ClienteNuevo />} />
+                          <Route path="/ordenes-servicio" element={<OrdenesServicio />} />
+                          <Route path="/ordenes-servicio/nueva" element={<OrdenServicioNueva />} />
                           <Route path="/configuracion" element={<Configuracion />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

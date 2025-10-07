@@ -11,7 +11,8 @@ import {
   DollarSign,
   BarChart3,
   Settings,
-  Menu
+  Menu,
+  ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -27,6 +28,11 @@ const navigationItems = [
     title: "Clientes", 
     icon: Building2, 
     href: "/clientes" 
+  },
+  { 
+    title: "Órdenes de Servicio", 
+    icon: ClipboardList, 
+    href: "/ordenes-servicio" 
   },
   { 
     title: "Inventario", 
