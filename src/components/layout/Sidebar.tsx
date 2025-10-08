@@ -12,7 +12,8 @@ import {
   BarChart3,
   Settings,
   Menu,
-  ClipboardList
+  ClipboardList,
+  MapPin
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,11 @@ const navigationItems = [
     title: "Calendario", 
     icon: Calendar, 
     href: "/calendario" 
+  },
+  { 
+    title: "Geolocalización", 
+    icon: MapPin, 
+    href: "/geolocalizacion" 
   },
   { 
     title: "Inventario", 
