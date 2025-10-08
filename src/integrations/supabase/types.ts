@@ -404,6 +404,66 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_ubicacion: {
+        Row: {
+          captured_at: string
+          created_at: string | null
+          estado_app: Database["public"]["Enums"]["estado_app"]
+          id: string
+          lat: number
+          lng: number
+          personal_id: string
+          precision_m: number | null
+        }
+        Insert: {
+          captured_at?: string
+          created_at?: string | null
+          estado_app?: Database["public"]["Enums"]["estado_app"]
+          id?: string
+          lat: number
+          lng: number
+          personal_id: string
+          precision_m?: number | null
+        }
+        Update: {
+          captured_at?: string
+          created_at?: string | null
+          estado_app?: Database["public"]["Enums"]["estado_app"]
+          id?: string
+          lat?: number
+          lng?: number
+          personal_id?: string
+          precision_m?: number | null
+        }
+        Relationships: []
+      }
+      rutas_dia: {
+        Row: {
+          created_at: string | null
+          fecha: string
+          id: string
+          paradas: Json | null
+          personal_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          fecha?: string
+          id?: string
+          paradas?: Json | null
+          personal_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          fecha?: string
+          id?: string
+          paradas?: Json | null
+          personal_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       ubicaciones: {
         Row: {
           alias: string
@@ -486,6 +546,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calcular_distancia_haversine: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       generar_numero_ot: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -497,9 +561,24 @@ export type Database = {
         }
         Returns: boolean
       }
+      limpiar_ubicaciones_antiguas: {
+        Args: { _limite?: number }
+        Returns: undefined
+      }
+      obtener_ultima_ubicacion: {
+        Args: { _personal_id: string }
+        Returns: {
+          captured_at: string
+          estado_app: Database["public"]["Enums"]["estado_app"]
+          lat: number
+          lng: number
+          precision_m: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "supervisor" | "cliente"
+      estado_app: "offline" | "online" | "en_ruta" | "en_proceso"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
       rol_en_ot: "tecnico" | "operario" | "despachador" | "otro"
       tipo_cliente: "empresa" | "persona"
@@ -637,6 +716,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "supervisor", "cliente"],
+      estado_app: ["offline", "online", "en_ruta", "en_proceso"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
       rol_en_ot: ["tecnico", "operario", "despachador", "otro"],
       tipo_cliente: ["empresa", "persona"],
