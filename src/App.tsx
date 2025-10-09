@@ -14,6 +14,7 @@ import Clientes from "./pages/Clientes";
 import ClienteNuevo from "./pages/ClienteNuevo";
 import OrdenesServicio from "./pages/OrdenesServicio";
 import OrdenServicioNueva from "./pages/OrdenServicioNueva";
+import OrdenServicioDetalle from "./pages/OrdenServicioDetalle";
 import Calendario from "./pages/Calendario";
 import Geolocalizacion from "./pages/Geolocalizacion";
 import NotFound from "./pages/NotFound";
@@ -49,6 +50,7 @@ const App = () => {
                           <Route path="/clientes/nuevo" element={<ClienteNuevo />} />
                           <Route path="/ordenes-servicio" element={<OrdenesServicio />} />
                           <Route path="/ordenes-servicio/nueva" element={<OrdenServicioNueva />} />
+                          <Route path="/ordenes-servicio/:id" element={<OrdenServicioDetalle />} />
                           <Route path="/calendario" element={<Calendario />} />
                           <Route path="/geolocalizacion" element={<Geolocalizacion />} />
                           <Route path="/configuracion" element={<Configuracion />} />

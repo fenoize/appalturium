@@ -181,6 +181,56 @@ export type Database = {
           },
         ]
       }
+      documentos_venta: {
+        Row: {
+          created_at: string | null
+          fecha: string
+          id: string
+          notas: string | null
+          numero: string
+          ot_id: string
+          pdf_url: string | null
+          saldo: number
+          tipo: Database["public"]["Enums"]["tipo_documento_venta"]
+          total: number
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          fecha: string
+          id?: string
+          notas?: string | null
+          numero: string
+          ot_id: string
+          pdf_url?: string | null
+          saldo: number
+          tipo: Database["public"]["Enums"]["tipo_documento_venta"]
+          total: number
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          fecha?: string
+          id?: string
+          notas?: string | null
+          numero?: string
+          ot_id?: string
+          pdf_url?: string | null
+          saldo?: number
+          tipo?: Database["public"]["Enums"]["tipo_documento_venta"]
+          total?: number
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_venta_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       informes_finales: {
         Row: {
           created_at: string | null
@@ -359,6 +409,50 @@ export type Database = {
           },
         ]
       }
+      pagos: {
+        Row: {
+          created_at: string | null
+          documento_id: string
+          fecha: string
+          id: string
+          metodo: Database["public"]["Enums"]["metodo_pago"]
+          monto: number
+          notas: string | null
+          referencia: string | null
+          registrado_por_user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          documento_id: string
+          fecha: string
+          id?: string
+          metodo: Database["public"]["Enums"]["metodo_pago"]
+          monto: number
+          notas?: string | null
+          referencia?: string | null
+          registrado_por_user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          documento_id?: string
+          fecha?: string
+          id?: string
+          metodo?: Database["public"]["Enums"]["metodo_pago"]
+          monto?: number
+          notas?: string | null
+          referencia?: string | null
+          registrado_por_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pagos_documento_id_fkey"
+            columns: ["documento_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_venta"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       parametros_sistema: {
         Row: {
           activo: boolean | null
@@ -436,6 +530,75 @@ export type Database = {
           precision_m?: number | null
         }
         Relationships: []
+      }
+      presupuestos: {
+        Row: {
+          aprobado_por_contacto_id: string | null
+          aprobado_ts: string | null
+          created_at: string | null
+          estado: Database["public"]["Enums"]["estado_presupuesto"]
+          id: string
+          impuestos: number
+          insumos: number
+          items: Json
+          mano_obra: number
+          ot_id: string
+          pdf_url: string | null
+          subtotal: number
+          total: number
+          updated_at: string | null
+          validez_dias: number
+        }
+        Insert: {
+          aprobado_por_contacto_id?: string | null
+          aprobado_ts?: string | null
+          created_at?: string | null
+          estado?: Database["public"]["Enums"]["estado_presupuesto"]
+          id?: string
+          impuestos?: number
+          insumos?: number
+          items?: Json
+          mano_obra?: number
+          ot_id: string
+          pdf_url?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string | null
+          validez_dias?: number
+        }
+        Update: {
+          aprobado_por_contacto_id?: string | null
+          aprobado_ts?: string | null
+          created_at?: string | null
+          estado?: Database["public"]["Enums"]["estado_presupuesto"]
+          id?: string
+          impuestos?: number
+          insumos?: number
+          items?: Json
+          mano_obra?: number
+          ot_id?: string
+          pdf_url?: string | null
+          subtotal?: number
+          total?: number
+          updated_at?: string | null
+          validez_dias?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "presupuestos_aprobado_por_contacto_id_fkey"
+            columns: ["aprobado_por_contacto_id"]
+            isOneToOne: false
+            referencedRelation: "contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuestos_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: true
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       rutas_dia: {
         Row: {
@@ -550,6 +713,10 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      generar_numero_documento: {
+        Args: { _tipo: Database["public"]["Enums"]["tipo_documento_venta"] }
+        Returns: string
+      }
       generar_numero_ot: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -579,6 +746,8 @@ export type Database = {
     Enums: {
       app_role: "admin" | "supervisor" | "cliente"
       estado_app: "offline" | "online" | "en_ruta" | "en_proceso"
+      estado_presupuesto: "borrador" | "enviado" | "aprobado" | "rechazado"
+      metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
       rol_en_ot: "tecnico" | "operario" | "despachador" | "otro"
       tipo_cliente: "empresa" | "persona"
@@ -587,6 +756,12 @@ export type Database = {
         | "encargado_proyecto"
         | "otro"
       tipo_contacto_persona: "pareja" | "hijo" | "secundario" | "otro"
+      tipo_documento_venta:
+        | "boleta"
+        | "factura"
+        | "nota_credito"
+        | "nota_debito"
+        | "otro"
       tipo_ubicacion: "sucursal" | "domicilio"
     }
     CompositeTypes: {
@@ -717,6 +892,8 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "supervisor", "cliente"],
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
+      estado_presupuesto: ["borrador", "enviado", "aprobado", "rechazado"],
+      metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
       rol_en_ot: ["tecnico", "operario", "despachador", "otro"],
       tipo_cliente: ["empresa", "persona"],
@@ -726,6 +903,13 @@ export const Constants = {
         "otro",
       ],
       tipo_contacto_persona: ["pareja", "hijo", "secundario", "otro"],
+      tipo_documento_venta: [
+        "boleta",
+        "factura",
+        "nota_credito",
+        "nota_debito",
+        "otro",
+      ],
       tipo_ubicacion: ["sucursal", "domicilio"],
     },
   },
