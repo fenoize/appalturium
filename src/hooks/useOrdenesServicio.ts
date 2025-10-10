@@ -51,16 +51,16 @@ export function useOrdenesServicio(filtros?: FiltrosOT) {
         `)
         .order("created_at", { ascending: false });
 
-      if (filtros?.estado) {
+      if (filtros?.estado && filtros.estado !== "todos") {
         query = query.eq("estado", filtros.estado);
       }
-      if (filtros?.prioridad) {
+      if (filtros?.prioridad && filtros.prioridad !== "todos") {
         query = query.eq("prioridad", filtros.prioridad as any);
       }
       if (filtros?.cliente_id) {
         query = query.eq("cliente_id", filtros.cliente_id);
       }
-      if (filtros?.tipo_trabajo) {
+      if (filtros?.tipo_trabajo && filtros.tipo_trabajo !== "todos") {
         query = query.eq("tipo_trabajo", filtros.tipo_trabajo);
       }
       if (filtros?.busqueda) {

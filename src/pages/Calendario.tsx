@@ -20,8 +20,8 @@ import { es } from "date-fns/locale";
 
 export default function Calendario() {
   const [filtros, setFiltros] = useState({
-    estado: "",
-    tipo_trabajo: "",
+    estado: "todos",
+    tipo_trabajo: "todos",
   });
 
   const {
@@ -173,7 +173,7 @@ export default function Calendario() {
                   <SelectValue placeholder="Filtrar por estado" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los estados</SelectItem>
+                  <SelectItem value="todos">Todos los estados</SelectItem>
                   {estados?.map((estado) => (
                     <SelectItem key={estado.key} value={estado.key}>
                       {estado.label}
@@ -190,7 +190,7 @@ export default function Calendario() {
                   <SelectValue placeholder="Filtrar por tipo" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todos los tipos</SelectItem>
+                  <SelectItem value="todos">Todos los tipos</SelectItem>
                   {tipos?.map((tipo) => (
                     <SelectItem key={tipo.key} value={tipo.key}>
                       {tipo.label}

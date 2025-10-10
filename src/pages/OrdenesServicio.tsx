@@ -22,8 +22,8 @@ import { es } from "date-fns/locale";
 
 export default function OrdenesServicio() {
   const [filtros, setFiltros] = useState({
-    estado: "",
-    prioridad: "",
+    estado: "todos",
+    prioridad: "todos",
     busqueda: "",
   });
 
@@ -89,7 +89,7 @@ export default function OrdenesServicio() {
                 <SelectValue placeholder="Todos los estados" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos los estados</SelectItem>
+                <SelectItem value="todos">Todos los estados</SelectItem>
                 {estados?.map((estado) => (
                   <SelectItem key={estado.key} value={estado.key}>
                     {estado.label}
@@ -106,7 +106,7 @@ export default function OrdenesServicio() {
                 <SelectValue placeholder="Todas las prioridades" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todas las prioridades</SelectItem>
+                <SelectItem value="todos">Todas las prioridades</SelectItem>
                 <SelectItem value="baja">Baja</SelectItem>
                 <SelectItem value="media">Media</SelectItem>
                 <SelectItem value="alta">Alta</SelectItem>
@@ -116,7 +116,7 @@ export default function OrdenesServicio() {
 
             <Button
               variant="outline"
-              onClick={() => setFiltros({ estado: "", prioridad: "", busqueda: "" })}
+              onClick={() => setFiltros({ estado: "todos", prioridad: "todos", busqueda: "" })}
             >
               Limpiar filtros
             </Button>
