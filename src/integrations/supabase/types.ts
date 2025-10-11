@@ -299,6 +299,62 @@ export type Database = {
           },
         ]
       }
+      notificaciones_log: {
+        Row: {
+          asunto: string | null
+          canal: string
+          contenido: string | null
+          created_at: string | null
+          destinatario_email: string | null
+          destinatario_user_id: string
+          enviado_exitosamente: boolean | null
+          error_mensaje: string | null
+          id: string
+          intentos: number | null
+          metadata: Json | null
+          ot_id: string | null
+          tipo_evento: string
+        }
+        Insert: {
+          asunto?: string | null
+          canal: string
+          contenido?: string | null
+          created_at?: string | null
+          destinatario_email?: string | null
+          destinatario_user_id: string
+          enviado_exitosamente?: boolean | null
+          error_mensaje?: string | null
+          id?: string
+          intentos?: number | null
+          metadata?: Json | null
+          ot_id?: string | null
+          tipo_evento: string
+        }
+        Update: {
+          asunto?: string | null
+          canal?: string
+          contenido?: string | null
+          created_at?: string | null
+          destinatario_email?: string | null
+          destinatario_user_id?: string
+          enviado_exitosamente?: boolean | null
+          error_mensaje?: string | null
+          id?: string
+          intentos?: number | null
+          metadata?: Json | null
+          ot_id?: string | null
+          tipo_evento?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notificaciones_log_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ordenes_servicio: {
         Row: {
           adjuntos: Json | null
@@ -531,6 +587,42 @@ export type Database = {
         }
         Relationships: []
       }
+      plantillas_email: {
+        Row: {
+          activa: boolean | null
+          asunto: string
+          contenido_html: string
+          created_at: string | null
+          id: string
+          nombre: string
+          tipo: Database["public"]["Enums"]["tipo_plantilla_email"]
+          updated_at: string | null
+          variables_disponibles: string[] | null
+        }
+        Insert: {
+          activa?: boolean | null
+          asunto: string
+          contenido_html: string
+          created_at?: string | null
+          id?: string
+          nombre: string
+          tipo: Database["public"]["Enums"]["tipo_plantilla_email"]
+          updated_at?: string | null
+          variables_disponibles?: string[] | null
+        }
+        Update: {
+          activa?: boolean | null
+          asunto?: string
+          contenido_html?: string
+          created_at?: string | null
+          id?: string
+          nombre?: string
+          tipo?: Database["public"]["Enums"]["tipo_plantilla_email"]
+          updated_at?: string | null
+          variables_disponibles?: string[] | null
+        }
+        Relationships: []
+      }
       presupuestos: {
         Row: {
           aprobado_por_contacto_id: string | null
@@ -599,6 +691,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      push_subscriptions: {
+        Row: {
+          created_at: string | null
+          id: string
+          subscription: Json
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          subscription: Json
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          subscription?: Json
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       rutas_dia: {
         Row: {
@@ -683,6 +799,48 @@ export type Database = {
           },
         ]
       }
+      user_notification_prefs: {
+        Row: {
+          created_at: string | null
+          email_asignacion: boolean | null
+          email_cambio_estado: boolean | null
+          email_ot_creada: boolean | null
+          email_recordatorio: boolean | null
+          id: string
+          push_asignacion: boolean | null
+          push_cambio_estado: boolean | null
+          push_recordatorio: boolean | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          email_asignacion?: boolean | null
+          email_cambio_estado?: boolean | null
+          email_ot_creada?: boolean | null
+          email_recordatorio?: boolean | null
+          id?: string
+          push_asignacion?: boolean | null
+          push_cambio_estado?: boolean | null
+          push_recordatorio?: boolean | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          email_asignacion?: boolean | null
+          email_cambio_estado?: boolean | null
+          email_ot_creada?: boolean | null
+          email_recordatorio?: boolean | null
+          id?: string
+          push_asignacion?: boolean | null
+          push_cambio_estado?: boolean | null
+          push_recordatorio?: boolean | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null
@@ -762,6 +920,11 @@ export type Database = {
         | "nota_credito"
         | "nota_debito"
         | "otro"
+      tipo_plantilla_email:
+        | "ot_creada"
+        | "asignacion_personal"
+        | "cambio_estado"
+        | "recordatorio_mantencion"
       tipo_ubicacion: "sucursal" | "domicilio"
     }
     CompositeTypes: {
@@ -909,6 +1072,12 @@ export const Constants = {
         "nota_credito",
         "nota_debito",
         "otro",
+      ],
+      tipo_plantilla_email: [
+        "ot_creada",
+        "asignacion_personal",
+        "cambio_estado",
+        "recordatorio_mantencion",
       ],
       tipo_ubicacion: ["sucursal", "domicilio"],
     },
