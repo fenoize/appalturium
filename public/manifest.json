@@ -1,0 +1,24 @@
+{
+  "name": "ALTURIUM - Sistema de Gestión de Servicios",
+  "short_name": "ALTURIUM",
+  "description": "Sistema integral de gestión de órdenes de servicio, clientes y personal",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0EA5E9",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/placeholder.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/placeholder.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

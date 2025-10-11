@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { NotificacionesPreferences } from "@/components/notificaciones/NotificacionesPreferences";
 import { 
   Settings, 
   Building, 
@@ -18,19 +21,27 @@ import {
 const Configuracion = () => {
   return (
     <div className="space-y-6">
-          {/* Page Header */}
-          <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
-            <div className="flex items-center space-x-3">
-              <Settings className="w-8 h-8" />
-              <div>
-                <h1 className="text-3xl font-bold">Configuración del Sistema</h1>
-                <p className="text-primary-foreground/80">
-                  Administra la configuración general de ALTURIUM
-                </p>
-              </div>
-            </div>
+      {/* Page Header */}
+      <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
+        <div className="flex items-center space-x-3">
+          <Settings className="w-8 h-8" />
+          <div>
+            <h1 className="text-3xl font-bold">Configuración del Sistema</h1>
+            <p className="text-primary-foreground/80">
+              Administra la configuración general de ALTURIUM
+            </p>
           </div>
+        </div>
+      </div>
 
+      <Tabs defaultValue="general" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
+          <TabsTrigger value="seguridad">Seguridad</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="general" className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Company Information */}
             <Card>
@@ -201,51 +212,107 @@ const Configuracion = () => {
               </CardContent>
             </Card>
 
-            {/* Notifications */}
+            {/* User Management */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Bell className="w-5 h-5 text-primary" />
-                  <span>Configuración de Notificaciones</span>
+                  <Users className="w-5 h-5 text-primary" />
+                  <span>Gestión de Usuarios</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Roles y Permisos</Label>
+                  <p className="text-sm text-muted-foreground">
+                    Administrar roles de usuario y permisos del sistema
+                  </p>
+                </div>
+                <Button variant="outline" className="w-full">
+                  Administrar Usuarios
+                </Button>
+                <Button variant="outline" className="w-full">
+                  Configurar Roles
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Backup & Database */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Database className="w-5 h-5 text-primary" />
+                  <span>Respaldos y Base de Datos</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label>Último respaldo</Label>
+                  <p className="text-sm text-muted-foreground">
+                    12 de Septiembre, 2025 - 14:30
+                  </p>
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <div className="space-y-0.5">
+                    <Label>Respaldo Automático</Label>
+                    <p className="text-sm text-muted-foreground">
+                      Realizar respaldo diario automático
+                    </p>
+                  </div>
+                  <Switch defaultChecked />
+                </div>
+                
+                <Button variant="outline" className="w-full">
+                  Crear Respaldo Manual
+                </Button>
+                <Button variant="outline" className="w-full">
+                  Restaurar desde Respaldo
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="notificaciones">
+          <NotificacionesPreferences />
+        </TabsContent>
+
+        <TabsContent value="seguridad" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Security Settings */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Shield className="w-5 w-5 text-primary" />
+                  <span>Configuración de Seguridad</span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
-                    <Label>Proyectos Vencidos</Label>
+                    <Label>Autenticación de Dos Factores</Label>
                     <p className="text-sm text-muted-foreground">
-                      Notificar cuando se vencen proyectos
+                      Activar 2FA para mayor seguridad
                     </p>
                   </div>
-                  <Switch defaultChecked />
+                  <Switch />
                 </div>
                 
                 <Separator />
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Stock Bajo</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Alertar cuando el inventario está bajo
-                    </p>
-                  </div>
-                  <Switch defaultChecked />
+                <div className="space-y-2">
+                  <Label>Tiempo de Sesión</Label>
+                  <Input defaultValue="8 horas" />
                 </div>
                 
-                <Separator />
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Mantenciones Programadas</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Recordatorios de mantenciones
-                    </p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
+                <Button variant="outline" className="w-full">
+                  Cambiar Contraseña
+                </Button>
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
