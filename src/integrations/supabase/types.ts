@@ -50,6 +50,13 @@ export type Database = {
             foreignKeyName: "asignaciones_ot_ot_id_fkey"
             columns: ["ot_id"]
             isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "asignaciones_ot_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
             referencedRelation: "ordenes_servicio"
             referencedColumns: ["id"]
           },
@@ -226,6 +233,13 @@ export type Database = {
             foreignKeyName: "documentos_venta_ot_id_fkey"
             columns: ["ot_id"]
             isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "documentos_venta_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
             referencedRelation: "ordenes_servicio"
             referencedColumns: ["id"]
           },
@@ -294,6 +308,13 @@ export type Database = {
             foreignKeyName: "informes_finales_ot_id_fkey"
             columns: ["ot_id"]
             isOneToOne: true
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "informes_finales_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: true
             referencedRelation: "ordenes_servicio"
             referencedColumns: ["id"]
           },
@@ -346,6 +367,13 @@ export type Database = {
           tipo_evento?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "notificaciones_log_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
           {
             foreignKeyName: "notificaciones_log_ot_id_fkey"
             columns: ["ot_id"]
@@ -456,6 +484,13 @@ export type Database = {
           ot_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "ot_estado_logs_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
           {
             foreignKeyName: "ot_estado_logs_ot_id_fkey"
             columns: ["ot_id"]
@@ -687,6 +722,13 @@ export type Database = {
             foreignKeyName: "presupuestos_ot_id_fkey"
             columns: ["ot_id"]
             isOneToOne: true
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "presupuestos_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: true
             referencedRelation: "ordenes_servicio"
             referencedColumns: ["id"]
           },
@@ -742,6 +784,73 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      tiempos_reales: {
+        Row: {
+          asignacion_id: string | null
+          created_at: string | null
+          en_proceso_fin: string | null
+          en_proceso_inicio: string | null
+          en_ruta_fin: string | null
+          en_ruta_inicio: string | null
+          fecha_creacion: string
+          id: string
+          ot_id: string
+          tiempo_respuesta_min: number | null
+          tiempo_servicio_min: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          asignacion_id?: string | null
+          created_at?: string | null
+          en_proceso_fin?: string | null
+          en_proceso_inicio?: string | null
+          en_ruta_fin?: string | null
+          en_ruta_inicio?: string | null
+          fecha_creacion: string
+          id?: string
+          ot_id: string
+          tiempo_respuesta_min?: number | null
+          tiempo_servicio_min?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          asignacion_id?: string | null
+          created_at?: string | null
+          en_proceso_fin?: string | null
+          en_proceso_inicio?: string | null
+          en_ruta_fin?: string | null
+          en_ruta_inicio?: string | null
+          fecha_creacion?: string
+          id?: string
+          ot_id?: string
+          tiempo_respuesta_min?: number | null
+          tiempo_servicio_min?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tiempos_reales_asignacion_id_fkey"
+            columns: ["asignacion_id"]
+            isOneToOne: false
+            referencedRelation: "asignaciones_ot"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tiempos_reales_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "tiempos_reales_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ubicaciones: {
         Row: {
@@ -864,21 +973,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      kpis_reportes: {
+        Row: {
+          ciudad: string | null
+          cliente_nombre: string | null
+          cliente_razon_social: string | null
+          comuna: string | null
+          costos: number | null
+          en_proceso_fin: string | null
+          en_proceso_inicio: string | null
+          en_ruta_inicio: string | null
+          estado: string | null
+          facturado: number | null
+          fecha_creacion: string | null
+          fecha_programada_inicio: string | null
+          margen: number | null
+          ot_id: string | null
+          ot_numero: string | null
+          personal_id: string | null
+          region: string | null
+          rol_en_ot: Database["public"]["Enums"]["rol_en_ot"] | null
+          semaforo: string | null
+          tiempo_respuesta_min: number | null
+          tiempo_servicio_min: number | null
+          tipo_trabajo: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       calcular_distancia_haversine: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      calcular_semaforo_tiempo: {
+        Args: { tiempo_servicio_min: number; tipo_trabajo: string }
+        Returns: string
+      }
       generar_numero_documento: {
         Args: { _tipo: Database["public"]["Enums"]["tipo_documento_venta"] }
         Returns: string
       }
-      generar_numero_ot: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generar_numero_ot: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -900,6 +1036,7 @@ export type Database = {
           precision_m: number
         }[]
       }
+      refresh_kpis_reportes: { Args: never; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "supervisor" | "cliente"

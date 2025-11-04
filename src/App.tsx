@@ -17,6 +17,7 @@ import OrdenServicioNueva from "./pages/OrdenServicioNueva";
 import OrdenServicioDetalle from "./pages/OrdenServicioDetalle";
 import Calendario from "./pages/Calendario";
 import Geolocalizacion from "./pages/Geolocalizacion";
+import Reportes from "./pages/Reportes";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +54,7 @@ const App = () => {
                           <Route path="/ordenes-servicio/:id" element={<OrdenServicioDetalle />} />
                           <Route path="/calendario" element={<Calendario />} />
                           <Route path="/geolocalizacion" element={<Geolocalizacion />} />
+                          <Route path="/reportes" element={<Reportes />} />
                           <Route path="/configuracion" element={<Configuracion />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

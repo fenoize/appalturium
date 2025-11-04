@@ -13,7 +13,8 @@ import {
   Settings,
   Menu,
   ClipboardList,
-  MapPin
+  MapPin,
+  TrendingUp
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -44,6 +45,11 @@ const navigationItems = [
     title: "Geolocalización", 
     icon: MapPin, 
     href: "/geolocalizacion" 
+  },
+  { 
+    title: "Reportes y KPIs", 
+    icon: TrendingUp, 
+    href: "/reportes" 
   },
   { 
     title: "Inventario", 
