@@ -113,6 +113,66 @@ export type Database = {
         }
         Relationships: []
       }
+      comunicaciones: {
+        Row: {
+          adjuntos: Json | null
+          canal: Database["public"]["Enums"]["canal_comunicacion"]
+          created_at: string | null
+          destinatario: string
+          emisor_user_id: string | null
+          estatus: Database["public"]["Enums"]["estatus_comunicacion"]
+          fecha: string
+          id: string
+          ot_id: string
+          requiere_respuesta: boolean | null
+          resumen: string
+          updated_at: string | null
+        }
+        Insert: {
+          adjuntos?: Json | null
+          canal: Database["public"]["Enums"]["canal_comunicacion"]
+          created_at?: string | null
+          destinatario: string
+          emisor_user_id?: string | null
+          estatus?: Database["public"]["Enums"]["estatus_comunicacion"]
+          fecha?: string
+          id?: string
+          ot_id: string
+          requiere_respuesta?: boolean | null
+          resumen: string
+          updated_at?: string | null
+        }
+        Update: {
+          adjuntos?: Json | null
+          canal?: Database["public"]["Enums"]["canal_comunicacion"]
+          created_at?: string | null
+          destinatario?: string
+          emisor_user_id?: string | null
+          estatus?: Database["public"]["Enums"]["estatus_comunicacion"]
+          fecha?: string
+          id?: string
+          ot_id?: string
+          requiere_respuesta?: boolean | null
+          resumen?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comunicaciones_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "comunicaciones_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contactos: {
         Row: {
           cliente_id: string
@@ -1040,8 +1100,10 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "supervisor" | "cliente"
+      canal_comunicacion: "email" | "telefono" | "whatsapp" | "nota"
       estado_app: "offline" | "online" | "en_ruta" | "en_proceso"
       estado_presupuesto: "borrador" | "enviado" | "aprobado" | "rechazado"
+      estatus_comunicacion: "pendiente" | "resuelto"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
       rol_en_ot: "tecnico" | "operario" | "despachador" | "otro"
@@ -1191,8 +1253,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "supervisor", "cliente"],
+      canal_comunicacion: ["email", "telefono", "whatsapp", "nota"],
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
       estado_presupuesto: ["borrador", "enviado", "aprobado", "rechazado"],
+      estatus_comunicacion: ["pendiente", "resuelto"],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
       rol_en_ot: ["tecnico", "operario", "despachador", "otro"],

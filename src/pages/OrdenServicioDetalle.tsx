@@ -14,6 +14,7 @@ import {
   Send,
   CheckCircle,
   XCircle,
+  MessageSquare,
 } from "lucide-react";
 import { useOrdenServicioDetalle } from "@/hooks/useOrdenServicioDetalle";
 import { usePresupuestoOT, useCrearPresupuesto, useActualizarPresupuesto, useCambiarEstadoPresupuesto } from "@/hooks/usePresupuestos";
@@ -26,6 +27,7 @@ import { DocumentoVentaCard } from "@/components/facturacion/DocumentoVentaCard"
 import { PagoForm } from "@/components/facturacion/PagoForm";
 import { ListaPagos } from "@/components/facturacion/ListaPagos";
 import { ResumenFinanciero } from "@/components/facturacion/ResumenFinanciero";
+import { ComunicacionesTimeline } from "@/components/comunicaciones/ComunicacionesTimeline";
 import {
   Dialog,
   DialogContent,
@@ -161,10 +163,14 @@ export default function OrdenServicioDetalle() {
 
       {/* Tabs */}
       <Tabs defaultValue="resumen" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="resumen">
             <ClipboardList className="h-4 w-4 mr-2" />
             Resumen
+          </TabsTrigger>
+          <TabsTrigger value="comunicaciones">
+            <MessageSquare className="h-4 w-4 mr-2" />
+            Comunicaciones
           </TabsTrigger>
           <TabsTrigger value="asignaciones">
             <Users className="h-4 w-4 mr-2" />
@@ -220,6 +226,11 @@ export default function OrdenServicioDetalle() {
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* Tab: Comunicaciones */}
+        <TabsContent value="comunicaciones">
+          <ComunicacionesTimeline otId={id!} />
         </TabsContent>
 
         {/* Tab: Asignaciones */}
