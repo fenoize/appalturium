@@ -19,6 +19,12 @@ import Calendario from "./pages/Calendario";
 import Geolocalizacion from "./pages/Geolocalizacion";
 import Reportes from "./pages/Reportes";
 import Personal from "./pages/Personal";
+import PortalCliente from "./pages/PortalCliente";
+import PortalClienteOrdenes from "./pages/PortalClienteOrdenes";
+import PortalClienteOrdenDetalle from "./pages/PortalClienteOrdenDetalle";
+import PortalClienteSolicitarMantencion from "./pages/PortalClienteSolicitarMantencion";
+import PortalClienteDocumentos from "./pages/PortalClienteDocumentos";
+import PortalClientePerfil from "./pages/PortalClientePerfil";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -57,6 +63,12 @@ const App = () => {
                           <Route path="/geolocalizacion" element={<Geolocalizacion />} />
                           <Route path="/reportes" element={<Reportes />} />
                           <Route path="/personal" element={<Personal />} />
+                          <Route path="/portal-cliente" element={<PortalCliente />} />
+                          <Route path="/portal-cliente/ordenes" element={<PortalClienteOrdenes />} />
+                          <Route path="/portal-cliente/ordenes/:id" element={<PortalClienteOrdenDetalle />} />
+                          <Route path="/portal-cliente/solicitar-mantencion" element={<PortalClienteSolicitarMantencion />} />
+                          <Route path="/portal-cliente/documentos" element={<PortalClienteDocumentos />} />
+                          <Route path="/portal-cliente/perfil" element={<PortalClientePerfil />} />
                           <Route path="/configuracion" element={<Configuracion />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>

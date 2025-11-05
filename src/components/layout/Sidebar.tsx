@@ -15,7 +15,8 @@ import {
   ClipboardList,
   MapPin,
   TrendingUp,
-  Users as UsersIcon
+  Users as UsersIcon,
+  LayoutDashboard
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -56,6 +57,11 @@ const navigationItems = [
     title: "Personal", 
     icon: UsersIcon, 
     href: "/personal" 
+  },
+  { 
+    title: "Portal Cliente", 
+    icon: LayoutDashboard, 
+    href: "/portal-cliente" 
   },
   { 
     title: "Inventario", 
