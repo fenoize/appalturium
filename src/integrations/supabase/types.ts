@@ -649,6 +649,72 @@ export type Database = {
         }
         Relationships: []
       }
+      personal_fichas: {
+        Row: {
+          activo: boolean
+          comentarios: string | null
+          contacto_emergencia: Json | null
+          created_at: string
+          documentos_urls: Json | null
+          domicilio: string | null
+          escolaridad: string | null
+          especialidad: string[] | null
+          estado_civil: Database["public"]["Enums"]["estado_civil"] | null
+          etiquetas: string[] | null
+          fecha_ingreso: string
+          fecha_termino: string | null
+          id: string
+          nombre_completo: string
+          rol_operativo: Database["public"]["Enums"]["rol_operativo"]
+          rut: string
+          sexo: Database["public"]["Enums"]["sexo"] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          activo?: boolean
+          comentarios?: string | null
+          contacto_emergencia?: Json | null
+          created_at?: string
+          documentos_urls?: Json | null
+          domicilio?: string | null
+          escolaridad?: string | null
+          especialidad?: string[] | null
+          estado_civil?: Database["public"]["Enums"]["estado_civil"] | null
+          etiquetas?: string[] | null
+          fecha_ingreso?: string
+          fecha_termino?: string | null
+          id?: string
+          nombre_completo: string
+          rol_operativo?: Database["public"]["Enums"]["rol_operativo"]
+          rut: string
+          sexo?: Database["public"]["Enums"]["sexo"] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          activo?: boolean
+          comentarios?: string | null
+          contacto_emergencia?: Json | null
+          created_at?: string
+          documentos_urls?: Json | null
+          domicilio?: string | null
+          escolaridad?: string | null
+          especialidad?: string[] | null
+          estado_civil?: Database["public"]["Enums"]["estado_civil"] | null
+          etiquetas?: string[] | null
+          fecha_ingreso?: string
+          fecha_termino?: string | null
+          id?: string
+          nombre_completo?: string
+          rol_operativo?: Database["public"]["Enums"]["rol_operativo"]
+          rut?: string
+          sexo?: Database["public"]["Enums"]["sexo"] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       personal_ubicacion: {
         Row: {
           captured_at: string
@@ -1102,11 +1168,25 @@ export type Database = {
       app_role: "admin" | "supervisor" | "cliente"
       canal_comunicacion: "email" | "telefono" | "whatsapp" | "nota"
       estado_app: "offline" | "online" | "en_ruta" | "en_proceso"
+      estado_civil:
+        | "soltero"
+        | "casado"
+        | "viudo"
+        | "divorciado"
+        | "union_libre"
       estado_presupuesto: "borrador" | "enviado" | "aprobado" | "rechazado"
       estatus_comunicacion: "pendiente" | "resuelto"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
       rol_en_ot: "tecnico" | "operario" | "despachador" | "otro"
+      rol_operativo:
+        | "tecnico"
+        | "operario"
+        | "despachador"
+        | "supervisor"
+        | "administrador"
+        | "otro"
+      sexo: "masculino" | "femenino" | "otro"
       tipo_cliente: "empresa" | "persona"
       tipo_contacto_empresa:
         | "administrador_sucursal"
@@ -1255,11 +1335,21 @@ export const Constants = {
       app_role: ["admin", "supervisor", "cliente"],
       canal_comunicacion: ["email", "telefono", "whatsapp", "nota"],
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
+      estado_civil: ["soltero", "casado", "viudo", "divorciado", "union_libre"],
       estado_presupuesto: ["borrador", "enviado", "aprobado", "rechazado"],
       estatus_comunicacion: ["pendiente", "resuelto"],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
       rol_en_ot: ["tecnico", "operario", "despachador", "otro"],
+      rol_operativo: [
+        "tecnico",
+        "operario",
+        "despachador",
+        "supervisor",
+        "administrador",
+        "otro",
+      ],
+      sexo: ["masculino", "femenino", "otro"],
       tipo_cliente: ["empresa", "persona"],
       tipo_contacto_empresa: [
         "administrador_sucursal",

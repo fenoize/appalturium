@@ -14,7 +14,8 @@ import {
   Menu,
   ClipboardList,
   MapPin,
-  TrendingUp
+  TrendingUp,
+  Users as UsersIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -50,6 +51,11 @@ const navigationItems = [
     title: "Reportes y KPIs", 
     icon: TrendingUp, 
     href: "/reportes" 
+  },
+  { 
+    title: "Personal", 
+    icon: UsersIcon, 
+    href: "/personal" 
   },
   { 
     title: "Inventario", 
