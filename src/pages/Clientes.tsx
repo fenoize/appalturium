@@ -19,6 +19,9 @@ type Cliente = {
   rut: string;
   email: string | null;
   telefono: string | null;
+  industria: string | null;
+  segmento: string | null;
+  estado_cliente: string;
   etiquetas: string[];
   created_at: string;
 };
@@ -30,6 +33,8 @@ export default function Clientes() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [tipoFilter, setTipoFilter] = useState<string>("todos");
+  const [estadoFilter, setEstadoFilter] = useState<string>("todos");
+  const [industriaFilter, setIndustriaFilter] = useState<string>("todos");
 
   useEffect(() => {
     fetchClientes();
@@ -43,7 +48,7 @@ export default function Clientes() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setClientes(data || []);
+      setClientes(data as any || []);
     } catch (error: any) {
       toast({
         variant: "destructive",
@@ -64,8 +69,10 @@ export default function Clientes() {
       (cliente.apellidos?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
 
     const matchesTipo = tipoFilter === "todos" || cliente.tipo === tipoFilter;
+    const matchesEstado = estadoFilter === "todos" || cliente.estado_cliente === estadoFilter;
+    const matchesIndustria = industriaFilter === "todos" || cliente.industria === industriaFilter;
 
-    return matchesSearch && matchesTipo;
+    return matchesSearch && matchesTipo && matchesEstado && matchesIndustria;
   });
 
   const getClienteName = (cliente: Cliente) => {
@@ -106,14 +113,44 @@ export default function Clientes() {
                 className="pl-10"
               />
             </div>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
             <Select value={tipoFilter} onValueChange={setTipoFilter}>
-              <SelectTrigger className="w-[200px]">
+              <SelectTrigger>
                 <SelectValue placeholder="Tipo de cliente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="todos">Todos</SelectItem>
+                <SelectItem value="todos">Todos los tipos</SelectItem>
                 <SelectItem value="empresa">Empresas</SelectItem>
                 <SelectItem value="persona">Personas</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los estados</SelectItem>
+                <SelectItem value="activo">Activo</SelectItem>
+                <SelectItem value="suspendido">Suspendido</SelectItem>
+                <SelectItem value="inactivo">Inactivo</SelectItem>
+              </SelectContent>
+            </Select>
+            
+            <Select value={industriaFilter} onValueChange={setIndustriaFilter}>
+              <SelectTrigger>
+                <SelectValue placeholder="Industria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todas las industrias</SelectItem>
+                <SelectItem value="climatizacion">Climatización</SelectItem>
+                <SelectItem value="retail">Retail</SelectItem>
+                <SelectItem value="residencial">Residencial</SelectItem>
+                <SelectItem value="industrial">Industrial</SelectItem>
+                <SelectItem value="hospitalaria">Hospitalaria</SelectItem>
+                <SelectItem value="educacion">Educación</SelectItem>
+                <SelectItem value="otro">Otro</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -148,9 +185,14 @@ export default function Clientes() {
                     ) : (
                       <User className="h-5 w-5 text-primary" />
                     )}
-                    <Badge variant={cliente.tipo === "empresa" ? "default" : "secondary"}>
-                      {cliente.tipo === "empresa" ? "Empresa" : "Persona"}
-                    </Badge>
+                    <div className="flex gap-2">
+                      <Badge variant={cliente.tipo === "empresa" ? "default" : "secondary"}>
+                        {cliente.tipo === "empresa" ? "Empresa" : "Persona"}
+                      </Badge>
+                      <Badge variant={cliente.estado_cliente === "activo" ? "default" : cliente.estado_cliente === "suspendido" ? "destructive" : "secondary"}>
+                        {cliente.estado_cliente}
+                      </Badge>
+                    </div>
                   </div>
                 </div>
                 <CardTitle className="mt-2">{getClienteName(cliente)}</CardTitle>

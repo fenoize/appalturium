@@ -18,26 +18,50 @@ type Cliente = {
   rut: string;
   email: string | null;
   telefono: string | null;
+  sitio_web: string | null;
+  industria: string | null;
+  segmento: string | null;
+  estado_cliente: string;
   notas: string | null;
   etiquetas: string[];
+  condiciones_pago: string;
+  credito_aprobado: boolean;
+  credito_monto_max: number | null;
+  lista_precios: string | null;
+  descuento_acordado_pct: number | null;
+  sla_prioridad: string;
+  noti_email: boolean;
+  noti_whatsapp: boolean;
+  noti_resumen_mensual: boolean;
   created_at: string;
 };
 
 type Ubicacion = {
   id: string;
   direccion: string;
+  referencia: string | null;
   comuna: string;
   region: string;
+  ciudad: string;
+  es_principal: boolean;
   por_defecto: boolean;
+  activo: boolean;
   alias: string;
+  tipo: string;
+  horario_atencion: string | null;
 };
 
 type Contacto = {
   id: string;
   nombre: string;
   rol_contextual: string | null;
+  cargo_rol: string | null;
   telefono: string | null;
   email: string | null;
+  es_principal: boolean;
+  recibe_notificaciones: boolean;
+  tipo_contacto_empresa: string | null;
+  tipo_contacto_persona: string | null;
 };
 
 type OrdenServicio = {
@@ -75,7 +99,7 @@ export default function ClienteDetalle() {
         .single();
 
       if (clienteError) throw clienteError;
-      setCliente(clienteData);
+      setCliente(clienteData as any);
 
       // Fetch ubicaciones
       const { data: ubicacionesData, error: ubicacionesError } = await supabase
@@ -85,7 +109,7 @@ export default function ClienteDetalle() {
         .order("por_defecto", { ascending: false });
 
       if (ubicacionesError) throw ubicacionesError;
-      setUbicaciones(ubicacionesData || []);
+      setUbicaciones(ubicacionesData as any || []);
 
       // Fetch contactos
       const { data: contactosData, error: contactosError } = await supabase
@@ -94,7 +118,7 @@ export default function ClienteDetalle() {
         .eq("cliente_id", id);
 
       if (contactosError) throw contactosError;
-      setContactos(contactosData || []);
+      setContactos(contactosData as any || []);
 
       // Fetch órdenes de servicio
       const { data: ordenesData, error: ordenesError } = await supabase
@@ -175,12 +199,14 @@ export default function ClienteDetalle() {
         </div>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-4">
-        <TabsList>
+        <Tabs defaultValue="general" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="ubicaciones">Ubicaciones</TabsTrigger>
           <TabsTrigger value="contactos">Contactos</TabsTrigger>
-          <TabsTrigger value="ordenes">Órdenes de Servicio</TabsTrigger>
+          <TabsTrigger value="comercial">Comercial</TabsTrigger>
+          <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
+          <TabsTrigger value="ordenes">Órdenes</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
@@ -212,6 +238,30 @@ export default function ClienteDetalle() {
                     </div>
                   </div>
                 )}
+                {cliente.sitio_web && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Sitio Web</label>
+                    <a href={cliente.sitio_web} target="_blank" rel="noopener noreferrer" className="text-lg text-primary hover:underline">
+                      {cliente.sitio_web}
+                    </a>
+                  </div>
+                )}
+                {cliente.industria && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Industria</label>
+                    <p className="text-lg">{cliente.industria}</p>
+                  </div>
+                )}
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Segmento</label>
+                  <Badge>{cliente.segmento}</Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Estado</label>
+                  <Badge variant={cliente.estado_cliente === "activo" ? "default" : cliente.estado_cliente === "suspendido" ? "destructive" : "secondary"}>
+                    {cliente.estado_cliente}
+                  </Badge>
+                </div>
               </div>
               
               {cliente.notas && (
@@ -252,10 +302,16 @@ export default function ClienteDetalle() {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle className="text-lg">{ubicacion.alias || "Ubicación"}</CardTitle>
-                      {ubicacion.por_defecto && (
-                        <Badge>Principal</Badge>
-                      )}
+                      <div className="flex gap-2">
+                        {(ubicacion.es_principal || ubicacion.por_defecto) && (
+                          <Badge>Principal</Badge>
+                        )}
+                        {ubicacion.activo && (
+                          <Badge variant="outline">Activo</Badge>
+                        )}
+                      </div>
                     </div>
+                    <CardDescription>{ubicacion.tipo}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
@@ -263,11 +319,19 @@ export default function ClienteDetalle() {
                         <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
                         <div>
                           <p>{ubicacion.direccion}</p>
+                          {ubicacion.referencia && (
+                            <p className="text-sm text-muted-foreground">{ubicacion.referencia}</p>
+                          )}
                           <p className="text-sm text-muted-foreground">
-                            {ubicacion.comuna}, {ubicacion.region}
+                            {ubicacion.comuna}, {ubicacion.ciudad}, {ubicacion.region}
                           </p>
                         </div>
                       </div>
+                      {ubicacion.horario_atencion && (
+                        <div className="text-sm text-muted-foreground">
+                          <strong>Horario:</strong> {ubicacion.horario_atencion}
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -289,9 +353,19 @@ export default function ClienteDetalle() {
               {contactos.map((contacto) => (
                 <Card key={contacto.id}>
                   <CardHeader>
-                    <CardTitle className="text-lg">{contacto.nombre}</CardTitle>
-                    {contacto.rol_contextual && (
-                      <CardDescription>{contacto.rol_contextual}</CardDescription>
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-lg">{contacto.nombre}</CardTitle>
+                      <div className="flex gap-2">
+                        {contacto.es_principal && (
+                          <Badge>Principal</Badge>
+                        )}
+                        {contacto.recibe_notificaciones && (
+                          <Badge variant="outline">Notificaciones</Badge>
+                        )}
+                      </div>
+                    </div>
+                    {(contacto.cargo_rol || contacto.rol_contextual) && (
+                      <CardDescription>{contacto.cargo_rol || contacto.rol_contextual}</CardDescription>
                     )}
                   </CardHeader>
                   <CardContent className="space-y-2">
@@ -307,11 +381,101 @@ export default function ClienteDetalle() {
                         <span>{contacto.telefono}</span>
                       </div>
                     )}
+                    {(contacto.tipo_contacto_empresa || contacto.tipo_contacto_persona) && (
+                      <div className="text-sm text-muted-foreground">
+                        <strong>Tipo:</strong> {contacto.tipo_contacto_empresa || contacto.tipo_contacto_persona}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="comercial" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Condiciones Comerciales</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-2">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Condiciones de Pago</label>
+                  <p className="text-lg">{cliente.condiciones_pago}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Prioridad SLA</label>
+                  <Badge variant={cliente.sla_prioridad === "crítico" ? "destructive" : cliente.sla_prioridad === "prioritario" ? "default" : "secondary"}>
+                    {cliente.sla_prioridad}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground">Crédito Aprobado</label>
+                  <Badge variant={cliente.credito_aprobado ? "default" : "secondary"}>
+                    {cliente.credito_aprobado ? "Sí" : "No"}
+                  </Badge>
+                </div>
+                {cliente.credito_aprobado && cliente.credito_monto_max && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Monto Máximo de Crédito</label>
+                    <p className="text-lg">${cliente.credito_monto_max.toLocaleString()}</p>
+                  </div>
+                )}
+                {cliente.lista_precios && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Lista de Precios</label>
+                    <p className="text-lg">{cliente.lista_precios}</p>
+                  </div>
+                )}
+                {cliente.descuento_acordado_pct && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground">Descuento Acordado</label>
+                    <p className="text-lg">{cliente.descuento_acordado_pct}%</p>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="notificaciones" className="space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Preferencias de Notificación</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div>
+                    <p className="font-medium">Email</p>
+                    <p className="text-sm text-muted-foreground">Recibir notificaciones por correo electrónico</p>
+                  </div>
+                  <Badge variant={cliente.noti_email ? "default" : "secondary"}>
+                    {cliente.noti_email ? "Activado" : "Desactivado"}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between py-2 border-b">
+                  <div>
+                    <p className="font-medium">WhatsApp</p>
+                    <p className="text-sm text-muted-foreground">Recibir notificaciones por WhatsApp</p>
+                  </div>
+                  <Badge variant={cliente.noti_whatsapp ? "default" : "secondary"}>
+                    {cliente.noti_whatsapp ? "Activado" : "Desactivado"}
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between py-2">
+                  <div>
+                    <p className="font-medium">Resumen Mensual</p>
+                    <p className="text-sm text-muted-foreground">Recibir resumen mensual de actividad</p>
+                  </div>
+                  <Badge variant={cliente.noti_resumen_mensual ? "default" : "secondary"}>
+                    {cliente.noti_resumen_mensual ? "Activado" : "Desactivado"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="ordenes" className="space-y-4">
