@@ -12,6 +12,7 @@ import Configuracion from "./pages/Configuracion";
 import Auth from "./pages/Auth";
 import Clientes from "./pages/Clientes";
 import ClienteNuevo from "./pages/ClienteNuevo";
+import ClienteDetalle from "./pages/ClienteDetalle";
 import OrdenesServicio from "./pages/OrdenesServicio";
 import OrdenServicioNueva from "./pages/OrdenServicioNueva";
 import OrdenServicioDetalle from "./pages/OrdenServicioDetalle";
@@ -56,6 +57,7 @@ const App = () => {
                           <Route path="/" element={<Index />} />
                           <Route path="/clientes" element={<Clientes />} />
                           <Route path="/clientes/nuevo" element={<ClienteNuevo />} />
+                          <Route path="/clientes/:id" element={<ClienteDetalle />} />
                           <Route path="/ordenes-servicio" element={<OrdenesServicio />} />
                           <Route path="/ordenes-servicio/nueva" element={<OrdenServicioNueva />} />
                           <Route path="/ordenes-servicio/:id" element={<OrdenServicioDetalle />} />
