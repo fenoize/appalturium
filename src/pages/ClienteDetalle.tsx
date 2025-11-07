@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList } from "lucide-react";
+import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit } from "lucide-react";
 
 type Cliente = {
   id: string;
@@ -175,10 +175,16 @@ export default function ClienteDetalle() {
   return (
     <div className="space-y-6">
       <div>
-        <Button variant="ghost" onClick={() => navigate("/clientes")} className="mb-4">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
-        </Button>
+        <div className="flex items-center justify-between mb-4">
+          <Button variant="ghost" onClick={() => navigate("/clientes")}>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Volver
+          </Button>
+          <Button onClick={() => navigate(`/clientes/${id}/editar`)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Editar Cliente
+          </Button>
+        </div>
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
