@@ -34,9 +34,10 @@ export default function ClienteNuevo() {
     industria: "",
     notas: "",
     etiquetas: [] as string[],
+    segmento: (tipo === "empresa" ? "B2B" : "B2C") as "B2B" | "B2C" | "Mixto",
     
     // Ubicación Principal
-    ubicacion_tipo: tipo === "empresa" ? "sucursal" : "domicilio",
+    ubicacion_tipo: (tipo === "empresa" ? "sucursal" : "domicilio") as "sucursal" | "domicilio",
     ubicacion_alias: "",
     ubicacion_direccion: "",
     ubicacion_referencia: "",
@@ -54,12 +55,12 @@ export default function ClienteNuevo() {
     contacto_recibe_noti: true,
     
     // Comercial
-    condiciones_pago: "contado" as const,
+    condiciones_pago: "contado" as "contado" | "15d" | "30d" | "45d" | "60d" | "otro",
     credito_aprobado: false,
     credito_monto_max: "",
     lista_precios: "",
     descuento_acordado_pct: "",
-    sla_prioridad: "normal" as const,
+    sla_prioridad: "normal" as "normal" | "prioritario" | "critico",
     
     // Notificaciones
     noti_email: true,
@@ -100,7 +101,7 @@ export default function ClienteNuevo() {
         telefono: formData.telefono || null,
         sitio_web: formData.sitio_web || null,
         industria: formData.industria || null,
-        segmento: tipo === "empresa" ? "B2B" : "B2C",
+        segmento: formData.segmento,
         notas: formData.notas || null,
         etiquetas: formData.etiquetas,
         condiciones_pago: formData.condiciones_pago,
@@ -150,7 +151,7 @@ export default function ClienteNuevo() {
         nombre: formData.contacto_nombre,
         email: formData.contacto_email,
         telefono: formData.contacto_telefono || null,
-        cargo_rol: formData.contacto_cargo || null,
+        rol_contextual: formData.contacto_cargo || null,
         tipo_contacto_empresa: tipo === "empresa" ? formData.contacto_tipo as any : null,
         tipo_contacto_persona: tipo === "persona" ? formData.contacto_tipo as any : null,
         es_principal: true,
@@ -227,7 +228,8 @@ export default function ClienteNuevo() {
                 setTipo(value);
                 setFormData({
                   ...formData,
-                  ubicacion_tipo: value === "empresa" ? "sucursal" : "domicilio",
+                  segmento: (value === "empresa" ? "B2B" : "B2C") as "B2B" | "B2C" | "Mixto",
+                  ubicacion_tipo: (value === "empresa" ? "sucursal" : "domicilio") as "sucursal" | "domicilio",
                   contacto_tipo: value === "empresa" ? "administrador_sucursal" : "principal",
                 });
               }}
@@ -431,7 +433,7 @@ export default function ClienteNuevo() {
                     <Label htmlFor="ubicacion_tipo">Tipo</Label>
                     <Select 
                       value={formData.ubicacion_tipo} 
-                      onValueChange={(value) => setFormData({ ...formData, ubicacion_tipo: value })}
+                      onValueChange={(value: "sucursal" | "domicilio") => setFormData({ ...formData, ubicacion_tipo: value })}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -665,7 +667,7 @@ export default function ClienteNuevo() {
                       <SelectContent>
                         <SelectItem value="normal">Normal</SelectItem>
                         <SelectItem value="prioritario">Prioritario</SelectItem>
-                        <SelectItem value="crítico">Crítico</SelectItem>
+                        <SelectItem value="critico">Crítico</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>

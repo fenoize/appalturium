@@ -64,54 +64,146 @@ export type Database = {
       }
       clientes: {
         Row: {
+          actualizado_por_user_id: string | null
           apellidos: string | null
+          condiciones_pago:
+            | Database["public"]["Enums"]["condiciones_pago"]
+            | null
+          creado_por_user_id: string | null
           created_at: string | null
+          credito_aprobado: boolean | null
+          credito_monto_max: number | null
+          descuento_acordado_pct: number | null
           email: string | null
+          estado_cliente: Database["public"]["Enums"]["estado_cliente"] | null
           etiquetas: string[] | null
           giro: string | null
           id: string
+          industria: string | null
+          lista_precios: string | null
           nombres: string | null
           notas: string | null
+          noti_email: boolean | null
+          noti_resumen_mensual: boolean | null
+          noti_whatsapp: boolean | null
           razon_social: string | null
           rut: string
+          segmento: Database["public"]["Enums"]["segmento_cliente"] | null
+          sitio_web: string | null
+          sla_prioridad: Database["public"]["Enums"]["sla_prioridad"] | null
           telefono: string | null
           tipo: Database["public"]["Enums"]["tipo_cliente"]
           updated_at: string | null
           user_id: string | null
         }
         Insert: {
+          actualizado_por_user_id?: string | null
           apellidos?: string | null
+          condiciones_pago?:
+            | Database["public"]["Enums"]["condiciones_pago"]
+            | null
+          creado_por_user_id?: string | null
           created_at?: string | null
+          credito_aprobado?: boolean | null
+          credito_monto_max?: number | null
+          descuento_acordado_pct?: number | null
           email?: string | null
+          estado_cliente?: Database["public"]["Enums"]["estado_cliente"] | null
           etiquetas?: string[] | null
           giro?: string | null
           id?: string
+          industria?: string | null
+          lista_precios?: string | null
           nombres?: string | null
           notas?: string | null
+          noti_email?: boolean | null
+          noti_resumen_mensual?: boolean | null
+          noti_whatsapp?: boolean | null
           razon_social?: string | null
           rut: string
+          segmento?: Database["public"]["Enums"]["segmento_cliente"] | null
+          sitio_web?: string | null
+          sla_prioridad?: Database["public"]["Enums"]["sla_prioridad"] | null
           telefono?: string | null
           tipo: Database["public"]["Enums"]["tipo_cliente"]
           updated_at?: string | null
           user_id?: string | null
         }
         Update: {
+          actualizado_por_user_id?: string | null
           apellidos?: string | null
+          condiciones_pago?:
+            | Database["public"]["Enums"]["condiciones_pago"]
+            | null
+          creado_por_user_id?: string | null
           created_at?: string | null
+          credito_aprobado?: boolean | null
+          credito_monto_max?: number | null
+          descuento_acordado_pct?: number | null
           email?: string | null
+          estado_cliente?: Database["public"]["Enums"]["estado_cliente"] | null
           etiquetas?: string[] | null
           giro?: string | null
           id?: string
+          industria?: string | null
+          lista_precios?: string | null
           nombres?: string | null
           notas?: string | null
+          noti_email?: boolean | null
+          noti_resumen_mensual?: boolean | null
+          noti_whatsapp?: boolean | null
           razon_social?: string | null
           rut?: string
+          segmento?: Database["public"]["Enums"]["segmento_cliente"] | null
+          sitio_web?: string | null
+          sla_prioridad?: Database["public"]["Enums"]["sla_prioridad"] | null
           telefono?: string | null
           tipo?: Database["public"]["Enums"]["tipo_cliente"]
           updated_at?: string | null
           user_id?: string | null
         }
         Relationships: []
+      }
+      clientes_documentos: {
+        Row: {
+          archivo_url: string | null
+          cliente_id: string
+          created_at: string | null
+          id: string
+          tipo: string
+          titulo: string
+          updated_at: string | null
+          vence_el: string | null
+        }
+        Insert: {
+          archivo_url?: string | null
+          cliente_id: string
+          created_at?: string | null
+          id?: string
+          tipo: string
+          titulo: string
+          updated_at?: string | null
+          vence_el?: string | null
+        }
+        Update: {
+          archivo_url?: string | null
+          cliente_id?: string
+          created_at?: string | null
+          id?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string | null
+          vence_el?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clientes_documentos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       comunicaciones: {
         Row: {
@@ -182,6 +274,7 @@ export type Database = {
           id: string
           nombre: string
           notas: string | null
+          recibe_notificaciones: boolean | null
           rol_contextual: string | null
           telefono: string | null
           tipo_contacto_empresa:
@@ -201,6 +294,7 @@ export type Database = {
           id?: string
           nombre: string
           notas?: string | null
+          recibe_notificaciones?: boolean | null
           rol_contextual?: string | null
           telefono?: string | null
           tipo_contacto_empresa?:
@@ -220,6 +314,7 @@ export type Database = {
           id?: string
           nombre?: string
           notas?: string | null
+          recibe_notificaciones?: boolean | null
           rol_contextual?: string | null
           telefono?: string | null
           tipo_contacto_empresa?:
@@ -980,46 +1075,58 @@ export type Database = {
       }
       ubicaciones: {
         Row: {
+          activo: boolean | null
           alias: string
           ciudad: string
           cliente_id: string
           comuna: string
           created_at: string | null
           direccion: string
+          es_principal: boolean | null
+          horario_atencion: string | null
           id: string
           lat: number | null
           lng: number | null
           por_defecto: boolean | null
+          referencia: string | null
           region: string
           tipo: Database["public"]["Enums"]["tipo_ubicacion"]
           updated_at: string | null
         }
         Insert: {
+          activo?: boolean | null
           alias: string
           ciudad: string
           cliente_id: string
           comuna: string
           created_at?: string | null
           direccion: string
+          es_principal?: boolean | null
+          horario_atencion?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
           por_defecto?: boolean | null
+          referencia?: string | null
           region: string
           tipo: Database["public"]["Enums"]["tipo_ubicacion"]
           updated_at?: string | null
         }
         Update: {
+          activo?: boolean | null
           alias?: string
           ciudad?: string
           cliente_id?: string
           comuna?: string
           created_at?: string | null
           direccion?: string
+          es_principal?: boolean | null
+          horario_atencion?: string | null
           id?: string
           lat?: number | null
           lng?: number | null
           por_defecto?: boolean | null
+          referencia?: string | null
           region?: string
           tipo?: Database["public"]["Enums"]["tipo_ubicacion"]
           updated_at?: string | null
@@ -1167,6 +1274,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "supervisor" | "cliente"
       canal_comunicacion: "email" | "telefono" | "whatsapp" | "nota"
+      condiciones_pago: "contado" | "15d" | "30d" | "45d" | "60d" | "otro"
       estado_app: "offline" | "online" | "en_ruta" | "en_proceso"
       estado_civil:
         | "soltero"
@@ -1174,6 +1282,7 @@ export type Database = {
         | "viudo"
         | "divorciado"
         | "union_libre"
+      estado_cliente: "activo" | "suspendido" | "inactivo"
       estado_presupuesto: "borrador" | "enviado" | "aprobado" | "rechazado"
       estatus_comunicacion: "pendiente" | "resuelto"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
@@ -1186,7 +1295,9 @@ export type Database = {
         | "supervisor"
         | "administrador"
         | "otro"
+      segmento_cliente: "B2B" | "B2C" | "Mixto"
       sexo: "masculino" | "femenino" | "otro"
+      sla_prioridad: "normal" | "prioritario" | "critico"
       tipo_cliente: "empresa" | "persona"
       tipo_contacto_empresa:
         | "administrador_sucursal"
@@ -1334,8 +1445,10 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "supervisor", "cliente"],
       canal_comunicacion: ["email", "telefono", "whatsapp", "nota"],
+      condiciones_pago: ["contado", "15d", "30d", "45d", "60d", "otro"],
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
       estado_civil: ["soltero", "casado", "viudo", "divorciado", "union_libre"],
+      estado_cliente: ["activo", "suspendido", "inactivo"],
       estado_presupuesto: ["borrador", "enviado", "aprobado", "rechazado"],
       estatus_comunicacion: ["pendiente", "resuelto"],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
@@ -1349,7 +1462,9 @@ export const Constants = {
         "administrador",
         "otro",
       ],
+      segmento_cliente: ["B2B", "B2C", "Mixto"],
       sexo: ["masculino", "femenino", "otro"],
+      sla_prioridad: ["normal", "prioritario", "critico"],
       tipo_cliente: ["empresa", "persona"],
       tipo_contacto_empresa: [
         "administrador_sucursal",
