@@ -341,6 +341,7 @@ export default function OrdenServicioDetalle() {
           <PresupuestoForm
             onSubmit={handleCrearPresupuesto}
             disabled={crearPresupuesto.isPending}
+            initialMoneda={presupuesto?.moneda}
           />
         </DialogContent>
       </Dialog>
@@ -355,6 +356,7 @@ export default function OrdenServicioDetalle() {
             onSubmit={handleCrearDocumento}
             onCancel={() => setDialogDocumento(false)}
             presupuestoTotal={presupuesto?.total}
+            moneda={presupuesto?.moneda}
           />
         </DialogContent>
       </Dialog>

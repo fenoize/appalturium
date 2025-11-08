@@ -3,6 +3,7 @@ import { DollarSign, TrendingUp, TrendingDown, AlertCircle } from "lucide-react"
 import { Presupuesto } from "@/hooks/usePresupuestos";
 import { DocumentoVenta } from "@/hooks/useDocumentosVenta";
 import { OrdenServicio } from "@/hooks/useOrdenesServicio";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface ResumenFinancieroProps {
   ordenServicio?: OrdenServicio;
@@ -15,6 +16,7 @@ export function ResumenFinanciero({
   presupuesto,
   documentos,
 }: ResumenFinancieroProps) {
+  const moneda = presupuesto?.moneda || "CLP";
   const presupuestado = presupuesto?.total || 0;
   const costosReales = ordenServicio?.costos_real || 0;
   const totalFacturado = documentos.reduce((acc, doc) => acc + doc.total, 0);
@@ -75,7 +77,7 @@ export function ResumenFinanciero({
                 </div>
                 <div>
                   <p className="text-2xl font-bold">
-                    ${metrica.valor.toFixed(2)}
+                    {formatCurrency(metrica.valor, moneda)}
                   </p>
                   {metrica.subtitulo && (
                     <p className={`text-sm ${metrica.color}`}>

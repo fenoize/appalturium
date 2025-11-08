@@ -7,6 +7,7 @@ import { DocumentoVenta } from "@/hooks/useDocumentosVenta";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { cn } from "@/lib/utils";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface DocumentoVentaCardProps {
   documento: DocumentoVenta;
@@ -51,8 +52,12 @@ export function DocumentoVentaCard({
         {/* Montos */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
+            <span className="text-sm text-muted-foreground">Moneda</span>
+            <span className="font-medium">{documento.moneda}</span>
+          </div>
+          <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Total</span>
-            <span className="text-lg font-semibold">${documento.total.toFixed(2)}</span>
+            <span className="text-lg font-semibold">{formatCurrency(documento.total, documento.moneda)}</span>
           </div>
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Saldo</span>
@@ -60,7 +65,7 @@ export function DocumentoVentaCard({
               "text-lg font-semibold",
               estaPagado ? "text-green-500" : "text-destructive"
             )}>
-              ${documento.saldo.toFixed(2)}
+              {formatCurrency(documento.saldo, documento.moneda)}
             </span>
           </div>
         </div>

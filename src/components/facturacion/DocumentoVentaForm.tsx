@@ -27,6 +27,7 @@ const documentoSchema = z.object({
   numero: z.string().optional(),
   fecha: z.string().min(1, "La fecha es requerida"),
   total: z.number().min(0.01, "El total debe ser mayor a 0"),
+  moneda: z.enum(["CLP", "UF", "USD"]),
   notas: z.string().optional(),
 });
 
@@ -36,12 +37,14 @@ interface DocumentoVentaFormProps {
   onSubmit: (data: DocumentoFormData) => void;
   onCancel: () => void;
   presupuestoTotal?: number;
+  moneda?: "CLP" | "UF" | "USD";
 }
 
 export function DocumentoVentaForm({
   onSubmit,
   onCancel,
   presupuestoTotal,
+  moneda = "CLP",
 }: DocumentoVentaFormProps) {
   const form = useForm<DocumentoFormData>({
     resolver: zodResolver(documentoSchema),
@@ -49,6 +52,7 @@ export function DocumentoVentaForm({
       tipo: "boleta",
       fecha: new Date().toISOString().split("T")[0],
       total: presupuestoTotal || 0,
+      moneda: moneda,
       notas: "",
     },
   });
@@ -95,19 +99,35 @@ export function DocumentoVentaForm({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="fecha"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Fecha</FormLabel>
-              <FormControl>
-                <Input type="date" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="fecha"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Fecha</FormLabel>
+                <FormControl>
+                  <Input type="date" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="moneda"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Moneda</FormLabel>
+                <FormControl>
+                  <Input {...field} disabled className="bg-muted" />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}

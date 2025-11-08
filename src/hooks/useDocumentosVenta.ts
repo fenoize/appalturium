@@ -10,6 +10,7 @@ export interface DocumentoVenta {
   fecha: string;
   total: number;
   saldo: number;
+  moneda: "CLP" | "UF" | "USD";
   pdf_url?: string;
   notas?: string;
   created_at: string;
