@@ -348,6 +348,7 @@ export type Database = {
           created_at: string | null
           fecha: string
           id: string
+          moneda: Database["public"]["Enums"]["tipo_moneda"]
           notas: string | null
           numero: string
           ot_id: string
@@ -361,6 +362,7 @@ export type Database = {
           created_at?: string | null
           fecha: string
           id?: string
+          moneda?: Database["public"]["Enums"]["tipo_moneda"]
           notas?: string | null
           numero: string
           ot_id: string
@@ -374,6 +376,7 @@ export type Database = {
           created_at?: string | null
           fecha?: string
           id?: string
+          moneda?: Database["public"]["Enums"]["tipo_moneda"]
           notas?: string | null
           numero?: string
           ot_id?: string
@@ -890,6 +893,7 @@ export type Database = {
           insumos: number
           items: Json
           mano_obra: number
+          moneda: Database["public"]["Enums"]["tipo_moneda"]
           ot_id: string
           pdf_url: string | null
           subtotal: number
@@ -907,6 +911,7 @@ export type Database = {
           insumos?: number
           items?: Json
           mano_obra?: number
+          moneda?: Database["public"]["Enums"]["tipo_moneda"]
           ot_id: string
           pdf_url?: string | null
           subtotal?: number
@@ -924,6 +929,7 @@ export type Database = {
           insumos?: number
           items?: Json
           mano_obra?: number
+          moneda?: Database["public"]["Enums"]["tipo_moneda"]
           ot_id?: string
           pdf_url?: string | null
           subtotal?: number
@@ -1310,6 +1316,7 @@ export type Database = {
         | "nota_credito"
         | "nota_debito"
         | "otro"
+      tipo_moneda: "CLP" | "UF" | "USD"
       tipo_plantilla_email:
         | "ot_creada"
         | "asignacion_personal"
@@ -1479,6 +1486,7 @@ export const Constants = {
         "nota_debito",
         "otro",
       ],
+      tipo_moneda: ["CLP", "UF", "USD"],
       tipo_plantilla_email: [
         "ot_creada",
         "asignacion_personal",

@@ -5,6 +5,7 @@ import { FileText, Send, CheckCircle, XCircle, Calendar } from "lucide-react";
 import { Presupuesto } from "@/hooks/usePresupuestos";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface PresupuestoCardProps {
   presupuesto: Presupuesto;
@@ -52,16 +53,20 @@ export function PresupuestoCard({
         {/* Totales */}
         <div className="grid grid-cols-2 gap-4 p-4 bg-muted rounded-lg">
           <div>
-            <p className="text-sm text-muted-foreground">Subtotal</p>
-            <p className="text-lg font-semibold">${presupuesto.subtotal.toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">Moneda</p>
+            <p className="text-lg font-semibold">{presupuesto.moneda}</p>
           </div>
           <div>
-            <p className="text-sm text-muted-foreground">IVA</p>
-            <p className="text-lg font-semibold">${presupuesto.impuestos.toFixed(2)}</p>
+            <p className="text-sm text-muted-foreground">Subtotal</p>
+            <p className="text-lg font-semibold">{formatCurrency(presupuesto.subtotal, presupuesto.moneda)}</p>
           </div>
-          <div className="col-span-2">
+          <div>
+            <p className="text-sm text-muted-foreground">IVA (19%)</p>
+            <p className="text-lg font-semibold">{formatCurrency(presupuesto.impuestos, presupuesto.moneda)}</p>
+          </div>
+          <div>
             <p className="text-sm text-muted-foreground">Total</p>
-            <p className="text-2xl font-bold text-primary">${presupuesto.total.toFixed(2)}</p>
+            <p className="text-2xl font-bold text-primary">{formatCurrency(presupuesto.total, presupuesto.moneda)}</p>
           </div>
         </div>
 
@@ -79,7 +84,7 @@ export function PresupuestoCard({
               <ul className="list-disc list-inside space-y-1 text-muted-foreground">
                 {presupuesto.items.map((item, index) => (
                   <li key={index}>
-                    {item.concepto} ({item.cantidad}x ${item.precio_unit.toFixed(2)})
+                    {item.concepto} ({item.cantidad}x {formatCurrency(item.precio_unit, presupuesto.moneda)})
                   </li>
                 ))}
               </ul>

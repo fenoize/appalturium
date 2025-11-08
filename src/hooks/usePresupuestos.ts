@@ -20,6 +20,7 @@ export interface Presupuesto {
   total: number;
   validez_dias: number;
   estado: "borrador" | "enviado" | "aprobado" | "rechazado";
+  moneda: "CLP" | "UF" | "USD";
   aprobado_por_contacto_id?: string;
   aprobado_ts?: string;
   pdf_url?: string;

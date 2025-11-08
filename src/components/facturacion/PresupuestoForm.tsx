@@ -4,12 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Plus, Trash2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PresupuestoItem } from "@/hooks/usePresupuestos";
+import { formatCurrency, getCurrencySymbol } from "@/lib/formatCurrency";
 
 interface PresupuestoFormProps {
   initialItems?: PresupuestoItem[];
   initialManoObra?: number;
   initialInsumos?: number;
+  initialMoneda?: "CLP" | "UF" | "USD";
   onSubmit: (data: {
     items: PresupuestoItem[];
     mano_obra: number;
@@ -17,6 +20,7 @@ interface PresupuestoFormProps {
     subtotal: number;
     impuestos: number;
     total: number;
+    moneda: "CLP" | "UF" | "USD";
   }) => void;
   disabled?: boolean;
 }
@@ -27,6 +31,7 @@ export function PresupuestoForm({
   initialItems = [],
   initialManoObra = 0,
   initialInsumos = 0,
+  initialMoneda = "CLP",
   onSubmit,
   disabled = false,
 }: PresupuestoFormProps) {
@@ -35,6 +40,7 @@ export function PresupuestoForm({
   );
   const [manoObra, setManoObra] = useState(initialManoObra);
   const [insumos, setInsumos] = useState(initialInsumos);
+  const [moneda, setMoneda] = useState<"CLP" | "UF" | "USD">(initialMoneda);
 
   // Calcular subtotal de un item
   const calcularSubtotalItem = (cantidad: number, precioUnit: number) => {
@@ -83,11 +89,27 @@ export function PresupuestoForm({
       subtotal,
       impuestos,
       total,
+      moneda,
     });
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Selector de Moneda */}
+      <div className="space-y-2">
+        <Label>Moneda</Label>
+        <Select value={moneda} onValueChange={(value: "CLP" | "UF" | "USD") => setMoneda(value)} disabled={disabled}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="CLP">Peso Chileno (CLP)</SelectItem>
+            <SelectItem value="UF">Unidad de Fomento (UF)</SelectItem>
+            <SelectItem value="USD">Dólar Estadounidense (USD)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Items */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
@@ -130,11 +152,11 @@ export function PresupuestoForm({
                 />
               </div>
               <div className="col-span-2">
-                <Label>Precio Unit.</Label>
+                <Label>Precio Unit. ({getCurrencySymbol(moneda)})</Label>
                 <Input
                   type="number"
                   min="0"
-                  step="0.01"
+                  step={moneda === "UF" ? "0.0001" : "0.01"}
                   value={item.precio_unit}
                   onChange={(e) => actualizarItem(index, "precio_unit", parseFloat(e.target.value) || 0)}
                   disabled={disabled}
@@ -144,8 +166,8 @@ export function PresupuestoForm({
               <div className="col-span-2">
                 <Label>Subtotal</Label>
                 <Input
-                  type="number"
-                  value={item.subtotal.toFixed(2)}
+                  type="text"
+                  value={formatCurrency(item.subtotal, moneda)}
                   disabled
                   className="bg-muted"
                 />
@@ -169,22 +191,22 @@ export function PresupuestoForm({
       {/* Mano de Obra e Insumos */}
       <div className="grid md:grid-cols-2 gap-4">
         <div>
-          <Label>Mano de Obra</Label>
+          <Label>Mano de Obra ({getCurrencySymbol(moneda)})</Label>
           <Input
             type="number"
             min="0"
-            step="0.01"
+            step={moneda === "UF" ? "0.0001" : "0.01"}
             value={manoObra}
             onChange={(e) => setManoObra(parseFloat(e.target.value) || 0)}
             disabled={disabled}
           />
         </div>
         <div>
-          <Label>Insumos</Label>
+          <Label>Insumos ({getCurrencySymbol(moneda)})</Label>
           <Input
             type="number"
             min="0"
-            step="0.01"
+            step={moneda === "UF" ? "0.0001" : "0.01"}
             value={insumos}
             onChange={(e) => setInsumos(parseFloat(e.target.value) || 0)}
             disabled={disabled}
@@ -197,19 +219,19 @@ export function PresupuestoForm({
         <div className="space-y-2">
           <div className="flex justify-between">
             <span>Subtotal Items:</span>
-            <span className="font-medium">${subtotalItems.toFixed(2)}</span>
+            <span className="font-medium">{formatCurrency(subtotalItems, moneda)}</span>
           </div>
           <div className="flex justify-between">
             <span>Subtotal:</span>
-            <span className="font-medium">${subtotal.toFixed(2)}</span>
+            <span className="font-medium">{formatCurrency(subtotal, moneda)}</span>
           </div>
           <div className="flex justify-between">
             <span>IVA (19%):</span>
-            <span className="font-medium">${impuestos.toFixed(2)}</span>
+            <span className="font-medium">{formatCurrency(impuestos, moneda)}</span>
           </div>
           <div className="flex justify-between text-lg font-bold pt-2 border-t">
             <span>Total:</span>
-            <span>${total.toFixed(2)}</span>
+            <span>{formatCurrency(total, moneda)}</span>
           </div>
         </div>
       </Card>
