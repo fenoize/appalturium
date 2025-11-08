@@ -67,8 +67,14 @@ export default function OrdenServicioNueva() {
 
   const handleSubmit = async () => {
     await crearOT.mutateAsync({
-      ...formData,
+      cliente_id: formData.cliente_id,
+      ubicacion_id: formData.ubicacion_id,
+      tipo_trabajo: formData.tipo_trabajo,
+      descripcion: formData.descripcion,
+      prioridad: formData.prioridad,
       costos_estimado: formData.costos_estimado ? parseFloat(formData.costos_estimado) : undefined,
+      fecha_programada_inicio: formData.fecha_programada_inicio || null,
+      fecha_programada_fin: formData.fecha_programada_fin || null,
       estado: "draft",
     });
     navigate("/ordenes-servicio");
