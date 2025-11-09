@@ -150,12 +150,15 @@ export default function Personal() {
           </div>
 
           {/* Rol */}
-          <Select value={filtroRol} onValueChange={setFiltroRol}>
+          <Select 
+            value={filtroRol || "todos"} 
+            onValueChange={(value) => setFiltroRol(value === "todos" ? "" : value)}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Todos los roles" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos los roles</SelectItem>
+              <SelectItem value="todos">Todos los roles</SelectItem>
               <SelectItem value="tecnico">Técnico</SelectItem>
               <SelectItem value="operario">Operario</SelectItem>
               <SelectItem value="despachador">Despachador</SelectItem>
@@ -167,14 +170,14 @@ export default function Personal() {
 
           {/* Especialidad */}
           <Select
-            value={filtroEspecialidad}
-            onValueChange={setFiltroEspecialidad}
+            value={filtroEspecialidad || "todas"}
+            onValueChange={(value) => setFiltroEspecialidad(value === "todas" ? "" : value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Todas las especialidades" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas las especialidades</SelectItem>
+              <SelectItem value="todas">Todas las especialidades</SelectItem>
               {especialidades?.map((esp) => (
                 <SelectItem key={esp} value={esp}>
                   {esp}
