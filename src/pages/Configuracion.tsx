@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificacionesPreferences } from "@/components/notificaciones/NotificacionesPreferences";
+import { IntegracionesConfig } from "@/components/configuracion/IntegracionesConfig";
 import { 
   Settings, 
   Building, 
@@ -15,7 +16,8 @@ import {
   Shield, 
   Database,
   Mail,
-  Palette
+  Palette,
+  Plug
 } from "lucide-react";
 
 const Configuracion = () => {
@@ -35,8 +37,9 @@ const Configuracion = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="integraciones">Integraciones</TabsTrigger>
           <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
           <TabsTrigger value="seguridad">Seguridad</TabsTrigger>
         </TabsList>
@@ -271,6 +274,10 @@ const Configuracion = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="integraciones">
+          <IntegracionesConfig />
         </TabsContent>
 
         <TabsContent value="notificaciones">
