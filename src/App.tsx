@@ -22,6 +22,7 @@ import Geolocalizacion from "./pages/Geolocalizacion";
 import Reportes from "./pages/Reportes";
 import Personal from "./pages/Personal";
 import Finanzas from "./pages/Finanzas";
+import Usuarios from "./pages/Usuarios";
 import PortalCliente from "./pages/PortalCliente";
 import PortalClienteOrdenes from "./pages/PortalClienteOrdenes";
 import PortalClienteOrdenDetalle from "./pages/PortalClienteOrdenDetalle";
@@ -69,6 +70,7 @@ const App = () => {
                           <Route path="/reportes" element={<Reportes />} />
                           <Route path="/personal" element={<Personal />} />
                           <Route path="/finanzas" element={<Finanzas />} />
+                          <Route path="/usuarios" element={<Usuarios />} />
                           <Route path="/portal-cliente" element={<PortalCliente />} />
                           <Route path="/portal-cliente/ordenes" element={<PortalClienteOrdenes />} />
                           <Route path="/portal-cliente/ordenes/:id" element={<PortalClienteOrdenDetalle />} />

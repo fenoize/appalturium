@@ -59,6 +59,11 @@ const navigationItems = [
     href: "/personal" 
   },
   { 
+    title: "Usuarios y Roles", 
+    icon: Users, 
+    href: "/usuarios" 
+  },
+  { 
     title: "Portal Cliente", 
     icon: LayoutDashboard, 
     href: "/portal-cliente" 
