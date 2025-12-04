@@ -62,6 +62,36 @@ export type Database = {
           },
         ]
       }
+      categorias_inventario: {
+        Row: {
+          activa: boolean | null
+          color: string | null
+          created_at: string | null
+          descripcion: string | null
+          id: string
+          nombre: string
+          updated_at: string | null
+        }
+        Insert: {
+          activa?: boolean | null
+          color?: string | null
+          created_at?: string | null
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          updated_at?: string | null
+        }
+        Update: {
+          activa?: boolean | null
+          color?: string | null
+          created_at?: string | null
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       clientes: {
         Row: {
           actualizado_por_user_id: string | null
@@ -478,6 +508,182 @@ export type Database = {
           },
         ]
       }
+      inventario: {
+        Row: {
+          activo: boolean | null
+          categoria_id: string | null
+          codigo: string
+          created_at: string | null
+          descripcion: string | null
+          id: string
+          nombre: string
+          precio_compra: number | null
+          precio_venta: number | null
+          proveedor_id: string | null
+          stock_actual: number | null
+          stock_maximo: number | null
+          stock_minimo: number | null
+          tipo: Database["public"]["Enums"]["tipo_item_inventario"]
+          ubicacion_bodega: string | null
+          unidad_medida: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activo?: boolean | null
+          categoria_id?: string | null
+          codigo: string
+          created_at?: string | null
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          precio_compra?: number | null
+          precio_venta?: number | null
+          proveedor_id?: string | null
+          stock_actual?: number | null
+          stock_maximo?: number | null
+          stock_minimo?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_item_inventario"]
+          ubicacion_bodega?: string | null
+          unidad_medida?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activo?: boolean | null
+          categoria_id?: string | null
+          codigo?: string
+          created_at?: string | null
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          precio_compra?: number | null
+          precio_venta?: number | null
+          proveedor_id?: string | null
+          stock_actual?: number | null
+          stock_maximo?: number | null
+          stock_minimo?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_item_inventario"]
+          ubicacion_bodega?: string | null
+          unidad_medida?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventario_categoria_id_fkey"
+            columns: ["categoria_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_inventario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventario_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      items_orden_compra: {
+        Row: {
+          cantidad_recibida: number | null
+          cantidad_solicitada: number
+          created_at: string | null
+          id: string
+          item_id: string
+          orden_id: string
+          precio_unitario: number
+          subtotal: number
+        }
+        Insert: {
+          cantidad_recibida?: number | null
+          cantidad_solicitada: number
+          created_at?: string | null
+          id?: string
+          item_id: string
+          orden_id: string
+          precio_unitario: number
+          subtotal: number
+        }
+        Update: {
+          cantidad_recibida?: number | null
+          cantidad_solicitada?: number
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          orden_id?: string
+          precio_unitario?: number
+          subtotal?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_orden_compra_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_orden_compra_orden_id_fkey"
+            columns: ["orden_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_compra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movimientos_inventario: {
+        Row: {
+          cantidad: number
+          costo_unitario: number | null
+          created_at: string | null
+          id: string
+          item_id: string
+          notas: string | null
+          referencia_id: string | null
+          referencia_tipo: string | null
+          registrado_por: string
+          stock_anterior: number
+          stock_nuevo: number
+          tipo: Database["public"]["Enums"]["tipo_movimiento_inventario"]
+        }
+        Insert: {
+          cantidad: number
+          costo_unitario?: number | null
+          created_at?: string | null
+          id?: string
+          item_id: string
+          notas?: string | null
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          registrado_por: string
+          stock_anterior: number
+          stock_nuevo: number
+          tipo: Database["public"]["Enums"]["tipo_movimiento_inventario"]
+        }
+        Update: {
+          cantidad?: number
+          costo_unitario?: number | null
+          created_at?: string | null
+          id?: string
+          item_id?: string
+          notas?: string | null
+          referencia_id?: string | null
+          referencia_tipo?: string | null
+          registrado_por?: string
+          stock_anterior?: number
+          stock_nuevo?: number
+          tipo?: Database["public"]["Enums"]["tipo_movimiento_inventario"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimientos_inventario_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notificaciones_log: {
         Row: {
           asunto: string | null
@@ -537,6 +743,68 @@ export type Database = {
             columns: ["ot_id"]
             isOneToOne: false
             referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ordenes_compra: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          estado: Database["public"]["Enums"]["estado_orden_compra"] | null
+          fecha_emision: string
+          fecha_entrega_esperada: string | null
+          fecha_recepcion: string | null
+          id: string
+          impuestos: number | null
+          moneda: Database["public"]["Enums"]["tipo_moneda"] | null
+          notas: string | null
+          numero: string
+          proveedor_id: string
+          subtotal: number | null
+          total: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          estado?: Database["public"]["Enums"]["estado_orden_compra"] | null
+          fecha_emision?: string
+          fecha_entrega_esperada?: string | null
+          fecha_recepcion?: string | null
+          id?: string
+          impuestos?: number | null
+          moneda?: Database["public"]["Enums"]["tipo_moneda"] | null
+          notas?: string | null
+          numero: string
+          proveedor_id: string
+          subtotal?: number | null
+          total?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          estado?: Database["public"]["Enums"]["estado_orden_compra"] | null
+          fecha_emision?: string
+          fecha_entrega_esperada?: string | null
+          fecha_recepcion?: string | null
+          id?: string
+          impuestos?: number | null
+          moneda?: Database["public"]["Enums"]["tipo_moneda"] | null
+          notas?: string | null
+          numero?: string
+          proveedor_id?: string
+          subtotal?: number | null
+          total?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ordenes_compra_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
             referencedColumns: ["id"]
           },
         ]
@@ -961,6 +1229,78 @@ export type Database = {
           },
         ]
       }
+      proveedores: {
+        Row: {
+          activo: boolean | null
+          ciudad: string | null
+          condiciones_pago:
+            | Database["public"]["Enums"]["condiciones_pago"]
+            | null
+          contacto_email: string | null
+          contacto_nombre: string | null
+          contacto_telefono: string | null
+          created_at: string | null
+          direccion: string | null
+          email: string | null
+          giro: string | null
+          id: string
+          nombre_fantasia: string | null
+          notas: string | null
+          razon_social: string
+          region: string | null
+          rut: string
+          sitio_web: string | null
+          telefono: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activo?: boolean | null
+          ciudad?: string | null
+          condiciones_pago?:
+            | Database["public"]["Enums"]["condiciones_pago"]
+            | null
+          contacto_email?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          created_at?: string | null
+          direccion?: string | null
+          email?: string | null
+          giro?: string | null
+          id?: string
+          nombre_fantasia?: string | null
+          notas?: string | null
+          razon_social: string
+          region?: string | null
+          rut: string
+          sitio_web?: string | null
+          telefono?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activo?: boolean | null
+          ciudad?: string | null
+          condiciones_pago?:
+            | Database["public"]["Enums"]["condiciones_pago"]
+            | null
+          contacto_email?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          created_at?: string | null
+          direccion?: string | null
+          email?: string | null
+          giro?: string | null
+          id?: string
+          nombre_fantasia?: string | null
+          notas?: string | null
+          razon_social?: string
+          region?: string | null
+          rut?: string
+          sitio_web?: string | null
+          telefono?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           created_at: string | null
@@ -1253,6 +1593,7 @@ export type Database = {
         Args: { _tipo: Database["public"]["Enums"]["tipo_documento_venta"] }
         Returns: string
       }
+      generar_numero_oc: { Args: never; Returns: string }
       generar_numero_ot: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -1289,6 +1630,12 @@ export type Database = {
         | "divorciado"
         | "union_libre"
       estado_cliente: "activo" | "suspendido" | "inactivo"
+      estado_orden_compra:
+        | "borrador"
+        | "enviada"
+        | "parcial"
+        | "completada"
+        | "cancelada"
       estado_presupuesto: "borrador" | "enviado" | "aprobado" | "rechazado"
       estatus_comunicacion: "pendiente" | "resuelto"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
@@ -1316,7 +1663,13 @@ export type Database = {
         | "nota_credito"
         | "nota_debito"
         | "otro"
+      tipo_item_inventario: "material" | "producto" | "servicio"
       tipo_moneda: "CLP" | "UF" | "USD"
+      tipo_movimiento_inventario:
+        | "entrada"
+        | "salida"
+        | "ajuste"
+        | "transferencia"
       tipo_plantilla_email:
         | "ot_creada"
         | "asignacion_personal"
@@ -1456,6 +1809,13 @@ export const Constants = {
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
       estado_civil: ["soltero", "casado", "viudo", "divorciado", "union_libre"],
       estado_cliente: ["activo", "suspendido", "inactivo"],
+      estado_orden_compra: [
+        "borrador",
+        "enviada",
+        "parcial",
+        "completada",
+        "cancelada",
+      ],
       estado_presupuesto: ["borrador", "enviado", "aprobado", "rechazado"],
       estatus_comunicacion: ["pendiente", "resuelto"],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
@@ -1486,7 +1846,14 @@ export const Constants = {
         "nota_debito",
         "otro",
       ],
+      tipo_item_inventario: ["material", "producto", "servicio"],
       tipo_moneda: ["CLP", "UF", "USD"],
+      tipo_movimiento_inventario: [
+        "entrada",
+        "salida",
+        "ajuste",
+        "transferencia",
+      ],
       tipo_plantilla_email: [
         "ot_creada",
         "asignacion_personal",
