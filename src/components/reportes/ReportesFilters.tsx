@@ -65,14 +65,14 @@ export function ReportesFilters({ filtros, onFiltroChange, onLimpiar }: Reportes
         <div className="space-y-2">
           <Label htmlFor="tipoTrabajo">Tipo de Trabajo</Label>
           <Select
-            value={filtros.tipoTrabajo || ''}
-            onValueChange={(value) => onFiltroChange('tipoTrabajo', value)}
+            value={filtros.tipoTrabajo || 'all'}
+            onValueChange={(value) => onFiltroChange('tipoTrabajo', value === 'all' ? '' : value)}
           >
             <SelectTrigger id="tipoTrabajo">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               {tiposTrabajoData?.map((tipo) => (
                 <SelectItem key={tipo.key} value={tipo.key}>
                   {tipo.label}
@@ -86,14 +86,14 @@ export function ReportesFilters({ filtros, onFiltroChange, onLimpiar }: Reportes
         <div className="space-y-2">
           <Label htmlFor="semaforo">Estado de Cumplimiento</Label>
           <Select
-            value={filtros.semaforo || ''}
-            onValueChange={(value) => onFiltroChange('semaforo', value)}
+            value={filtros.semaforo || 'all'}
+            onValueChange={(value) => onFiltroChange('semaforo', value === 'all' ? '' : value)}
           >
             <SelectTrigger id="semaforo">
               <SelectValue placeholder="Todos" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todos</SelectItem>
+              <SelectItem value="all">Todos</SelectItem>
               <SelectItem value="verde">
                 <span className="flex items-center">
                   <span className="w-3 h-3 rounded-full bg-success mr-2"></span>
