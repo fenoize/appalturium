@@ -24,6 +24,16 @@ const roleLabels: Record<string, string> = {
 };
 
 export function UsuarioCard({ usuario, onRemoverRol }: UsuarioCardProps) {
+  const formatDate = (dateString: string | null | undefined, formatStr: string) => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return null;
+    return format(date, formatStr, { locale: es });
+  };
+
+  const createdAt = formatDate(usuario.created_at, "PP");
+  const lastSignIn = formatDate(usuario.last_sign_in_at, "PPp");
+
   return (
     <Card>
       <CardHeader>
@@ -41,18 +51,16 @@ export function UsuarioCard({ usuario, onRemoverRol }: UsuarioCardProps) {
             <Mail className="h-4 w-4" />
             <span>{usuario.email}</span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Calendar className="h-4 w-4" />
-            <span>
-              Creado: {format(new Date(usuario.created_at), "PP", { locale: es })}
-            </span>
-          </div>
-          {usuario.last_sign_in_at && (
+          {createdAt && (
             <div className="flex items-center gap-2 text-muted-foreground">
               <Calendar className="h-4 w-4" />
-              <span>
-                Último acceso: {format(new Date(usuario.last_sign_in_at), "PPp", { locale: es })}
-              </span>
+              <span>Creado: {createdAt}</span>
+            </div>
+          )}
+          {lastSignIn && (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Calendar className="h-4 w-4" />
+              <span>Último acceso: {lastSignIn}</span>
             </div>
           )}
         </div>
