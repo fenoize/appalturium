@@ -20,6 +20,7 @@ import { Header } from "@/components/layout/Header";
 import { ProveedorCard } from "@/components/proveedores/ProveedorCard";
 import { ProveedorForm } from "@/components/proveedores/ProveedorForm";
 import { OrdenCompraForm } from "@/components/proveedores/OrdenCompraForm";
+import { ReporteCompras } from "@/components/proveedores/ReporteCompras";
 import { useProveedores, useDeleteProveedor, type Proveedor } from "@/hooks/useProveedores";
 import { useOrdenesCompra } from "@/hooks/useOrdenesCompra";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -34,6 +35,7 @@ import {
   Clock,
   CheckCircle,
   XCircle,
+  BarChart3,
 } from "lucide-react";
 
 const estadoOrdenLabels: Record<string, { label: string; variant: "default" | "secondary" | "destructive" | "outline" }> = {
@@ -196,6 +198,10 @@ export default function Proveedores() {
               <TabsList>
                 <TabsTrigger value="proveedores">Proveedores</TabsTrigger>
                 <TabsTrigger value="ordenes">Órdenes de Compra</TabsTrigger>
+                <TabsTrigger value="reportes" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Reportes
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="proveedores">
@@ -287,6 +293,10 @@ export default function Proveedores() {
                     })}
                   </div>
                 )}
+              </TabsContent>
+
+              <TabsContent value="reportes">
+                <ReporteCompras />
               </TabsContent>
             </Tabs>
           </div>
