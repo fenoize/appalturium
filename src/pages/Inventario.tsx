@@ -8,6 +8,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { InventarioTable } from "@/components/inventario/InventarioTable";
 import { InventarioForm } from "@/components/inventario/InventarioForm";
+import { ReporteMovimientos } from "@/components/inventario/ReporteMovimientos";
 import { useInventario, useCategorias, useMovimientos, type ItemInventario } from "@/hooks/useInventario";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { format } from "date-fns";
@@ -20,6 +21,7 @@ import {
   TrendingDown,
   ArrowUpDown,
   Box,
+  BarChart3,
 } from "lucide-react";
 
 export default function Inventario() {
@@ -169,6 +171,10 @@ export default function Inventario() {
                 <TabsTrigger value="items">Items</TabsTrigger>
                 <TabsTrigger value="movimientos">Movimientos</TabsTrigger>
                 <TabsTrigger value="bajo-stock">Stock Bajo</TabsTrigger>
+                <TabsTrigger value="reportes" className="gap-2">
+                  <BarChart3 className="h-4 w-4" />
+                  Reportes
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="items">
@@ -239,6 +245,10 @@ export default function Inventario() {
                 ) : (
                   <InventarioTable items={itemsBajoStock} onEdit={handleEdit} />
                 )}
+              </TabsContent>
+
+              <TabsContent value="reportes">
+                <ReporteMovimientos />
               </TabsContent>
             </Tabs>
           </div>
