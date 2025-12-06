@@ -4,8 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "@/components/layout/Header";
 import { InventarioTable } from "@/components/inventario/InventarioTable";
 import { InventarioForm } from "@/components/inventario/InventarioForm";
 import { ReporteMovimientos } from "@/components/inventario/ReporteMovimientos";
@@ -25,7 +23,6 @@ import {
 } from "lucide-react";
 
 export default function Inventario() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ItemInventario | undefined>();
 
@@ -74,26 +71,19 @@ export default function Inventario() {
   };
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
-      <Sidebar collapsed={sidebarCollapsed} onToggle={() => setSidebarCollapsed(!sidebarCollapsed)} />
-
-      <div className="flex-1 flex flex-col">
-        <Header />
-
-        <main className="flex-1 p-6">
-          <div className="max-w-7xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold">Inventario</h1>
-                <p className="text-muted-foreground">
-                  Gestión de stock, materiales y productos
-                </p>
-              </div>
-              <Button onClick={() => setFormOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Nuevo Item
-              </Button>
-            </div>
+    <div className="max-w-7xl mx-auto space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">Inventario</h1>
+          <p className="text-muted-foreground">
+            Gestión de stock, materiales y productos
+          </p>
+        </div>
+        <Button onClick={() => setFormOpen(true)}>
+          <Plus className="h-4 w-4 mr-2" />
+          Nuevo Item
+        </Button>
+      </div>
 
             {/* Métricas */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -251,9 +241,6 @@ export default function Inventario() {
                 <ReporteMovimientos />
               </TabsContent>
             </Tabs>
-          </div>
-        </main>
-      </div>
 
       <InventarioForm
         open={formOpen}
