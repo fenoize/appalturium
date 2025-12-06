@@ -29,6 +29,8 @@ import PortalClienteOrdenDetalle from "./pages/PortalClienteOrdenDetalle";
 import PortalClienteSolicitarMantencion from "./pages/PortalClienteSolicitarMantencion";
 import PortalClienteDocumentos from "./pages/PortalClienteDocumentos";
 import PortalClientePerfil from "./pages/PortalClientePerfil";
+import Inventario from "./pages/Inventario";
+import Proveedores from "./pages/Proveedores";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -78,6 +80,8 @@ const App = () => {
                           <Route path="/portal-cliente/documentos" element={<PortalClienteDocumentos />} />
                           <Route path="/portal-cliente/perfil" element={<PortalClientePerfil />} />
                           <Route path="/configuracion" element={<Configuracion />} />
+                          <Route path="/inventario" element={<Inventario />} />
+                          <Route path="/proveedores" element={<Proveedores />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
