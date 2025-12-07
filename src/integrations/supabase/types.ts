@@ -235,6 +235,38 @@ export type Database = {
           },
         ]
       }
+      comentarios_tarea: {
+        Row: {
+          contenido: string
+          created_at: string | null
+          id: string
+          tarea_id: string
+          usuario_id: string
+        }
+        Insert: {
+          contenido: string
+          created_at?: string | null
+          id?: string
+          tarea_id: string
+          usuario_id: string
+        }
+        Update: {
+          contenido?: string
+          created_at?: string | null
+          id?: string
+          tarea_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comentarios_tarea_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comunicaciones: {
         Row: {
           adjuntos: Json | null
@@ -1301,6 +1333,77 @@ export type Database = {
         }
         Relationships: []
       }
+      proyectos: {
+        Row: {
+          cliente_id: string | null
+          costo_real: number | null
+          created_at: string | null
+          created_by: string
+          descripcion: string | null
+          estado: Database["public"]["Enums"]["estado_proyecto"]
+          etiquetas: string[] | null
+          fecha_fin_estimada: string | null
+          fecha_fin_real: string | null
+          fecha_inicio: string | null
+          id: string
+          nombre: string
+          notas: string | null
+          presupuesto: number | null
+          prioridad: Database["public"]["Enums"]["prioridad_tarea"] | null
+          progreso: number | null
+          responsable_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          costo_real?: number | null
+          created_at?: string | null
+          created_by: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_proyecto"]
+          etiquetas?: string[] | null
+          fecha_fin_estimada?: string | null
+          fecha_fin_real?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre: string
+          notas?: string | null
+          presupuesto?: number | null
+          prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
+          progreso?: number | null
+          responsable_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          costo_real?: number | null
+          created_at?: string | null
+          created_by?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_proyecto"]
+          etiquetas?: string[] | null
+          fecha_fin_estimada?: string | null
+          fecha_fin_real?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre?: string
+          notas?: string | null
+          presupuesto?: number | null
+          prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
+          progreso?: number | null
+          responsable_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proyectos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_subscriptions: {
         Row: {
           created_at: string | null
@@ -1351,6 +1454,87 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      tareas: {
+        Row: {
+          adjuntos: Json | null
+          asignado_a: string | null
+          created_at: string | null
+          created_by: string
+          descripcion: string | null
+          estado: Database["public"]["Enums"]["estado_tarea"]
+          etiquetas: string[] | null
+          fecha_completada: string | null
+          fecha_inicio: string | null
+          fecha_vencimiento: string | null
+          horas_estimadas: number | null
+          horas_reales: number | null
+          id: string
+          orden: number | null
+          prioridad: Database["public"]["Enums"]["prioridad_tarea"] | null
+          proyecto_id: string
+          tarea_padre_id: string | null
+          titulo: string
+          updated_at: string | null
+        }
+        Insert: {
+          adjuntos?: Json | null
+          asignado_a?: string | null
+          created_at?: string | null
+          created_by: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_tarea"]
+          etiquetas?: string[] | null
+          fecha_completada?: string | null
+          fecha_inicio?: string | null
+          fecha_vencimiento?: string | null
+          horas_estimadas?: number | null
+          horas_reales?: number | null
+          id?: string
+          orden?: number | null
+          prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
+          proyecto_id: string
+          tarea_padre_id?: string | null
+          titulo: string
+          updated_at?: string | null
+        }
+        Update: {
+          adjuntos?: Json | null
+          asignado_a?: string | null
+          created_at?: string | null
+          created_by?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_tarea"]
+          etiquetas?: string[] | null
+          fecha_completada?: string | null
+          fecha_inicio?: string | null
+          fecha_vencimiento?: string | null
+          horas_estimadas?: number | null
+          horas_reales?: number | null
+          id?: string
+          orden?: number | null
+          prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
+          proyecto_id?: string
+          tarea_padre_id?: string | null
+          titulo?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tareas_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tareas_tarea_padre_id_fkey"
+            columns: ["tarea_padre_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tiempos_reales: {
         Row: {
@@ -1637,9 +1821,22 @@ export type Database = {
         | "completada"
         | "cancelada"
       estado_presupuesto: "borrador" | "enviado" | "aprobado" | "rechazado"
+      estado_proyecto:
+        | "planificacion"
+        | "en_progreso"
+        | "pausado"
+        | "completado"
+        | "cancelado"
+      estado_tarea:
+        | "pendiente"
+        | "en_progreso"
+        | "revision"
+        | "completada"
+        | "cancelada"
       estatus_comunicacion: "pendiente" | "resuelto"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
+      prioridad_tarea: "baja" | "media" | "alta" | "urgente"
       rol_en_ot: "tecnico" | "operario" | "despachador" | "otro"
       rol_operativo:
         | "tecnico"
@@ -1817,9 +2014,24 @@ export const Constants = {
         "cancelada",
       ],
       estado_presupuesto: ["borrador", "enviado", "aprobado", "rechazado"],
+      estado_proyecto: [
+        "planificacion",
+        "en_progreso",
+        "pausado",
+        "completado",
+        "cancelado",
+      ],
+      estado_tarea: [
+        "pendiente",
+        "en_progreso",
+        "revision",
+        "completada",
+        "cancelada",
+      ],
       estatus_comunicacion: ["pendiente", "resuelto"],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
+      prioridad_tarea: ["baja", "media", "alta", "urgente"],
       rol_en_ot: ["tecnico", "operario", "despachador", "otro"],
       rol_operativo: [
         "tecnico",

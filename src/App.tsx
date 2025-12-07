@@ -31,6 +31,8 @@ import PortalClienteDocumentos from "./pages/PortalClienteDocumentos";
 import PortalClientePerfil from "./pages/PortalClientePerfil";
 import Inventario from "./pages/Inventario";
 import Proveedores from "./pages/Proveedores";
+import Proyectos from "./pages/Proyectos";
+import Tareas from "./pages/Tareas";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +84,8 @@ const App = () => {
                           <Route path="/configuracion" element={<Configuracion />} />
                           <Route path="/inventario" element={<Inventario />} />
                           <Route path="/proveedores" element={<Proveedores />} />
+                          <Route path="/proyectos" element={<Proyectos />} />
+                          <Route path="/tareas" element={<Tareas />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
