@@ -57,7 +57,7 @@ export function useTareas(proyectoId?: string) {
         .select(`
           *,
           proyecto:proyectos(nombre),
-          asignado:personal_fichas!tareas_asignado_a_fkey(nombre_completo)
+          asignado:personal_fichas(nombre_completo)
         `)
         .order("orden", { ascending: true });
 
@@ -81,7 +81,7 @@ export function useTarea(id: string) {
         .select(`
           *,
           proyecto:proyectos(nombre),
-          asignado:personal_fichas!tareas_asignado_a_fkey(nombre_completo)
+          asignado:personal_fichas(nombre_completo)
         `)
         .eq("id", id)
         .single();

@@ -1402,6 +1402,13 @@ export type Database = {
             referencedRelation: "clientes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "proyectos_responsable_id_fkey"
+            columns: ["responsable_id"]
+            isOneToOne: false
+            referencedRelation: "personal_fichas"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       push_subscriptions: {
@@ -1520,6 +1527,13 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "tareas_asignado_a_fkey"
+            columns: ["asignado_a"]
+            isOneToOne: false
+            referencedRelation: "personal_fichas"
+            referencedColumns: ["user_id"]
+          },
           {
             foreignKeyName: "tareas_proyecto_id_fkey"
             columns: ["proyecto_id"]

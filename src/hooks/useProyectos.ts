@@ -57,7 +57,7 @@ export function useProyectos() {
         .select(`
           *,
           cliente:clientes(razon_social, nombres, apellidos),
-          responsable:personal_fichas!proyectos_responsable_id_fkey(nombre_completo)
+          responsable:personal_fichas(nombre_completo)
         `)
         .order("created_at", { ascending: false });
 
@@ -76,7 +76,7 @@ export function useProyecto(id: string) {
         .select(`
           *,
           cliente:clientes(razon_social, nombres, apellidos),
-          responsable:personal_fichas!proyectos_responsable_id_fkey(nombre_completo)
+          responsable:personal_fichas(nombre_completo)
         `)
         .eq("id", id)
         .single();
