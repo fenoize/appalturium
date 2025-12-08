@@ -95,15 +95,15 @@ export function ProyectoForm({ open, onOpenChange, onSubmit, proyecto, isLoading
   const handleSubmit = (values: z.infer<typeof formSchema>) => {
     onSubmit({
       nombre: values.nombre,
-      descripcion: values.descripcion,
+      descripcion: values.descripcion || undefined,
       cliente_id: values.cliente_id || undefined,
       estado: values.estado,
       prioridad: values.prioridad,
-      fecha_inicio: values.fecha_inicio,
-      fecha_fin_estimada: values.fecha_fin_estimada,
+      fecha_inicio: values.fecha_inicio || undefined,
+      fecha_fin_estimada: values.fecha_fin_estimada || undefined,
       presupuesto: values.presupuesto,
       responsable_id: values.responsable_id || undefined,
-      notas: values.notas,
+      notas: values.notas || undefined,
     });
   };
 

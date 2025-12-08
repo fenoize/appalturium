@@ -97,12 +97,12 @@ export function TareaForm({ open, onOpenChange, onSubmit, tarea, proyectoId, isL
     onSubmit({
       proyecto_id: values.proyecto_id,
       titulo: values.titulo,
-      descripcion: values.descripcion,
+      descripcion: values.descripcion || undefined,
       estado: values.estado,
       prioridad: values.prioridad,
       asignado_a: values.asignado_a || undefined,
-      fecha_inicio: values.fecha_inicio,
-      fecha_vencimiento: values.fecha_vencimiento,
+      fecha_inicio: values.fecha_inicio || undefined,
+      fecha_vencimiento: values.fecha_vencimiento || undefined,
       horas_estimadas: values.horas_estimadas,
     });
   };
