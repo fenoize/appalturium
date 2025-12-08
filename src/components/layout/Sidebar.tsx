@@ -16,7 +16,8 @@ import {
   MapPin,
   TrendingUp,
   Users as UsersIcon,
-  LayoutDashboard
+  LayoutDashboard,
+  GanttChart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -100,7 +101,7 @@ const navigationItems = [
   },
   { 
     title: "Gantt", 
-    icon: Calendar, 
+    icon: GanttChart, 
     href: "/gantt" 
   },
   { 
