@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, type FC } from "react";
 import { format, addDays, startOfMonth, endOfMonth, eachDayOfInterval, differenceInDays, isSameMonth, isToday, startOfWeek, endOfWeek, addMonths, subMonths, addWeeks, subWeeks } from "date-fns";
 import { es } from "date-fns/locale";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,11 +19,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Calendar } from "@/components/ui/calendar";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { useProyectos, Proyecto } from "@/hooks/useProyectos";
-import { useTareas, Tarea } from "@/hooks/useTareas";
+import { useProyectos, useActualizarProyecto } from "@/hooks/useProyectos";
+import { useTareas, useActualizarTarea } from "@/hooks/useTareas";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
+import html2canvas from "html2canvas";
 import {
   ChevronLeft,
   ChevronRight,
@@ -38,6 +46,11 @@ import {
   ListTodo,
   Eye,
   X,
+  Download,
+  FileImage,
+  FileText,
+  Loader2,
+  GripVertical,
 } from "lucide-react";
 
 type VistaRango = "semana" | "mes" | "trimestre";
@@ -50,14 +63,14 @@ const prioridadOrden = { urgente: 0, alta: 1, media: 2, baja: 3 };
 const estadoOrdenProyecto = { en_progreso: 0, planificacion: 1, pausado: 2, completado: 3, cancelado: 4 };
 const estadoOrdenTarea = { en_progreso: 0, pendiente: 1, revision: 2, completada: 3, cancelada: 4 };
 
-const coloresPrioridad = {
+const coloresPrioridad: Record<string, string> = {
   urgente: "hsl(0 84% 60%)",
   alta: "hsl(25 95% 53%)",
   media: "hsl(217 91% 60%)",
   baja: "hsl(142 71% 45%)",
 };
 
-const coloresEstadoProyecto = {
+const coloresEstadoProyecto: Record<string, string> = {
   planificacion: "hsl(217 91% 60%)",
   en_progreso: "hsl(142 71% 45%)",
   pausado: "hsl(45 93% 47%)",
@@ -65,7 +78,7 @@ const coloresEstadoProyecto = {
   cancelado: "hsl(0 0% 60%)",
 };
 
-const coloresEstadoTarea = {
+const coloresEstadoTarea: Record<string, string> = {
   pendiente: "hsl(217 91% 60%)",
   en_progreso: "hsl(142 71% 45%)",
   revision: "hsl(45 93% 47%)",
@@ -73,9 +86,160 @@ const coloresEstadoTarea = {
   cancelada: "hsl(0 0% 60%)",
 };
 
+interface GanttItem {
+  id: string;
+  tipo: "proyecto" | "tarea";
+  nombre: string;
+  fecha_inicio: string | null;
+  fecha_fin: string | null;
+  prioridad: string;
+  estado: string;
+  proyectoNombre?: string;
+  proyecto_id?: string;
+}
+
+// Draggable Bar Component
+function DraggableBar({
+  item,
+  position,
+  color,
+  rangoStart,
+  totalDias,
+  onDragEnd,
+}: {
+  item: GanttItem;
+  position: { left: string; width: string };
+  color: string;
+  rangoStart: Date;
+  totalDias: number;
+  onDragEnd: (id: string, tipo: "proyecto" | "tarea", newStart: Date, newEnd: Date) => void;
+}) {
+  const barRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isResizing, setIsResizing] = useState<"start" | "end" | null>(null);
+  const dragOffset = useRef({ x: 0, startLeft: 0, startWidth: 0 });
+
+  const handleMouseDown = (e: React.MouseEvent, action: "drag" | "resize-start" | "resize-end") => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!barRef.current) return;
+
+    const startLeft = parseFloat(position.left);
+    const startWidth = parseFloat(position.width);
+
+    dragOffset.current = {
+      x: e.clientX,
+      startLeft,
+      startWidth,
+    };
+
+    if (action === "drag") {
+      setIsDragging(true);
+    } else if (action === "resize-start") {
+      setIsResizing("start");
+    } else {
+      setIsResizing("end");
+    }
+  };
+
+  useEffect(() => {
+    if (!isDragging && !isResizing) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!barRef.current || !barRef.current.parentElement) return;
+
+      const parentRect = barRef.current.parentElement.getBoundingClientRect();
+      const deltaX = e.clientX - dragOffset.current.x;
+      const deltaPercent = (deltaX / parentRect.width) * 100;
+
+      if (isDragging) {
+        const newLeft = Math.max(0, Math.min(100 - dragOffset.current.startWidth, dragOffset.current.startLeft + deltaPercent));
+        barRef.current.style.left = `${newLeft}%`;
+      } else if (isResizing === "end") {
+        const newWidth = Math.max(2, Math.min(100 - dragOffset.current.startLeft, dragOffset.current.startWidth + deltaPercent));
+        barRef.current.style.width = `${newWidth}%`;
+      } else if (isResizing === "start") {
+        const newLeft = Math.max(0, dragOffset.current.startLeft + deltaPercent);
+        const newWidth = Math.max(2, dragOffset.current.startWidth - deltaPercent);
+        if (newLeft + newWidth <= 100) {
+          barRef.current.style.left = `${newLeft}%`;
+          barRef.current.style.width = `${newWidth}%`;
+        }
+      }
+    };
+
+    const handleMouseUp = () => {
+      if (!barRef.current) return;
+
+      const newLeft = parseFloat(barRef.current.style.left);
+      const newWidth = parseFloat(barRef.current.style.width);
+
+      const startDayOffset = Math.round((newLeft / 100) * totalDias);
+      const durationDays = Math.round((newWidth / 100) * totalDias);
+
+      const newStartDate = addDays(rangoStart, startDayOffset);
+      const newEndDate = addDays(newStartDate, Math.max(0, durationDays - 1));
+
+      onDragEnd(item.id, item.tipo, newStartDate, newEndDate);
+
+      setIsDragging(false);
+      setIsResizing(null);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging, isResizing, totalDias, rangoStart, item.id, item.tipo, onDragEnd]);
+
+  const isTarea = item.tipo === "tarea";
+
+  return (
+    <div
+      ref={barRef}
+      className={cn(
+        "absolute flex items-center shadow-sm group/bar",
+        "hover:shadow-md transition-shadow select-none",
+        isTarea ? "h-6 top-4 rounded-sm" : "h-8 top-3 rounded-md",
+        (isDragging || isResizing) && "opacity-80 shadow-lg z-20"
+      )}
+      style={{
+        left: position.left,
+        width: position.width,
+        backgroundColor: color,
+        color: "white",
+        cursor: isDragging ? "grabbing" : "grab",
+      }}
+      title={`${item.nombre}\n${item.fecha_inicio ? format(new Date(item.fecha_inicio), "d MMM", { locale: es }) : "Sin fecha"} - ${item.fecha_fin ? format(new Date(item.fecha_fin), "d MMM", { locale: es }) : "Sin fecha"}\n(Arrastrar para mover, bordes para redimensionar)`}
+      onMouseDown={(e) => handleMouseDown(e, "drag")}
+    >
+      <div
+        className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover/bar:opacity-100 hover:bg-black/20 rounded-l-md transition-opacity"
+        onMouseDown={(e) => handleMouseDown(e, "resize-start")}
+      />
+
+      <div className="flex items-center px-2 gap-1 w-full overflow-hidden">
+        <GripVertical className="h-3 w-3 flex-shrink-0 opacity-50" />
+        <span className="text-xs font-medium truncate">{item.nombre}</span>
+      </div>
+
+      <div
+        className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover/bar:opacity-100 hover:bg-black/20 rounded-r-md transition-opacity"
+        onMouseDown={(e) => handleMouseDown(e, "resize-end")}
+      />
+    </div>
+  );
+}
+
 export default function Gantt() {
   const { data: proyectos = [], isLoading: loadingProyectos } = useProyectos();
   const { data: tareas = [], isLoading: loadingTareas } = useTareas();
+  const actualizarProyecto = useActualizarProyecto();
+  const actualizarTarea = useActualizarTarea();
 
   const [tipoVista, setTipoVista] = useState<TipoVista>("gantt");
   const [vistaRango, setVistaRango] = useState<VistaRango>("mes");
@@ -88,6 +252,9 @@ export default function Gantt() {
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [filtroProyecto, setFiltroProyecto] = useState<string>("todos");
   const [showFilters, setShowFilters] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const ganttRef = useRef<HTMLDivElement>(null);
 
   // Calcular rango de fechas según vista
   const rangoFechas = useMemo(() => {
@@ -122,19 +289,125 @@ export default function Gantt() {
     }
   };
 
+  // Handle drag end - update dates
+  const handleDragEnd = useCallback(
+    async (id: string, tipo: "proyecto" | "tarea", newStart: Date, newEnd: Date) => {
+      const startStr = format(newStart, "yyyy-MM-dd");
+      const endStr = format(newEnd, "yyyy-MM-dd");
+
+      try {
+        if (tipo === "proyecto") {
+          await actualizarProyecto.mutateAsync({
+            id,
+            fecha_inicio: startStr,
+            fecha_fin_estimada: endStr,
+          });
+        } else {
+          await actualizarTarea.mutateAsync({
+            id,
+            fecha_inicio: startStr,
+            fecha_vencimiento: endStr,
+          });
+        }
+        toast.success("Fechas actualizadas correctamente");
+      } catch (error) {
+        toast.error("Error al actualizar las fechas");
+      }
+    },
+    [actualizarProyecto, actualizarTarea]
+  );
+
+  // Export functions
+  const exportAsImage = async (formatType: "png" | "jpeg") => {
+    if (!ganttRef.current) {
+      toast.error("No se encontró el contenido para exportar");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(ganttRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const link = document.createElement("a");
+      link.download = `gantt-${format(new Date(), "yyyy-MM-dd")}.${formatType}`;
+      link.href = canvas.toDataURL(`image/${formatType}`, 0.95);
+      link.click();
+
+      toast.success(`Diagrama exportado como ${formatType.toUpperCase()}`);
+    } catch (error) {
+      console.error("Error exporting:", error);
+      toast.error("Error al exportar el diagrama");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const exportAsPDF = async () => {
+    if (!ganttRef.current) {
+      toast.error("No se encontró el contenido para exportar");
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(ganttRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: "#ffffff",
+        logging: false,
+      });
+
+      const imgData = canvas.toDataURL("image/png");
+      
+      const printWindow = window.open("", "_blank");
+      if (printWindow) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Gantt - ${format(new Date(), "yyyy-MM-dd")}</title>
+              <style>
+                @page { size: landscape; margin: 10mm; }
+                body { margin: 0; padding: 20px; }
+                img { max-width: 100%; height: auto; }
+                @media print {
+                  body { padding: 0; }
+                }
+              </style>
+            </head>
+            <body>
+              <img src="${imgData}" alt="Gantt Chart" />
+              <script>
+                window.onload = function() {
+                  window.print();
+                  window.onafterprint = function() { window.close(); };
+                };
+              </script>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+      }
+
+      toast.success("Abriendo diálogo de impresión para PDF");
+    } catch (error) {
+      console.error("Error exporting:", error);
+      toast.error("Error al exportar el diagrama");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   // Filtrar y ordenar datos
   const datosFiltrados = useMemo(() => {
-    const items: Array<{
-      id: string;
-      tipo: "proyecto" | "tarea";
-      nombre: string;
-      fecha_inicio: string | null;
-      fecha_fin: string | null;
-      prioridad: string;
-      estado: string;
-      proyectoNombre?: string;
-      proyecto_id?: string;
-    }> = [];
+    const items: GanttItem[] = [];
 
     if (mostrar === "proyectos" || mostrar === "ambos") {
       proyectos.forEach((p) => {
@@ -198,16 +471,16 @@ export default function Gantt() {
           comparacion = (a.fecha_fin || "9999").localeCompare(b.fecha_fin || "9999");
           break;
         case "prioridad":
-          comparacion = (prioridadOrden[a.prioridad as keyof typeof prioridadOrden] || 99) -
-            (prioridadOrden[b.prioridad as keyof typeof prioridadOrden] || 99);
+          comparacion = (prioridadOrden[a.prioridad as keyof typeof prioridadOrden] ?? 99) -
+            (prioridadOrden[b.prioridad as keyof typeof prioridadOrden] ?? 99);
           break;
         case "estado":
           if (a.tipo === "proyecto") {
-            comparacion = (estadoOrdenProyecto[a.estado as keyof typeof estadoOrdenProyecto] || 99) -
-              (estadoOrdenProyecto[b.estado as keyof typeof estadoOrdenProyecto] || 99);
+            comparacion = (estadoOrdenProyecto[a.estado as keyof typeof estadoOrdenProyecto] ?? 99) -
+              (estadoOrdenProyecto[b.estado as keyof typeof estadoOrdenProyecto] ?? 99);
           } else {
-            comparacion = (estadoOrdenTarea[a.estado as keyof typeof estadoOrdenTarea] || 99) -
-              (estadoOrdenTarea[b.estado as keyof typeof estadoOrdenTarea] || 99);
+            comparacion = (estadoOrdenTarea[a.estado as keyof typeof estadoOrdenTarea] ?? 99) -
+              (estadoOrdenTarea[b.estado as keyof typeof estadoOrdenTarea] ?? 99);
           }
           break;
       }
@@ -236,11 +509,11 @@ export default function Gantt() {
     return { left: `${leftPercent}%`, width: `${widthPercent}%` };
   };
 
-  const getColor = (item: typeof datosFiltrados[0]) => {
+  const getColor = (item: GanttItem) => {
     if (item.tipo === "proyecto") {
-      return coloresEstadoProyecto[item.estado as keyof typeof coloresEstadoProyecto] || "hsl(var(--muted))";
+      return coloresEstadoProyecto[item.estado] || "hsl(var(--muted))";
     }
-    return coloresEstadoTarea[item.estado as keyof typeof coloresEstadoTarea] || "hsl(var(--muted))";
+    return coloresEstadoTarea[item.estado] || "hsl(var(--muted))";
   };
 
   const limpiarFiltros = () => {
@@ -266,6 +539,34 @@ export default function Gantt() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Export Button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" disabled={isExporting} className="gap-2">
+                {isExporting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Download className="h-4 w-4" />
+                )}
+                Exportar
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => exportAsImage("png")} className="gap-2">
+                <FileImage className="h-4 w-4" />
+                Exportar como PNG
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => exportAsImage("jpeg")} className="gap-2">
+                <FileImage className="h-4 w-4" />
+                Exportar como JPEG
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={exportAsPDF} className="gap-2">
+                <FileText className="h-4 w-4" />
+                Imprimir / Guardar como PDF
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <Tabs value={tipoVista} onValueChange={(v) => setTipoVista(v as TipoVista)}>
             <TabsList>
               <TabsTrigger value="gantt" className="gap-2">
@@ -478,7 +779,7 @@ export default function Gantt() {
         <Card>
           <CardContent className="p-4">
             <ScrollArea className="w-full">
-              <div className="min-w-[800px]">
+              <div className="min-w-[800px]" ref={ganttRef}>
                 {/* Encabezado de fechas */}
                 <div className="flex border-b pb-2 sticky top-0 bg-background z-10">
                   <div className="w-64 flex-shrink-0 font-semibold text-sm px-2">
@@ -532,7 +833,7 @@ export default function Gantt() {
                               </Badge>
                               <div
                                 className="w-2 h-2 rounded-full"
-                                style={{ backgroundColor: coloresPrioridad[item.prioridad as keyof typeof coloresPrioridad] }}
+                                style={{ backgroundColor: coloresPrioridad[item.prioridad] }}
                                 title={item.prioridad}
                               />
                             </div>
@@ -559,25 +860,16 @@ export default function Gantt() {
                               ))}
                             </div>
 
-                            {/* Barra */}
+                            {/* Barra draggable */}
                             {position ? (
-                              <div
-                                className={cn(
-                                  "absolute h-8 top-3 rounded-md flex items-center px-2 shadow-sm",
-                                  "group-hover:shadow-md transition-shadow cursor-pointer",
-                                  item.tipo === "tarea" && "rounded-sm h-6 top-4"
-                                )}
-                                style={{
-                                  ...position,
-                                  backgroundColor: getColor(item),
-                                  color: "white",
-                                }}
-                                title={`${item.nombre}\n${item.fecha_inicio ? format(new Date(item.fecha_inicio), "d MMM", { locale: es }) : "Sin fecha"} - ${item.fecha_fin ? format(new Date(item.fecha_fin), "d MMM", { locale: es }) : "Sin fecha"}`}
-                              >
-                                <span className="text-xs font-medium truncate">
-                                  {item.nombre}
-                                </span>
-                              </div>
+                              <DraggableBar
+                                item={item}
+                                position={position}
+                                color={getColor(item)}
+                                rangoStart={rangoFechas.start}
+                                totalDias={dias.length}
+                                onDragEnd={handleDragEnd}
+                              />
                             ) : (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-xs text-muted-foreground">Sin fechas</span>
@@ -696,6 +988,11 @@ export default function Gantt() {
                 ))}
               </div>
             </div>
+          </div>
+          <div className="mt-3 pt-3 border-t">
+            <p className="text-xs text-muted-foreground">
+              💡 <strong>Tip:</strong> Arrastra las barras para mover fechas, o usa los bordes para redimensionar la duración.
+            </p>
           </div>
         </CardContent>
       </Card>
