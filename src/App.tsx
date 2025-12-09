@@ -34,6 +34,7 @@ import Proveedores from "./pages/Proveedores";
 import Proyectos from "./pages/Proyectos";
 import Tareas from "./pages/Tareas";
 import Gantt from "./pages/Gantt";
+import Servicios from "./pages/Servicios";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -88,6 +89,7 @@ const App = () => {
                           <Route path="/proyectos" element={<Proyectos />} />
                           <Route path="/tareas" element={<Tareas />} />
                           <Route path="/gantt" element={<Gantt />} />
+                          <Route path="/servicios" element={<Servicios />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
