@@ -1462,6 +1462,114 @@ export type Database = {
         }
         Relationships: []
       }
+      servicios: {
+        Row: {
+          activo: boolean | null
+          codigo: string
+          contacto_email: string | null
+          contacto_nombre: string | null
+          contacto_telefono: string | null
+          created_at: string | null
+          created_by: string
+          descripcion: string | null
+          estado: Database["public"]["Enums"]["estado_servicio"]
+          etiquetas: string[] | null
+          fecha_fin_contrato: string | null
+          fecha_inicio_contrato: string | null
+          frecuencia_facturacion:
+            | Database["public"]["Enums"]["frecuencia_facturacion"]
+            | null
+          id: string
+          moneda: Database["public"]["Enums"]["tipo_moneda"] | null
+          monto_base: number | null
+          nombre: string
+          notas: string | null
+          numero_contrato: string | null
+          proveedor_id: string | null
+          proyecto_id: string | null
+          renovacion_automatica: boolean | null
+          sla_tiempo_resolucion_horas: number | null
+          sla_tiempo_respuesta_horas: number | null
+          tipo: Database["public"]["Enums"]["tipo_servicio"]
+          updated_at: string | null
+        }
+        Insert: {
+          activo?: boolean | null
+          codigo: string
+          contacto_email?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          created_at?: string | null
+          created_by: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_servicio"]
+          etiquetas?: string[] | null
+          fecha_fin_contrato?: string | null
+          fecha_inicio_contrato?: string | null
+          frecuencia_facturacion?:
+            | Database["public"]["Enums"]["frecuencia_facturacion"]
+            | null
+          id?: string
+          moneda?: Database["public"]["Enums"]["tipo_moneda"] | null
+          monto_base?: number | null
+          nombre: string
+          notas?: string | null
+          numero_contrato?: string | null
+          proveedor_id?: string | null
+          proyecto_id?: string | null
+          renovacion_automatica?: boolean | null
+          sla_tiempo_resolucion_horas?: number | null
+          sla_tiempo_respuesta_horas?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_servicio"]
+          updated_at?: string | null
+        }
+        Update: {
+          activo?: boolean | null
+          codigo?: string
+          contacto_email?: string | null
+          contacto_nombre?: string | null
+          contacto_telefono?: string | null
+          created_at?: string | null
+          created_by?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_servicio"]
+          etiquetas?: string[] | null
+          fecha_fin_contrato?: string | null
+          fecha_inicio_contrato?: string | null
+          frecuencia_facturacion?:
+            | Database["public"]["Enums"]["frecuencia_facturacion"]
+            | null
+          id?: string
+          moneda?: Database["public"]["Enums"]["tipo_moneda"] | null
+          monto_base?: number | null
+          nombre?: string
+          notas?: string | null
+          numero_contrato?: string | null
+          proveedor_id?: string | null
+          proyecto_id?: string | null
+          renovacion_automatica?: boolean | null
+          sla_tiempo_resolucion_horas?: number | null
+          sla_tiempo_respuesta_horas?: number | null
+          tipo?: Database["public"]["Enums"]["tipo_servicio"]
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "servicios_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "servicios_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tareas: {
         Row: {
           adjuntos: Json | null
@@ -1841,6 +1949,7 @@ export type Database = {
         | "pausado"
         | "completado"
         | "cancelado"
+      estado_servicio: "activo" | "pausado" | "cancelado" | "finalizado"
       estado_tarea:
         | "pendiente"
         | "en_progreso"
@@ -1848,6 +1957,12 @@ export type Database = {
         | "completada"
         | "cancelada"
       estatus_comunicacion: "pendiente" | "resuelto"
+      frecuencia_facturacion:
+        | "unico"
+        | "mensual"
+        | "trimestral"
+        | "semestral"
+        | "anual"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
       prioridad_tarea: "baja" | "media" | "alta" | "urgente"
@@ -1886,6 +2001,14 @@ export type Database = {
         | "asignacion_personal"
         | "cambio_estado"
         | "recordatorio_mantencion"
+      tipo_servicio:
+        | "mantencion"
+        | "consultoria"
+        | "soporte"
+        | "desarrollo"
+        | "instalacion"
+        | "capacitacion"
+        | "otro"
       tipo_ubicacion: "sucursal" | "domicilio"
     }
     CompositeTypes: {
@@ -2035,6 +2158,7 @@ export const Constants = {
         "completado",
         "cancelado",
       ],
+      estado_servicio: ["activo", "pausado", "cancelado", "finalizado"],
       estado_tarea: [
         "pendiente",
         "en_progreso",
@@ -2043,6 +2167,13 @@ export const Constants = {
         "cancelada",
       ],
       estatus_comunicacion: ["pendiente", "resuelto"],
+      frecuencia_facturacion: [
+        "unico",
+        "mensual",
+        "trimestral",
+        "semestral",
+        "anual",
+      ],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
       prioridad_tarea: ["baja", "media", "alta", "urgente"],
@@ -2085,6 +2216,15 @@ export const Constants = {
         "asignacion_personal",
         "cambio_estado",
         "recordatorio_mantencion",
+      ],
+      tipo_servicio: [
+        "mantencion",
+        "consultoria",
+        "soporte",
+        "desarrollo",
+        "instalacion",
+        "capacitacion",
+        "otro",
       ],
       tipo_ubicacion: ["sucursal", "domicilio"],
     },

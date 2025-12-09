@@ -128,7 +128,7 @@ export function useActualizarProyecto() {
   const { toast } = useToast();
 
   return useMutation({
-    mutationFn: async ({ id, ...proyecto }: ProyectoInput & { id: string }) => {
+    mutationFn: async ({ id, ...proyecto }: Partial<ProyectoInput> & { id: string }) => {
       const { data, error } = await supabase
         .from("proyectos")
         .update(proyecto)

@@ -17,7 +17,8 @@ import {
   TrendingUp,
   Users as UsersIcon,
   LayoutDashboard,
-  GanttChart
+  GanttChart,
+  Wrench
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -78,6 +79,11 @@ const navigationItems = [
     title: "Proveedores", 
     icon: Truck, 
     href: "/proveedores" 
+  },
+  { 
+    title: "Servicios", 
+    icon: Wrench, 
+    href: "/servicios" 
   },
   { 
     title: "Contratos", 
