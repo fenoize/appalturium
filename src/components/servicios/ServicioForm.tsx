@@ -281,14 +281,14 @@ export function ServicioForm({ open, onOpenChange, onSubmit, servicio, isLoading
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Proveedor</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select onValueChange={(val) => field.onChange(val === "__none__" ? null : val)} value={field.value || "__none__"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar proveedor" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Sin proveedor</SelectItem>
+                        <SelectItem value="__none__">Sin proveedor</SelectItem>
                         {proveedores?.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.nombre_fantasia || p.razon_social}
@@ -306,14 +306,14 @@ export function ServicioForm({ open, onOpenChange, onSubmit, servicio, isLoading
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Proyecto</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <Select onValueChange={(val) => field.onChange(val === "__none__" ? null : val)} value={field.value || "__none__"}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Seleccionar proyecto" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">Sin proyecto</SelectItem>
+                        <SelectItem value="__none__">Sin proyecto</SelectItem>
                         {proyectos?.map((p) => (
                           <SelectItem key={p.id} value={p.id}>
                             {p.nombre}
