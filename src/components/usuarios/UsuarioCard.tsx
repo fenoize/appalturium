@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Calendar, Shield, Trash2, X } from "lucide-react";
+import { Mail, Calendar, Shield, X, User, Building2 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { UsuarioConRoles } from "@/hooks/useUsuarios";
@@ -71,6 +71,28 @@ export function UsuarioCard({ usuario, onRemoverRol, onEditar, onEliminar }: Usu
               <span>Último acceso: {lastSignIn}</span>
             </div>
           )}
+        </div>
+
+        {/* Vínculos */}
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Vínculos:</p>
+          <div className="flex flex-wrap gap-2">
+            {usuario.linked_personal && (
+              <Badge variant="outline" className="gap-1">
+                <User className="h-3 w-3" />
+                <span>{usuario.linked_personal}</span>
+              </Badge>
+            )}
+            {usuario.linked_cliente && (
+              <Badge variant="outline" className="gap-1">
+                <Building2 className="h-3 w-3" />
+                <span>{usuario.linked_cliente}</span>
+              </Badge>
+            )}
+            {!usuario.linked_personal && !usuario.linked_cliente && (
+              <span className="text-sm text-muted-foreground">Sin vínculos</span>
+            )}
+          </div>
         </div>
 
         {/* Roles */}

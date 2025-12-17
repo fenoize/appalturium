@@ -11,6 +11,8 @@ export interface UsuarioConRoles {
   created_at: string;
   roles: AppRole[];
   last_sign_in_at?: string;
+  linked_personal?: string | null;
+  linked_cliente?: string | null;
 }
 
 // Helper to call the manage-users backend function
@@ -141,6 +143,49 @@ export function useCrearUsuario() {
     onError: (error: any) => {
       toast({
         title: "Error al crear usuario",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+// Hook para crear usuario con ficha de personal
+export function useCrearUsuarioConPersonal() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ 
+      email, 
+      password, 
+      roles, 
+      personalData 
+    }: { 
+      email: string; 
+      password: string; 
+      roles: AppRole[]; 
+      personalData: any;
+    }) => {
+      const data = await callManageUsers("create_with_personal", { 
+        email, 
+        password, 
+        roles,
+        personalData 
+      });
+      return data.user;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["usuarios"] });
+      queryClient.invalidateQueries({ queryKey: ["personal"] });
+      toast({
+        title: "Usuario y ficha creados",
+        description: "El usuario y su ficha de personal se han creado correctamente.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al crear",
         description: error.message,
         variant: "destructive",
       });

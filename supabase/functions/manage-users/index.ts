@@ -104,6 +104,115 @@ serve(async (req) => {
         break;
       }
 
+      // NEW: Create user with personal ficha in one step
+      case "create_with_personal": {
+        const { email, password, roles: userRoles, personalData } = payload;
+        
+        // Create user
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+
+        if (authError) {
+          if ((authError as any).code === "email_exists" || String(authError.message || "").includes("already been registered")) {
+            return new Response(
+              JSON.stringify({ error: "Ya existe un usuario con este email." }),
+              { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+          throw authError;
+        }
+
+        const newUserId = authData.user.id;
+
+        // Assign roles if provided
+        if (userRoles && userRoles.length > 0) {
+          const { error: rolesInsertError } = await supabaseAdmin
+            .from("user_roles")
+            .upsert(
+              userRoles.map((role: string) => ({ user_id: newUserId, role })),
+              { onConflict: 'user_id,role', ignoreDuplicates: true }
+            );
+
+          if (rolesInsertError) {
+            // Rollback: delete user
+            await supabaseAdmin.auth.admin.deleteUser(newUserId);
+            throw rolesInsertError;
+          }
+        }
+
+        // Create personal ficha
+        if (personalData) {
+          const { error: personalError } = await supabaseAdmin
+            .from("personal_fichas")
+            .insert({
+              ...personalData,
+              user_id: newUserId,
+            });
+
+          if (personalError) {
+            // Rollback: delete roles and user
+            await supabaseAdmin.from("user_roles").delete().eq("user_id", newUserId);
+            await supabaseAdmin.auth.admin.deleteUser(newUserId);
+            throw personalError;
+          }
+        }
+
+        result = { user: authData.user };
+        break;
+      }
+
+      // NEW: Create user and link to cliente
+      case "create_for_cliente": {
+        const { email, password, clienteId } = payload;
+        
+        // Create user
+        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+          email,
+          password,
+          email_confirm: true,
+        });
+
+        if (authError) {
+          if ((authError as any).code === "email_exists" || String(authError.message || "").includes("already been registered")) {
+            return new Response(
+              JSON.stringify({ error: "Ya existe un usuario con este email." }),
+              { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+          throw authError;
+        }
+
+        const newUserId = authData.user.id;
+
+        // Assign cliente role
+        const { error: roleError } = await supabaseAdmin
+          .from("user_roles")
+          .insert({ user_id: newUserId, role: "cliente" });
+
+        if (roleError) {
+          await supabaseAdmin.auth.admin.deleteUser(newUserId);
+          throw roleError;
+        }
+
+        // Update cliente with user_id
+        const { error: clienteError } = await supabaseAdmin
+          .from("clientes")
+          .update({ user_id: newUserId })
+          .eq("id", clienteId);
+
+        if (clienteError) {
+          await supabaseAdmin.from("user_roles").delete().eq("user_id", newUserId);
+          await supabaseAdmin.auth.admin.deleteUser(newUserId);
+          throw clienteError;
+        }
+
+        result = { user: authData.user };
+        break;
+      }
+
       case "update": {
         const { userId, email, password } = payload;
         const updateData: { email?: string; password?: string } = {};
@@ -123,6 +232,12 @@ serve(async (req) => {
         await supabaseAdmin
           .from("user_roles")
           .delete()
+          .eq("user_id", userId);
+
+        // Unlink from clientes
+        await supabaseAdmin
+          .from("clientes")
+          .update({ user_id: null })
           .eq("user_id", userId);
 
         // Delete the user
@@ -148,6 +263,16 @@ serve(async (req) => {
 
         if (allRolesError) throw allRolesError;
 
+        // Get personal_fichas to check linked users
+        const { data: personalFichas } = await supabaseAdmin
+          .from("personal_fichas")
+          .select("user_id, nombre_completo");
+
+        // Get clientes to check linked users
+        const { data: clientes } = await supabaseAdmin
+          .from("clientes")
+          .select("user_id, razon_social, nombres, apellidos, tipo");
+
         // Get unique user IDs
         const userIds = [...new Set(allRoles?.map(r => r.user_id) || [])];
 
@@ -156,12 +281,26 @@ serve(async (req) => {
           userIds.map(async (uid) => {
             const { data: userData } = await supabaseAdmin.auth.admin.getUserById(uid);
             const userRolesData = allRoles?.filter(r => r.user_id === uid).map(r => r.role) || [];
+            
+            // Find linked personal
+            const linkedPersonal = personalFichas?.find(p => p.user_id === uid);
+            
+            // Find linked cliente
+            const linkedCliente = clientes?.find(c => c.user_id === uid);
+            const clienteName = linkedCliente 
+              ? (linkedCliente.tipo === 'empresa' 
+                  ? linkedCliente.razon_social 
+                  : `${linkedCliente.nombres} ${linkedCliente.apellidos}`)
+              : null;
+
             return {
               id: uid,
               email: userData.user?.email || "",
               created_at: userData.user?.created_at || "",
               last_sign_in_at: userData.user?.last_sign_in_at,
               roles: userRolesData,
+              linked_personal: linkedPersonal?.nombre_completo || null,
+              linked_cliente: clienteName,
             };
           })
         );

@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit } from "lucide-react";
 import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDialog";
+import { CrearAccesoPortalDialog } from "@/components/clientes/CrearAccesoPortalDialog";
 
 type Cliente = {
   id: string;
@@ -181,10 +182,19 @@ export default function ClienteDetalle() {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
-          <Button onClick={() => navigate(`/clientes/${id}/editar`)}>
-            <Edit className="h-4 w-4 mr-2" />
-            Editar Cliente
-          </Button>
+          <div className="flex gap-2">
+            <CrearAccesoPortalDialog
+              clienteId={id!}
+              clienteEmail={cliente.email}
+              clienteName={getClienteName()}
+              hasAccess={!!(cliente as any).user_id}
+              onSuccess={fetchClienteData}
+            />
+            <Button onClick={() => navigate(`/clientes/${id}/editar`)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Editar Cliente
+            </Button>
+          </div>
         </div>
         <div className="flex items-start justify-between">
           <div>
