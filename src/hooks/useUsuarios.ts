@@ -13,19 +13,26 @@ export interface UsuarioConRoles {
   last_sign_in_at?: string;
 }
 
-// Helper to call the manage-users edge function
+// Helper to call the manage-users backend function
 async function callManageUsers(action: string, payload: Record<string, any> = {}) {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  const response = await supabase.functions.invoke("manage-users", {
+  const res = await supabase.functions.invoke("manage-users", {
     body: { action, ...payload },
   });
 
-  if (response.error) {
-    throw new Error(response.error.message || "Error en la operación");
+  if (res.error) {
+    // Supabase wraps function errors like: "Edge Function returned 409: ..., {\"error\":\"...\"}"
+    const raw = res.error.message || "Error en la operación";
+    const jsonMatch = raw.match(/\{\s*"error"\s*:\s*"([\s\S]*?)"\s*\}$/);
+    const message = (jsonMatch?.[1] || raw).replace(/\\n/g, "\n");
+    throw new Error(message);
   }
 
-  return response.data;
+  // Some non-2xx responses may come back as data with an { error } payload
+  if (res.data && typeof res.data === "object" && "error" in res.data) {
+    throw new Error(String((res.data as any).error));
+  }
+
+  return res.data;
 }
 
 // Hook para obtener todos los usuarios con sus roles
