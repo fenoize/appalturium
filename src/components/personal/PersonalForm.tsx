@@ -27,14 +27,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { PersonalConUsuario } from "@/hooks/usePersonal";
-import { useUsuarios } from "@/hooks/useUsuarios";
+import { useUsuarios, useCrearUsuarioConPersonal } from "@/hooks/useUsuarios";
 import { usePersonal } from "@/hooks/usePersonal";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, UserPlus, Users } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const personalSchema = z.object({
-  user_id: z.string().min(1, "Debe seleccionar un usuario"),
+  user_id: z.string().optional(),
   nombre_completo: z.string().min(1, "El nombre completo es requerido"),
   rut: z.string().min(1, "El RUT es requerido"),
   domicilio: z.string().optional(),
@@ -57,6 +58,9 @@ const personalSchema = z.object({
     "administrador",
     "otro",
   ]),
+  // New user fields
+  nuevo_email: z.string().optional(),
+  nuevo_password: z.string().optional(),
 });
 
 type PersonalFormValues = z.infer<typeof personalSchema>;
@@ -78,9 +82,12 @@ export function PersonalForm({
   const [nuevaEspecialidad, setNuevaEspecialidad] = useState("");
   const [etiquetas, setEtiquetas] = useState<string[]>([]);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
+  const [modoUsuario, setModoUsuario] = useState<"existente" | "nuevo">("existente");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: usuarios, isLoading: loadingUsuarios } = useUsuarios();
   const { data: personalExistente } = usePersonal();
+  const crearUsuarioConPersonal = useCrearUsuarioConPersonal();
 
   // Filtrar usuarios que NO tienen ficha de personal (para nuevos)
   const usuariosDisponibles = usuarios?.filter(
@@ -110,6 +117,8 @@ export function PersonalForm({
       fecha_ingreso: personal?.fecha_ingreso || new Date().toISOString().split("T")[0],
       fecha_termino: personal?.fecha_termino || "",
       rol_operativo: personal?.rol_operativo || "tecnico",
+      nuevo_email: "",
+      nuevo_password: "",
     },
   });
 
@@ -118,6 +127,7 @@ export function PersonalForm({
     if (open) {
       setEspecialidades(personal?.especialidad || []);
       setEtiquetas(personal?.etiquetas || []);
+      setModoUsuario("existente");
       form.reset({
         user_id: personal?.user_id || "",
         nombre_completo: personal?.nombre_completo || "",
@@ -133,18 +143,24 @@ export function PersonalForm({
         fecha_ingreso: personal?.fecha_ingreso || new Date().toISOString().split("T")[0],
         fecha_termino: personal?.fecha_termino || "",
         rol_operativo: personal?.rol_operativo || "tecnico",
+        nuevo_email: "",
+        nuevo_password: "",
       });
     }
   }, [open, personal]);
-  const handleSubmit = (values: PersonalFormValues) => {
+
+  const handleSubmit = async (values: PersonalFormValues) => {
     const {
       contacto_emergencia_nombre,
       contacto_emergencia_telefono,
       contacto_emergencia_relacion,
+      nuevo_email,
+      nuevo_password,
+      user_id,
       ...rest
     } = values;
 
-    const data = {
+    const personalData = {
       ...rest,
       especialidad: especialidades,
       etiquetas: etiquetas,
@@ -154,6 +170,52 @@ export function PersonalForm({
         relacion: contacto_emergencia_relacion,
       },
       fecha_termino: values.fecha_termino || null,
+    };
+
+    // If creating new user with personal
+    if (!personal && modoUsuario === "nuevo") {
+      if (!nuevo_email || !nuevo_password) {
+        return;
+      }
+      
+      setIsSubmitting(true);
+      
+      // Determine roles based on rol_operativo
+      const roles: ("admin" | "supervisor" | "cliente")[] = [];
+      if (rest.rol_operativo === "supervisor") {
+        roles.push("supervisor");
+      } else if (rest.rol_operativo === "administrador") {
+        roles.push("admin");
+      }
+      
+      crearUsuarioConPersonal.mutate(
+        { 
+          email: nuevo_email, 
+          password: nuevo_password, 
+          roles,
+          personalData,
+        },
+        {
+          onSuccess: () => {
+            setIsSubmitting(false);
+            onClose();
+          },
+          onError: () => {
+            setIsSubmitting(false);
+          },
+        }
+      );
+      return;
+    }
+
+    // Standard flow - existing user or editing
+    if (!personal && modoUsuario === "existente" && !user_id) {
+      return;
+    }
+
+    const data = {
+      ...personalData,
+      user_id: user_id,
     };
 
     onSubmit(data);
@@ -198,38 +260,87 @@ export function PersonalForm({
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
             {/* Usuario vinculado (solo para nuevo personal) */}
             {!personal && (
-              <FormField
-                control={form.control}
-                name="user_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Usuario del Sistema *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder={loadingUsuarios ? "Cargando..." : "Seleccionar usuario"} />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {usuariosDisponibles?.map((u) => (
-                          <SelectItem key={u.id} value={u.id}>
-                            {u.email}
-                          </SelectItem>
-                        ))}
-                        {usuariosDisponibles?.length === 0 && (
-                          <div className="px-2 py-1 text-sm text-muted-foreground">
-                            No hay usuarios disponibles
-                          </div>
-                        )}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                    <p className="text-xs text-muted-foreground">
-                      Solo usuarios sin ficha de personal asignada
-                    </p>
-                  </FormItem>
-                )}
-              />
+              <div className="space-y-4">
+                <Tabs value={modoUsuario} onValueChange={(v) => setModoUsuario(v as "existente" | "nuevo")}>
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="existente" className="gap-2">
+                      <Users className="h-4 w-4" />
+                      Usuario Existente
+                    </TabsTrigger>
+                    <TabsTrigger value="nuevo" className="gap-2">
+                      <UserPlus className="h-4 w-4" />
+                      Crear Usuario
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="existente" className="mt-4">
+                    <FormField
+                      control={form.control}
+                      name="user_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Usuario del Sistema *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder={loadingUsuarios ? "Cargando..." : "Seleccionar usuario"} />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {usuariosDisponibles?.map((u) => (
+                                <SelectItem key={u.id} value={u.id}>
+                                  {u.email}
+                                </SelectItem>
+                              ))}
+                              {usuariosDisponibles?.length === 0 && (
+                                <div className="px-2 py-1 text-sm text-muted-foreground">
+                                  No hay usuarios disponibles
+                                </div>
+                              )}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                          <p className="text-xs text-muted-foreground">
+                            Solo usuarios sin ficha de personal asignada
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="nuevo" className="mt-4 space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="nuevo_email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email *</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="email" placeholder="usuario@email.com" />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="nuevo_password"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Contraseña *</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="password" placeholder="Mínimo 6 caracteres" />
+                          </FormControl>
+                          <FormMessage />
+                          <p className="text-xs text-muted-foreground">
+                            Se creará un nuevo usuario con acceso al sistema
+                          </p>
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+                </Tabs>
+              </div>
             )}
 
             {/* Información Básica */}
@@ -557,10 +668,11 @@ export function PersonalForm({
             />
 
             <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={onClose}>
+              <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>
                 Cancelar
               </Button>
-              <Button type="submit">
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
                 {personal ? "Actualizar" : "Crear"}
               </Button>
             </div>
