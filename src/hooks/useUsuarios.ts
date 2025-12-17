@@ -4,7 +4,6 @@ import { useToast } from "@/hooks/use-toast";
 import type { Database } from "@/integrations/supabase/types";
 
 type AppRole = Database["public"]["Enums"]["app_role"];
-type UserRole = Database["public"]["Tables"]["user_roles"]["Row"];
 
 export interface UsuarioConRoles {
   id: string;
@@ -14,37 +13,28 @@ export interface UsuarioConRoles {
   last_sign_in_at?: string;
 }
 
+// Helper to call the manage-users edge function
+async function callManageUsers(action: string, payload: Record<string, any> = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  const response = await supabase.functions.invoke("manage-users", {
+    body: { action, ...payload },
+  });
+
+  if (response.error) {
+    throw new Error(response.error.message || "Error en la operación");
+  }
+
+  return response.data;
+}
+
 // Hook para obtener todos los usuarios con sus roles
 export function useUsuarios() {
   return useQuery({
     queryKey: ["usuarios"],
     queryFn: async () => {
-      // Obtener todos los roles
-      const { data: rolesData, error: rolesError } = await supabase
-        .from("user_roles")
-        .select("*");
-
-      if (rolesError) throw rolesError;
-
-      // Obtener usuarios únicos
-      const userIds = [...new Set(rolesData?.map(r => r.user_id) || [])];
-      
-      const usuarios: UsuarioConRoles[] = await Promise.all(
-        userIds.map(async (userId) => {
-          const { data: userData } = await supabase.auth.admin.getUserById(userId);
-          const userRoles = rolesData?.filter(r => r.user_id === userId).map(r => r.role) || [];
-          
-          return {
-            id: userId,
-            email: userData.user?.email || "",
-            created_at: userData.user?.created_at || "",
-            last_sign_in_at: userData.user?.last_sign_in_at,
-            roles: userRoles as AppRole[],
-          };
-        })
-      );
-
-      return usuarios.sort((a, b) => a.email.localeCompare(b.email));
+      const data = await callManageUsers("list");
+      return data.users as UsuarioConRoles[];
     },
   });
 }
@@ -131,26 +121,8 @@ export function useCrearUsuario() {
 
   return useMutation({
     mutationFn: async ({ email, password, roles }: { email: string; password: string; roles: AppRole[] }) => {
-      // Crear usuario en auth
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        email_confirm: true,
-      });
-
-      if (authError) throw authError;
-      if (!authData.user) throw new Error("No se pudo crear el usuario");
-
-      // Asignar roles
-      if (roles.length > 0) {
-        const { error: rolesError } = await supabase
-          .from("user_roles")
-          .insert(roles.map(role => ({ user_id: authData.user.id, role })));
-
-        if (rolesError) throw rolesError;
-      }
-
-      return authData.user;
+      const data = await callManageUsers("create", { email, password, roles });
+      return data.user;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usuarios"] });
@@ -176,18 +148,7 @@ export function useEliminarUsuario() {
 
   return useMutation({
     mutationFn: async (userId: string) => {
-      // Primero eliminar los roles del usuario
-      const { error: rolesError } = await supabase
-        .from("user_roles")
-        .delete()
-        .eq("user_id", userId);
-
-      if (rolesError) throw rolesError;
-
-      // Eliminar usuario de auth
-      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
-
-      if (authError) throw authError;
+      await callManageUsers("delete", { userId });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usuarios"] });
@@ -213,14 +174,8 @@ export function useActualizarUsuario() {
 
   return useMutation({
     mutationFn: async ({ userId, email, password }: { userId: string; email?: string; password?: string }) => {
-      const updateData: { email?: string; password?: string } = {};
-      if (email) updateData.email = email;
-      if (password) updateData.password = password;
-
-      const { data, error } = await supabase.auth.admin.updateUserById(userId, updateData);
-
-      if (error) throw error;
-      return data;
+      const data = await callManageUsers("update", { userId, email, password });
+      return data.user;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["usuarios"] });
