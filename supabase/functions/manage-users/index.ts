@@ -77,8 +77,16 @@ serve(async (req) => {
           email_confirm: true,
         });
 
-        if (authError) throw authError;
-        if (!authData.user) throw new Error("No se pudo crear el usuario");
+        if (authError) {
+          // Typical case: 422 email already exists
+          if ((authError as any).code === "email_exists" || String(authError.message || "").includes("already been registered")) {
+            return new Response(
+              JSON.stringify({ error: "Ya existe un usuario con este email." }),
+              { status: 409, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+            );
+          }
+          throw authError;
+        }
 
         // Assign roles if provided (use upsert to avoid duplicates)
         if (userRoles && userRoles.length > 0) {
@@ -171,8 +179,17 @@ serve(async (req) => {
     });
   } catch (error: any) {
     console.error("Error in manage-users function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 400,
+
+    // Preserve meaningful status codes when possible
+    const status =
+      typeof error?.status === "number" ? error.status :
+      typeof error?.statusCode === "number" ? error.statusCode :
+      400;
+
+    const message = error?.message || "Error";
+
+    return new Response(JSON.stringify({ error: message }), {
+      status,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
