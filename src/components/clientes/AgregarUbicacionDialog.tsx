@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -34,25 +34,11 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Plus, MapPin, User } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
-
-const REGIONES_CHILE = [
-  "Arica y Parinacota",
-  "Tarapacá",
-  "Antofagasta",
-  "Atacama",
-  "Coquimbo",
-  "Valparaíso",
-  "Metropolitana de Santiago",
-  "O'Higgins",
-  "Maule",
-  "Ñuble",
-  "Biobío",
-  "La Araucanía",
-  "Los Ríos",
-  "Los Lagos",
-  "Aysén",
-  "Magallanes y la Antártica Chilena",
-];
+import {
+  getRegionNames,
+  getCiudadesByRegion,
+  getComunasByRegion,
+} from "@/lib/chile-data";
 
 const ubicacionSchema = z.object({
   alias: z.string().min(1, "El alias es requerido").max(100),
@@ -102,6 +88,30 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
     },
   });
 
+  const selectedRegion = form.watch("region");
+  const selectedCiudad = form.watch("ciudad");
+
+  // Obtener ciudades disponibles para la región seleccionada
+  const ciudadesDisponibles = selectedRegion ? getCiudadesByRegion(selectedRegion) : [];
+  
+  // Obtener comunas disponibles para la región seleccionada
+  const comunasDisponibles = selectedRegion ? getComunasByRegion(selectedRegion) : [];
+
+  // Resetear ciudad y comuna cuando cambia la región
+  useEffect(() => {
+    if (selectedRegion) {
+      form.setValue("ciudad", "");
+      form.setValue("comuna", "");
+    }
+  }, [selectedRegion, form]);
+
+  // Resetear comuna cuando cambia la ciudad (opcional, si quieres filtrar por ciudad)
+  useEffect(() => {
+    if (selectedCiudad) {
+      form.setValue("comuna", "");
+    }
+  }, [selectedCiudad, form]);
+
   const onSubmit = async (data: UbicacionFormData) => {
     setLoading(true);
     try {
@@ -141,7 +151,6 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
 
         if (contactoError) {
           console.error("Error creating contact:", contactoError);
-          // No lanzamos error, la ubicación ya fue creada
           toast({
             variant: "default",
             title: "Ubicación creada",
@@ -159,18 +168,26 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
       setOpen(false);
       onSuccess();
     } catch (error: any) {
+      console.error("Error al agregar ubicación:", error);
       toast({
         variant: "destructive",
         title: "Error al agregar ubicación",
-        description: error.message,
+        description: error.message || "Ocurrió un error inesperado",
       });
     } finally {
       setLoading(false);
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (!newOpen) {
+      form.reset();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
           <Plus className="h-4 w-4 mr-2" />
@@ -218,7 +235,7 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Tipo *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Seleccionar tipo" />
@@ -266,13 +283,24 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
 
                 <FormField
                   control={form.control}
-                  name="comuna"
+                  name="region"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Comuna *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ej: Providencia" {...field} />
-                      </FormControl>
+                      <FormLabel>Región *</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Seleccionar región" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {getRegionNames().map((region) => (
+                            <SelectItem key={region} value={region}>
+                              {region}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -286,9 +314,24 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Ciudad *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Ej: Santiago" {...field} />
-                      </FormControl>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={!selectedRegion}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder={selectedRegion ? "Seleccionar ciudad" : "Primero selecciona región"} />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {ciudadesDisponibles.map((ciudad) => (
+                            <SelectItem key={ciudad} value={ciudad}>
+                              {ciudad}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -296,20 +339,24 @@ export function AgregarUbicacionDialog({ clienteId, onSuccess }: AgregarUbicacio
 
                 <FormField
                   control={form.control}
-                  name="region"
+                  name="comuna"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Región *</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormLabel>Comuna *</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value}
+                        disabled={!selectedRegion}
+                      >
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Seleccionar región" />
+                            <SelectValue placeholder={selectedRegion ? "Seleccionar comuna" : "Primero selecciona región"} />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {REGIONES_CHILE.map((region) => (
-                            <SelectItem key={region} value={region}>
-                              {region}
+                          {comunasDisponibles.map((comuna) => (
+                            <SelectItem key={comuna.nombre} value={comuna.nombre}>
+                              {comuna.nombre}
                             </SelectItem>
                           ))}
                         </SelectContent>
