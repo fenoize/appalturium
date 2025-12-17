@@ -168,3 +168,73 @@ export function useCrearUsuario() {
     },
   });
 }
+
+// Hook para eliminar usuario
+export function useEliminarUsuario() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async (userId: string) => {
+      // Primero eliminar los roles del usuario
+      const { error: rolesError } = await supabase
+        .from("user_roles")
+        .delete()
+        .eq("user_id", userId);
+
+      if (rolesError) throw rolesError;
+
+      // Eliminar usuario de auth
+      const { error: authError } = await supabase.auth.admin.deleteUser(userId);
+
+      if (authError) throw authError;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["usuarios"] });
+      toast({
+        title: "Usuario eliminado",
+        description: "El usuario se ha eliminado correctamente.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al eliminar usuario",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}
+
+// Hook para actualizar usuario
+export function useActualizarUsuario() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
+  return useMutation({
+    mutationFn: async ({ userId, email, password }: { userId: string; email?: string; password?: string }) => {
+      const updateData: { email?: string; password?: string } = {};
+      if (email) updateData.email = email;
+      if (password) updateData.password = password;
+
+      const { data, error } = await supabase.auth.admin.updateUserById(userId, updateData);
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["usuarios"] });
+      toast({
+        title: "Usuario actualizado",
+        description: "El usuario se ha actualizado correctamente.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error al actualizar usuario",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+}

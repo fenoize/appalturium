@@ -1,14 +1,18 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Mail, Calendar, Shield, Trash2 } from "lucide-react";
+import { Mail, Calendar, Shield, Trash2, X } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import type { UsuarioConRoles } from "@/hooks/useUsuarios";
+import { EditarUsuarioDialog } from "./EditarUsuarioDialog";
+import { EliminarUsuarioDialog } from "./EliminarUsuarioDialog";
 
 interface UsuarioCardProps {
   usuario: UsuarioConRoles;
   onRemoverRol: (userId: string, role: string) => void;
+  onEditar: (userId: string, email?: string, password?: string) => void;
+  onEliminar: (userId: string) => void;
 }
 
 const roleColors: Record<string, string> = {
@@ -23,7 +27,7 @@ const roleLabels: Record<string, string> = {
   cliente: "Cliente",
 };
 
-export function UsuarioCard({ usuario, onRemoverRol }: UsuarioCardProps) {
+export function UsuarioCard({ usuario, onRemoverRol, onEditar, onEliminar }: UsuarioCardProps) {
   const formatDate = (dateString: string | null | undefined, formatStr: string) => {
     if (!dateString) return null;
     const date = new Date(dateString);
@@ -36,11 +40,15 @@ export function UsuarioCard({ usuario, onRemoverRol }: UsuarioCardProps) {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-muted-foreground" />
-            <span className="text-base">{usuario.email}</span>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
+            <Shield className="h-5 w-5 text-muted-foreground shrink-0" />
+            <span className="text-base truncate">{usuario.email}</span>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <EditarUsuarioDialog usuario={usuario} onEditar={onEditar} />
+            <EliminarUsuarioDialog usuario={usuario} onEliminar={onEliminar} />
           </div>
         </CardTitle>
       </CardHeader>
@@ -48,18 +56,18 @@ export function UsuarioCard({ usuario, onRemoverRol }: UsuarioCardProps) {
         {/* Información del usuario */}
         <div className="space-y-2 text-sm">
           <div className="flex items-center gap-2 text-muted-foreground">
-            <Mail className="h-4 w-4" />
-            <span>{usuario.email}</span>
+            <Mail className="h-4 w-4 shrink-0" />
+            <span className="truncate">{usuario.email}</span>
           </div>
           {createdAt && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 shrink-0" />
               <span>Creado: {createdAt}</span>
             </div>
           )}
           {lastSignIn && (
             <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-4 w-4" />
+              <Calendar className="h-4 w-4 shrink-0" />
               <span>Último acceso: {lastSignIn}</span>
             </div>
           )}
@@ -75,16 +83,16 @@ export function UsuarioCard({ usuario, onRemoverRol }: UsuarioCardProps) {
               usuario.roles.map((role) => (
                 <Badge
                   key={role}
-                  className={roleColors[role] || "bg-muted text-muted-foreground"}
+                  className={`${roleColors[role] || "bg-muted text-muted-foreground"} gap-1`}
                 >
                   <span>{roleLabels[role] || role}</span>
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-4 w-4 ml-2 p-0 hover:bg-transparent"
+                    className="h-4 w-4 p-0 hover:bg-transparent opacity-70 hover:opacity-100"
                     onClick={() => onRemoverRol(usuario.id, role)}
                   >
-                    <Trash2 className="h-3 w-3" />
+                    <X className="h-3 w-3" />
                   </Button>
                 </Badge>
               ))

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Search, Users as UsersIcon } from "lucide-react";
+import { Search, Users as UsersIcon, ShieldCheck, UserCog } from "lucide-react";
 import { UsuarioCard } from "@/components/usuarios/UsuarioCard";
 import { AsignarRolDialog } from "@/components/usuarios/AsignarRolDialog";
 import { CrearUsuarioDialog } from "@/components/usuarios/CrearUsuarioDialog";
@@ -10,6 +10,8 @@ import {
   useAsignarRol,
   useRemoverRol,
   useCrearUsuario,
+  useEliminarUsuario,
+  useActualizarUsuario,
 } from "@/hooks/useUsuarios";
 
 export default function Usuarios() {
@@ -19,6 +21,8 @@ export default function Usuarios() {
   const asignarRol = useAsignarRol();
   const removerRol = useRemoverRol();
   const crearUsuario = useCrearUsuario();
+  const eliminarUsuario = useEliminarUsuario();
+  const actualizarUsuario = useActualizarUsuario();
 
   const usuariosFiltrados = usuarios?.filter((usuario) =>
     usuario.email.toLowerCase().includes(busqueda.toLowerCase())
@@ -34,6 +38,14 @@ export default function Usuarios() {
 
   const handleCrearUsuario = (email: string, password: string, roles: any[]) => {
     crearUsuario.mutate({ email, password, roles });
+  };
+
+  const handleEditarUsuario = (userId: string, email?: string, password?: string) => {
+    actualizarUsuario.mutate({ userId, email, password });
+  };
+
+  const handleEliminarUsuario = (userId: string) => {
+    eliminarUsuario.mutate(userId);
   };
 
   if (isLoading) {
@@ -90,7 +102,7 @@ export default function Usuarios() {
                 {usuarios?.filter((u) => u.roles.includes("admin")).length || 0}
               </p>
             </div>
-            <UsersIcon className="h-8 w-8 text-muted-foreground" />
+            <ShieldCheck className="h-8 w-8 text-destructive/70" />
           </div>
         </div>
         <div className="rounded-lg border bg-card p-6">
@@ -101,7 +113,7 @@ export default function Usuarios() {
                 {usuarios?.filter((u) => u.roles.includes("supervisor")).length || 0}
               </p>
             </div>
-            <UsersIcon className="h-8 w-8 text-muted-foreground" />
+            <UserCog className="h-8 w-8 text-primary/70" />
           </div>
         </div>
       </div>
@@ -110,7 +122,12 @@ export default function Usuarios() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {usuariosFiltrados?.map((usuario) => (
           <div key={usuario.id} className="space-y-2">
-            <UsuarioCard usuario={usuario} onRemoverRol={handleRemoverRol} />
+            <UsuarioCard
+              usuario={usuario}
+              onRemoverRol={handleRemoverRol}
+              onEditar={handleEditarUsuario}
+              onEliminar={handleEliminarUsuario}
+            />
             {rolesDisponibles && (
               <AsignarRolDialog
                 usuario={usuario}
