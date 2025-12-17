@@ -41,20 +41,8 @@ export function usePersonal(filtros?: {
 
       if (error) throw error;
 
-      // Obtener emails de los usuarios
-      const personalConEmail: PersonalConUsuario[] = await Promise.all(
-        (data || []).map(async (ficha) => {
-          const { data: userData } = await supabase.auth.admin.getUserById(
-            ficha.user_id
-          );
-          return {
-            ...ficha,
-            email: userData.user?.email,
-          };
-        })
-      );
-
-      return personalConEmail;
+      // Retornar datos sin intentar obtener emails (eso requiere API admin)
+      return (data || []) as PersonalConUsuario[];
     },
   });
 }
@@ -75,13 +63,7 @@ export function usePersonalFicha(userId?: string) {
 
       if (error) throw error;
 
-      // Obtener email del usuario
-      const { data: userData } = await supabase.auth.admin.getUserById(userId);
-
-      return {
-        ...data,
-        email: userData.user?.email,
-      } as PersonalConUsuario;
+      return data as PersonalConUsuario;
     },
   });
 }

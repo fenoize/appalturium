@@ -28,11 +28,13 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import type { PersonalConUsuario } from "@/hooks/usePersonal";
-import { X } from "lucide-react";
-import { useState } from "react";
+import { useUsuarios } from "@/hooks/useUsuarios";
+import { usePersonal } from "@/hooks/usePersonal";
+import { X, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
 
 const personalSchema = z.object({
-  user_id: z.string().uuid(),
+  user_id: z.string().min(1, "Debe seleccionar un usuario"),
   nombre_completo: z.string().min(1, "El nombre completo es requerido"),
   rut: z.string().min(1, "El RUT es requerido"),
   domicilio: z.string().optional(),
@@ -72,14 +74,18 @@ export function PersonalForm({
   onSubmit,
   personal,
 }: PersonalFormProps) {
-  const [especialidades, setEspecialidades] = useState<string[]>(
-    personal?.especialidad || []
-  );
+  const [especialidades, setEspecialidades] = useState<string[]>([]);
   const [nuevaEspecialidad, setNuevaEspecialidad] = useState("");
-  const [etiquetas, setEtiquetas] = useState<string[]>(
-    personal?.etiquetas || []
-  );
+  const [etiquetas, setEtiquetas] = useState<string[]>([]);
   const [nuevaEtiqueta, setNuevaEtiqueta] = useState("");
+
+  const { data: usuarios, isLoading: loadingUsuarios } = useUsuarios();
+  const { data: personalExistente } = usePersonal();
+
+  // Filtrar usuarios que NO tienen ficha de personal (para nuevos)
+  const usuariosDisponibles = usuarios?.filter(
+    (u) => !personalExistente?.some((p) => p.user_id === u.id)
+  );
 
   const contactoEmergencia =
     typeof personal?.contacto_emergencia === "object" &&
@@ -107,6 +113,29 @@ export function PersonalForm({
     },
   });
 
+  // Reset form when dialog opens/closes or personal changes
+  useEffect(() => {
+    if (open) {
+      setEspecialidades(personal?.especialidad || []);
+      setEtiquetas(personal?.etiquetas || []);
+      form.reset({
+        user_id: personal?.user_id || "",
+        nombre_completo: personal?.nombre_completo || "",
+        rut: personal?.rut || "",
+        domicilio: personal?.domicilio || "",
+        estado_civil: personal?.estado_civil || undefined,
+        contacto_emergencia_nombre: contactoEmergencia.nombre || "",
+        contacto_emergencia_telefono: contactoEmergencia.telefono || "",
+        contacto_emergencia_relacion: contactoEmergencia.relacion || "",
+        escolaridad: personal?.escolaridad || "",
+        sexo: personal?.sexo || undefined,
+        comentarios: personal?.comentarios || "",
+        fecha_ingreso: personal?.fecha_ingreso || new Date().toISOString().split("T")[0],
+        fecha_termino: personal?.fecha_termino || "",
+        rol_operativo: personal?.rol_operativo || "tecnico",
+      });
+    }
+  }, [open, personal]);
   const handleSubmit = (values: PersonalFormValues) => {
     const {
       contacto_emergencia_nombre,
@@ -167,6 +196,42 @@ export function PersonalForm({
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+            {/* Usuario vinculado (solo para nuevo personal) */}
+            {!personal && (
+              <FormField
+                control={form.control}
+                name="user_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Usuario del Sistema *</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={loadingUsuarios ? "Cargando..." : "Seleccionar usuario"} />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {usuariosDisponibles?.map((u) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.email}
+                          </SelectItem>
+                        ))}
+                        {usuariosDisponibles?.length === 0 && (
+                          <div className="px-2 py-1 text-sm text-muted-foreground">
+                            No hay usuarios disponibles
+                          </div>
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                    <p className="text-xs text-muted-foreground">
+                      Solo usuarios sin ficha de personal asignada
+                    </p>
+                  </FormItem>
+                )}
+              />
+            )}
+
             {/* Información Básica */}
             <div className="space-y-4">
               <h3 className="font-semibold">Información Básica</h3>
