@@ -80,11 +80,14 @@ serve(async (req) => {
         if (authError) throw authError;
         if (!authData.user) throw new Error("No se pudo crear el usuario");
 
-        // Assign roles if provided
+        // Assign roles if provided (use upsert to avoid duplicates)
         if (userRoles && userRoles.length > 0) {
           const { error: rolesInsertError } = await supabaseAdmin
             .from("user_roles")
-            .insert(userRoles.map((role: string) => ({ user_id: authData.user.id, role })));
+            .upsert(
+              userRoles.map((role: string) => ({ user_id: authData.user.id, role })),
+              { onConflict: 'user_id,role', ignoreDuplicates: true }
+            );
 
           if (rolesInsertError) throw rolesInsertError;
         }
