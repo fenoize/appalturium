@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit } from "lucide-react";
+import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDialog";
 
 type Cliente = {
   id: string;
@@ -294,11 +295,18 @@ export default function ClienteDetalle() {
         </TabsContent>
 
         <TabsContent value="ubicaciones" className="space-y-4">
+          <div className="flex justify-end">
+            <AgregarUbicacionDialog clienteId={id!} onSuccess={fetchClienteData} />
+          </div>
+          
           {ubicaciones.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <MapPin className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">No hay ubicaciones registradas</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Usa el botón "Agregar Ubicación" para registrar la primera.
+                </p>
               </CardContent>
             </Card>
           ) : (
