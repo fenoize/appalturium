@@ -1923,6 +1923,10 @@ export type Database = {
         }[]
       }
       refresh_kpis_reportes: { Args: never; Returns: undefined }
+      update_project_progress: {
+        Args: { p_project_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "supervisor" | "cliente"

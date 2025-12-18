@@ -116,6 +116,8 @@ export function useCrearTarea() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tareas"] });
+      queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["proyecto"] });
       toast({ title: "Tarea creada exitosamente" });
     },
     onError: (error) => {
@@ -153,6 +155,8 @@ export function useActualizarTarea() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tareas"] });
+      queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["proyecto"] });
       toast({ title: "Tarea actualizada" });
     },
     onError: (error) => {
@@ -176,6 +180,8 @@ export function useEliminarTarea() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tareas"] });
+      queryClient.invalidateQueries({ queryKey: ["proyectos"] });
+      queryClient.invalidateQueries({ queryKey: ["proyecto"] });
       toast({ title: "Tarea eliminada" });
     },
     onError: (error) => {
