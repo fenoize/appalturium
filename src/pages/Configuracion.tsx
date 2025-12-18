@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,16 +7,14 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificacionesPreferences } from "@/components/notificaciones/NotificacionesPreferences";
 import { IntegracionesConfig } from "@/components/configuracion/IntegracionesConfig";
+import { GestionUsuarios } from "@/components/configuracion/GestionUsuarios";
 import { 
   Settings, 
   Building, 
   Users, 
-  Bell, 
   Shield, 
   Database,
-  Mail,
-  Palette,
-  Plug
+  Palette
 } from "lucide-react";
 
 const Configuracion = () => {
@@ -37,8 +34,9 @@ const Configuracion = () => {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="general">General</TabsTrigger>
+          <TabsTrigger value="usuarios">Usuarios</TabsTrigger>
           <TabsTrigger value="integraciones">Integraciones</TabsTrigger>
           <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
           <TabsTrigger value="seguridad">Seguridad</TabsTrigger>
@@ -124,121 +122,6 @@ const Configuracion = () => {
               </CardContent>
             </Card>
 
-            {/* User Management */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  <span>Gestión de Usuarios</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Roles y Permisos</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Administrar roles de usuario y permisos del sistema
-                  </p>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Administrar Usuarios
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Configurar Roles
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Security Settings */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Shield className="w-5 h-5 text-primary" />
-                  <span>Configuración de Seguridad</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Autenticación de Dos Factores</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Activar 2FA para mayor seguridad
-                    </p>
-                  </div>
-                  <Switch />
-                </div>
-                
-                <Separator />
-                
-                <div className="space-y-2">
-                  <Label>Tiempo de Sesión</Label>
-                  <Input defaultValue="8 horas" />
-                </div>
-                
-                <Button variant="outline" className="w-full">
-                  Cambiar Contraseña
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Backup & Database */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Database className="w-5 h-5 text-primary" />
-                  <span>Respaldos y Base de Datos</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Último respaldo</Label>
-                  <p className="text-sm text-muted-foreground">
-                    12 de Septiembre, 2025 - 14:30
-                  </p>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label>Respaldo Automático</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Realizar respaldo diario automático
-                    </p>
-                  </div>
-                  <Switch defaultChecked />
-                </div>
-                
-                <Button variant="outline" className="w-full">
-                  Crear Respaldo Manual
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Restaurar desde Respaldo
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* User Management */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="w-5 h-5 text-primary" />
-                  <span>Gestión de Usuarios</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Roles y Permisos</Label>
-                  <p className="text-sm text-muted-foreground">
-                    Administrar roles de usuario y permisos del sistema
-                  </p>
-                </div>
-                <Button variant="outline" className="w-full">
-                  Administrar Usuarios
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Configurar Roles
-                </Button>
-              </CardContent>
-            </Card>
-
             {/* Backup & Database */}
             <Card>
               <CardHeader>
@@ -274,6 +157,10 @@ const Configuracion = () => {
               </CardContent>
             </Card>
           </div>
+        </TabsContent>
+
+        <TabsContent value="usuarios">
+          <GestionUsuarios />
         </TabsContent>
 
         <TabsContent value="integraciones">
