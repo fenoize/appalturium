@@ -898,12 +898,16 @@ export type Database = {
           created_by_user_id: string
           descripcion: string
           estado: string
+          fase_id: string | null
           fecha_programada_fin: string | null
           fecha_programada_inicio: string | null
           id: string
           numero: string
           prioridad: Database["public"]["Enums"]["prioridad_ot"] | null
+          proyecto_id: string | null
+          tarea_id: string | null
           tipo_trabajo: string
+          trabajo_id: string | null
           ubicacion_id: string
           updated_at: string | null
         }
@@ -916,12 +920,16 @@ export type Database = {
           created_by_user_id: string
           descripcion: string
           estado?: string
+          fase_id?: string | null
           fecha_programada_fin?: string | null
           fecha_programada_inicio?: string | null
           id?: string
           numero: string
           prioridad?: Database["public"]["Enums"]["prioridad_ot"] | null
+          proyecto_id?: string | null
+          tarea_id?: string | null
           tipo_trabajo: string
+          trabajo_id?: string | null
           ubicacion_id: string
           updated_at?: string | null
         }
@@ -934,12 +942,16 @@ export type Database = {
           created_by_user_id?: string
           descripcion?: string
           estado?: string
+          fase_id?: string | null
           fecha_programada_fin?: string | null
           fecha_programada_inicio?: string | null
           id?: string
           numero?: string
           prioridad?: Database["public"]["Enums"]["prioridad_ot"] | null
+          proyecto_id?: string | null
+          tarea_id?: string | null
           tipo_trabajo?: string
+          trabajo_id?: string | null
           ubicacion_id?: string
           updated_at?: string | null
         }
@@ -949,6 +961,34 @@ export type Database = {
             columns: ["cliente_id"]
             isOneToOne: false
             referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordenes_servicio_fase_id_fkey"
+            columns: ["fase_id"]
+            isOneToOne: false
+            referencedRelation: "fases_proyecto"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordenes_servicio_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordenes_servicio_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordenes_servicio_trabajo_id_fkey"
+            columns: ["trabajo_id"]
+            isOneToOne: false
+            referencedRelation: "trabajos"
             referencedColumns: ["id"]
           },
           {
