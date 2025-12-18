@@ -17,6 +17,12 @@ export interface UsuarioConRoles {
 
 // Helper to call the manage-users backend function
 async function callManageUsers(action: string, payload: Record<string, any> = {}) {
+  // Check for valid session first
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) {
+    throw new Error("No hay sesión activa. Por favor, inicie sesión.");
+  }
+
   const res = await supabase.functions.invoke("manage-users", {
     body: { action, ...payload },
   });
@@ -45,6 +51,7 @@ export function useUsuarios() {
       const data = await callManageUsers("list");
       return data.users as UsuarioConRoles[];
     },
+    retry: false, // Don't retry on auth errors
   });
 }
 
