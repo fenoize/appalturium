@@ -78,7 +78,7 @@ export default function EmpleadoDetalle() {
           </div>
           <div>
             <h1 className="text-2xl font-bold">{empleado.nombre_completo}</h1>
-            <p className="text-muted-foreground">{empleado.cargo || empleado.rol_operativo}</p>
+            <p className="text-muted-foreground">{empleado.rol_operativo}</p>
             <div className="flex gap-2 mt-2">
               <Badge variant={empleado.activo ? "default" : "secondary"}>
                 {empleado.activo ? "Activo" : "Inactivo"}
