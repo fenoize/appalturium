@@ -7,6 +7,10 @@ export interface OrdenServicio {
   numero: string;
   cliente_id: string;
   ubicacion_id: string;
+  trabajo_id: string | null;
+  proyecto_id: string | null;
+  fase_id: string | null;
+  tarea_id: string | null;
   tipo_trabajo: string;
   descripcion: string;
   prioridad: "baja" | "media" | "alta" | "urgente";
@@ -28,6 +32,15 @@ export interface OrdenServicio {
     alias: string;
     direccion: string;
   };
+  trabajos?: {
+    nombre_trabajo: string;
+  };
+  proyectos?: {
+    nombre: string;
+  };
+  tareas?: {
+    titulo: string;
+  };
 }
 
 interface FiltrosOT {
@@ -47,7 +60,10 @@ export function useOrdenesServicio(filtros?: FiltrosOT) {
         .select(`
           *,
           clientes (razon_social, nombres, apellidos),
-          ubicaciones (alias, direccion)
+          ubicaciones (alias, direccion),
+          trabajos (nombre_trabajo),
+          proyectos (nombre),
+          tareas (titulo)
         `)
         .order("created_at", { ascending: false });
 
@@ -89,6 +105,10 @@ export function useCrearOrdenServicio() {
         .insert([{ 
           cliente_id: nuevaOT.cliente_id,
           ubicacion_id: nuevaOT.ubicacion_id,
+          trabajo_id: nuevaOT.trabajo_id || null,
+          proyecto_id: nuevaOT.proyecto_id || null,
+          fase_id: nuevaOT.fase_id || null,
+          tarea_id: nuevaOT.tarea_id || null,
           tipo_trabajo: nuevaOT.tipo_trabajo,
           descripcion: nuevaOT.descripcion,
           prioridad: nuevaOT.prioridad,

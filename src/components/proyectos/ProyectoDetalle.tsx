@@ -28,7 +28,8 @@ import {
   Plus,
   CheckSquare,
   LayoutGrid,
-  List
+  List,
+  ClipboardList
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -37,6 +38,7 @@ import { useTareas, useCrearTarea, useActualizarTarea, useEliminarTarea, Tarea, 
 import { TareaCard } from "@/components/tareas/TareaCard";
 import { TareaForm } from "@/components/tareas/TareaForm";
 import { TareaKanban } from "@/components/tareas/TareaKanban";
+import { OrdenesServicioList } from "@/components/ordenes/OrdenesServicioList";
 import { useToast } from "@/hooks/use-toast";
 
 interface ProyectoDetalleProps {
@@ -198,77 +200,103 @@ export function ProyectoDetalle({ open, onOpenChange, proyecto: proyectoInicial 
                 )}
               </div>
 
-              {/* Tareas */}
-              <Card>
-                <CardHeader className="pb-3">
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="text-lg">Tareas</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <div className="flex rounded-lg border border-border overflow-hidden">
-                        <Button
-                          variant={vistaKanban ? "secondary" : "ghost"}
-                          size="sm"
-                          onClick={() => setVistaKanban(true)}
-                          className="rounded-none"
-                        >
-                          <LayoutGrid className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant={!vistaKanban ? "secondary" : "ghost"}
-                          size="sm"
-                          onClick={() => setVistaKanban(false)}
-                          className="rounded-none"
-                        >
-                          <List className="h-4 w-4" />
-                        </Button>
+              {/* Tabs para Tareas y OTs */}
+              <Tabs defaultValue="tareas" className="space-y-4">
+                <TabsList>
+                  <TabsTrigger value="tareas">
+                    <CheckSquare className="h-4 w-4 mr-2" />
+                    Tareas
+                  </TabsTrigger>
+                  <TabsTrigger value="ordenes">
+                    <ClipboardList className="h-4 w-4 mr-2" />
+                    Órdenes de Servicio
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="tareas">
+                  <Card>
+                    <CardHeader className="pb-3">
+                      <div className="flex items-center justify-between">
+                        <CardTitle className="text-lg">Tareas</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <div className="flex rounded-lg border border-border overflow-hidden">
+                            <Button
+                              variant={vistaKanban ? "secondary" : "ghost"}
+                              size="sm"
+                              onClick={() => setVistaKanban(true)}
+                              className="rounded-none"
+                            >
+                              <LayoutGrid className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant={!vistaKanban ? "secondary" : "ghost"}
+                              size="sm"
+                              onClick={() => setVistaKanban(false)}
+                              className="rounded-none"
+                            >
+                              <List className="h-4 w-4" />
+                            </Button>
+                          </div>
+                          <Button size="sm" onClick={() => setFormOpen(true)}>
+                            <Plus className="h-4 w-4 mr-1" />
+                            Nueva Tarea
+                          </Button>
+                        </div>
                       </div>
-                      <Button size="sm" onClick={() => setFormOpen(true)}>
-                        <Plus className="h-4 w-4 mr-1" />
-                        Nueva Tarea
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {isLoading ? (
-                    <p className="text-muted-foreground text-center py-8">Cargando tareas...</p>
-                  ) : tareas.length === 0 ? (
-                    <div className="text-center py-12">
-                      <CheckSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                      <p className="text-muted-foreground mb-4">No hay tareas en este proyecto</p>
-                      <Button onClick={() => setFormOpen(true)}>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Crear primera tarea
-                      </Button>
-                    </div>
-                  ) : vistaKanban ? (
-                    <TareaKanban
-                      tareas={tareas}
-                      onEdit={(tarea) => {
-                        setTareaEditar(tarea);
-                        setFormOpen(true);
-                      }}
-                      onDelete={setTareaEliminar}
-                      onToggleComplete={handleToggleComplete}
-                    />
-                  ) : (
-                    <div className="space-y-3">
-                      {tareas.map((tarea) => (
-                        <TareaCard
-                          key={tarea.id}
-                          tarea={tarea}
-                          onEdit={(t) => {
-                            setTareaEditar(t);
+                    </CardHeader>
+                    <CardContent>
+                      {isLoading ? (
+                        <p className="text-muted-foreground text-center py-8">Cargando tareas...</p>
+                      ) : tareas.length === 0 ? (
+                        <div className="text-center py-12">
+                          <CheckSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                          <p className="text-muted-foreground mb-4">No hay tareas en este proyecto</p>
+                          <Button onClick={() => setFormOpen(true)}>
+                            <Plus className="h-4 w-4 mr-2" />
+                            Crear primera tarea
+                          </Button>
+                        </div>
+                      ) : vistaKanban ? (
+                        <TareaKanban
+                          tareas={tareas}
+                          onEdit={(tarea) => {
+                            setTareaEditar(tarea);
                             setFormOpen(true);
                           }}
                           onDelete={setTareaEliminar}
                           onToggleComplete={handleToggleComplete}
                         />
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                      ) : (
+                        <div className="space-y-3">
+                          {tareas.map((tarea) => (
+                            <TareaCard
+                              key={tarea.id}
+                              tarea={tarea}
+                              onEdit={(t) => {
+                                setTareaEditar(t);
+                                setFormOpen(true);
+                              }}
+                              onDelete={setTareaEliminar}
+                              onToggleComplete={handleToggleComplete}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+
+                <TabsContent value="ordenes">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">Órdenes de Servicio del Proyecto</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <OrdenesServicioList proyectoId={proyecto.id} />
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              </Tabs>
 
               {proyecto.etiquetas && proyecto.etiquetas.length > 0 && (
                 <Card>

@@ -10,6 +10,7 @@ import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, 
 import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDialog";
 import { CrearAccesoPortalDialog } from "@/components/clientes/CrearAccesoPortalDialog";
 import { TrabajosList } from "@/components/trabajos/TrabajosList";
+import { OrdenesServicioList } from "@/components/ordenes/OrdenesServicioList";
 import { Trabajo } from "@/hooks/useTrabajos";
 
 type Cliente = {
@@ -506,45 +507,7 @@ export default function ClienteDetalle() {
         </TabsContent>
 
         <TabsContent value="ordenes" className="space-y-4">
-          {ordenes.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <ClipboardList className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <p className="text-muted-foreground">No hay órdenes de servicio registradas</p>
-                <Button 
-                  onClick={() => navigate("/ordenes-servicio/nueva")} 
-                  className="mt-4"
-                >
-                  Nueva Orden de Servicio
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="space-y-3">
-              {ordenes.map((orden) => (
-                <Card 
-                  key={orden.id}
-                  className="cursor-pointer hover:shadow-lg transition-shadow"
-                  onClick={() => navigate(`/ordenes-servicio/${orden.id}`)}
-                >
-                  <CardContent className="pt-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-primary" />
-                          <div>
-                            <p className="font-semibold">{orden.numero}</p>
-                            <p className="text-sm text-muted-foreground">{orden.tipo_trabajo}</p>
-                          </div>
-                        </div>
-                      </div>
-                      <Badge>{orden.estado}</Badge>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+          <OrdenesServicioList clienteId={id!} showCreateButton />
         </TabsContent>
 
         <TabsContent value="trabajos" className="space-y-4">
