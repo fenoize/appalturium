@@ -256,6 +256,21 @@ export function ProyectoDetalle({ open, onOpenChange, proyecto: proyectoInicial 
                 </CardContent>
               </Card>
 
+              {proyecto.etiquetas && proyecto.etiquetas.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Etiquetas</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex flex-wrap gap-2">
+                      {proyecto.etiquetas.map((tag, i) => (
+                        <Badge key={i} variant="secondary">{tag}</Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
               {proyecto.descripcion && (
                 <Card>
                   <CardHeader>

@@ -28,10 +28,11 @@ import {
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Proyecto, ProyectoInput } from "@/hooks/useProyectos";
+import { TagInput } from "@/components/ui/tag-input";
 
 const formSchema = z.object({
-  nombre: z.string().min(1, "El nombre es requerido"),
-  descripcion: z.string().optional(),
+  nombre: z.string().min(1, "El nombre es requerido").max(200, "El nombre no puede exceder 200 caracteres"),
+  descripcion: z.string().max(2000, "La descripción no puede exceder 2000 caracteres").optional(),
   cliente_id: z.string().optional(),
   estado: z.enum(["planificacion", "en_progreso", "pausado", "completado", "cancelado"]),
   prioridad: z.enum(["baja", "media", "alta", "urgente"]),
@@ -39,7 +40,17 @@ const formSchema = z.object({
   fecha_fin_estimada: z.string().optional(),
   presupuesto: z.coerce.number().min(0).optional(),
   responsable_id: z.string().optional(),
-  notas: z.string().optional(),
+  notas: z.string().max(2000, "Las notas no pueden exceder 2000 caracteres").optional(),
+  etiquetas: z.array(z.string().max(50, "Cada etiqueta debe tener máximo 50 caracteres")).max(10, "Máximo 10 etiquetas").optional(),
+}).refine((data) => {
+  // Solo validar si ambas fechas están presentes
+  if (data.fecha_inicio && data.fecha_fin_estimada) {
+    return new Date(data.fecha_fin_estimada) > new Date(data.fecha_inicio);
+  }
+  return true;
+}, {
+  message: "La fecha fin estimada debe ser posterior a la fecha de inicio",
+  path: ["fecha_fin_estimada"],
 });
 
 interface ProyectoFormProps {
@@ -64,6 +75,7 @@ export function ProyectoForm({ open, onOpenChange, onSubmit, proyecto, isLoading
       presupuesto: proyecto?.presupuesto || 0,
       responsable_id: proyecto?.responsable_id || "",
       notas: proyecto?.notas || "",
+      etiquetas: proyecto?.etiquetas || [],
     },
   });
 
@@ -104,6 +116,7 @@ export function ProyectoForm({ open, onOpenChange, onSubmit, proyecto, isLoading
       presupuesto: values.presupuesto,
       responsable_id: values.responsable_id || undefined,
       notas: values.notas || undefined,
+      etiquetas: values.etiquetas && values.etiquetas.length > 0 ? values.etiquetas : undefined,
     });
   };
 
@@ -290,6 +303,25 @@ export function ProyectoForm({ open, onOpenChange, onSubmit, proyecto, isLoading
                   <FormLabel>Presupuesto</FormLabel>
                   <FormControl>
                     <Input type="number" placeholder="0" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="etiquetas"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Etiquetas</FormLabel>
+                  <FormControl>
+                    <TagInput
+                      value={field.value || []}
+                      onChange={field.onChange}
+                      placeholder="Escribe y presiona Enter para agregar..."
+                      maxTags={10}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
