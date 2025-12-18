@@ -6,9 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit } from "lucide-react";
+import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit, Briefcase } from "lucide-react";
 import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDialog";
 import { CrearAccesoPortalDialog } from "@/components/clientes/CrearAccesoPortalDialog";
+import { TrabajosList } from "@/components/trabajos/TrabajosList";
+import { Trabajo } from "@/hooks/useTrabajos";
 
 type Cliente = {
   id: string;
@@ -217,13 +219,14 @@ export default function ClienteDetalle() {
       </div>
 
         <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="ubicaciones">Ubicaciones</TabsTrigger>
           <TabsTrigger value="contactos">Contactos</TabsTrigger>
           <TabsTrigger value="comercial">Comercial</TabsTrigger>
           <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
           <TabsTrigger value="ordenes">Órdenes</TabsTrigger>
+          <TabsTrigger value="trabajos">Trabajos</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
@@ -542,6 +545,15 @@ export default function ClienteDetalle() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="trabajos" className="space-y-4">
+          <TrabajosList 
+            clienteId={id!} 
+            onCreateProject={(trabajo: Trabajo) => {
+              navigate(`/proyectos?trabajo_id=${trabajo.id}&cliente_id=${trabajo.cliente_id}&nombre=${encodeURIComponent(trabajo.nombre_trabajo)}`);
+            }} 
+          />
         </TabsContent>
       </Tabs>
     </div>
