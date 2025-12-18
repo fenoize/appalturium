@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -25,7 +26,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useCrearTrabajo } from "@/hooks/useTrabajos";
+import { useCrearTrabajo, useActualizarTrabajo, Trabajo } from "@/hooks/useTrabajos";
 
 const formSchema = z.object({
   nombre_trabajo: z.string().min(1, "El nombre es requerido").max(200),
@@ -40,10 +41,13 @@ interface TrabajoFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   clienteId: string;
+  trabajo?: Trabajo | null;
 }
 
-export function TrabajoForm({ open, onOpenChange, clienteId }: TrabajoFormProps) {
+export function TrabajoForm({ open, onOpenChange, clienteId, trabajo }: TrabajoFormProps) {
   const crearTrabajo = useCrearTrabajo();
+  const actualizarTrabajo = useActualizarTrabajo();
+  const isEditing = !!trabajo;
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,8 +61,30 @@ export function TrabajoForm({ open, onOpenChange, clienteId }: TrabajoFormProps)
     },
   });
 
+  useEffect(() => {
+    if (trabajo) {
+      form.reset({
+        nombre_trabajo: trabajo.nombre_trabajo,
+        tipo_trabajo: trabajo.tipo_trabajo,
+        descripcion: trabajo.descripcion || "",
+        fecha_inicio_estimada: trabajo.fecha_inicio_estimada || "",
+        fecha_fin_estimada: trabajo.fecha_fin_estimada || "",
+        estado: trabajo.estado,
+      });
+    } else {
+      form.reset({
+        nombre_trabajo: "",
+        tipo_trabajo: "simple",
+        descripcion: "",
+        fecha_inicio_estimada: "",
+        fecha_fin_estimada: "",
+        estado: "pendiente",
+      });
+    }
+  }, [trabajo, form]);
+
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
-    await crearTrabajo.mutateAsync({
+    const data = {
       cliente_id: clienteId,
       nombre_trabajo: values.nombre_trabajo,
       tipo_trabajo: values.tipo_trabajo,
@@ -66,16 +92,24 @@ export function TrabajoForm({ open, onOpenChange, clienteId }: TrabajoFormProps)
       fecha_inicio_estimada: values.fecha_inicio_estimada || undefined,
       fecha_fin_estimada: values.fecha_fin_estimada || undefined,
       estado: values.estado,
-    });
+    };
+
+    if (isEditing) {
+      await actualizarTrabajo.mutateAsync({ id: trabajo.id, ...data });
+    } else {
+      await crearTrabajo.mutateAsync(data);
+    }
     form.reset();
     onOpenChange(false);
   };
+
+  const isPending = crearTrabajo.isPending || actualizarTrabajo.isPending;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>Nuevo Trabajo</DialogTitle>
+          <DialogTitle>{isEditing ? "Editar Trabajo" : "Nuevo Trabajo"}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -190,8 +224,8 @@ export function TrabajoForm({ open, onOpenChange, clienteId }: TrabajoFormProps)
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancelar
               </Button>
-              <Button type="submit" disabled={crearTrabajo.isPending}>
-                {crearTrabajo.isPending ? "Creando..." : "Crear"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? (isEditing ? "Guardando..." : "Creando...") : (isEditing ? "Guardar" : "Crear")}
               </Button>
             </div>
           </form>
