@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/card";
 import { Edit, UserX, UserCheck, AlertTriangle } from "lucide-react";
 import type { PersonalConUsuario } from "@/hooks/usePersonal";
+import { useNavigate } from "react-router-dom";
 import { format, differenceInDays } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -23,6 +24,8 @@ export function PersonalCard({
   onEdit,
   onToggleActivo,
 }: PersonalCardProps) {
+  const navigate = useNavigate();
+
   const getRolBadgeVariant = (rol: string) => {
     switch (rol) {
       case "tecnico":
@@ -46,8 +49,15 @@ export function PersonalCard({
     diasHastaExpiracion >= 0 &&
     diasHastaExpiracion <= 30;
 
+  const handleCardClick = () => {
+    navigate(`/empleados/${personal.id}`);
+  };
+
   return (
-    <Card className={!personal.activo ? "opacity-60" : ""}>
+    <Card 
+      className={`${!personal.activo ? "opacity-60" : ""} cursor-pointer hover:shadow-md transition-shadow`}
+      onClick={handleCardClick}
+    >
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
@@ -74,14 +84,20 @@ export function PersonalCard({
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onEdit(personal)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(personal);
+              }}
             >
               <Edit className="h-4 w-4" />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => onToggleActivo(personal.id, personal.activo)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleActivo(personal.id, personal.activo);
+              }}
             >
               {personal.activo ? (
                 <UserX className="h-4 w-4" />
