@@ -21,6 +21,7 @@ import Calendario from "./pages/Calendario";
 import Geolocalizacion from "./pages/Geolocalizacion";
 import Reportes from "./pages/Reportes";
 import Personal from "./pages/Personal";
+import EmpleadoDetalle from "./pages/EmpleadoDetalle";
 import Finanzas from "./pages/Finanzas";
 import Usuarios from "./pages/Usuarios";
 import PortalCliente from "./pages/PortalCliente";
@@ -75,6 +76,8 @@ const App = () => {
                           <Route path="/geolocalizacion" element={<Geolocalizacion />} />
                           <Route path="/reportes" element={<Reportes />} />
                           <Route path="/personal" element={<Personal />} />
+                          <Route path="/empleados" element={<Personal />} />
+                          <Route path="/empleados/:id" element={<EmpleadoDetalle />} />
                           <Route path="/finanzas" element={<Finanzas />} />
                           <Route path="/usuarios" element={<Usuarios />} />
                           <Route path="/portal-cliente" element={<PortalCliente />} />
