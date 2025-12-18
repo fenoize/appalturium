@@ -32,7 +32,7 @@ import {
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
-import { Proyecto } from "@/hooks/useProyectos";
+import { Proyecto, useProyecto } from "@/hooks/useProyectos";
 import { useTareas, useCrearTarea, useActualizarTarea, useEliminarTarea, Tarea, TareaInput } from "@/hooks/useTareas";
 import { TareaCard } from "@/components/tareas/TareaCard";
 import { TareaForm } from "@/components/tareas/TareaForm";
@@ -52,11 +52,15 @@ const estadoConfig: Record<string, { label: string; variant: "default" | "second
   cancelado: { label: "Cancelado", variant: "destructive" },
 };
 
-export function ProyectoDetalle({ open, onOpenChange, proyecto }: ProyectoDetalleProps) {
+export function ProyectoDetalle({ open, onOpenChange, proyecto: proyectoInicial }: ProyectoDetalleProps) {
   const [vistaKanban, setVistaKanban] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [tareaEditar, setTareaEditar] = useState<Tarea | null>(null);
   const [tareaEliminar, setTareaEliminar] = useState<string | null>(null);
+
+  // Usar hook para obtener datos actualizados del proyecto (incluyendo progreso)
+  const { data: proyectoActualizado } = useProyecto(proyectoInicial.id);
+  const proyecto = proyectoActualizado || proyectoInicial;
 
   const { data: tareas = [], isLoading } = useTareas(proyecto.id);
   const crearTarea = useCrearTarea();
@@ -95,8 +99,9 @@ export function ProyectoDetalle({ open, onOpenChange, proyecto }: ProyectoDetall
     }
   };
 
+  // Usar el progreso persistido del proyecto (calculado por trigger en DB)
   const tareasCompletadas = tareas.filter(t => t.estado === 'completada').length;
-  const porcentajeTareas = tareas.length > 0 ? Math.round((tareasCompletadas / tareas.length) * 100) : 0;
+  const porcentajeTareas = proyecto.progreso ?? 0;
 
   return (
     <>
