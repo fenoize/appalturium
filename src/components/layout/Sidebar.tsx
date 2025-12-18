@@ -1,6 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { 
-  Building2, 
   Package, 
   Truck, 
   FileText, 
@@ -18,11 +17,12 @@ import {
   Users as UsersIcon,
   LayoutDashboard,
   GanttChart,
-  Wrench
+  Wrench,
+  Building2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { Logo } from "./Logo";
 
 const navigationItems = [
   { 
@@ -138,17 +138,8 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
     )}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b border-border">
-        {!collapsed && (
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-              <Building2 className="w-5 h-5 text-primary-foreground" />
-            </div>
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">ALTURIUM</h1>
-              <p className="text-xs text-muted-foreground">Sistema Logístico</p>
-            </div>
-          </div>
-        )}
+        {!collapsed && <Logo size="md" />}
+        {collapsed && <Logo size="sm" showText={false} />}
         <Button
           variant="ghost"
           size="sm"
@@ -160,7 +151,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-2 space-y-1">
+      <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
         {navigationItems.map((item) => {
           const Icon = item.icon;
           const active = isActive(item.href);
@@ -193,7 +184,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
         })}
       </nav>
 
-      {/* Footer */}
+      {/* Settings Link */}
       <div className="p-2 border-t border-border">
         <NavLink
           to="/configuracion"
@@ -218,6 +209,24 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
           )}
         </NavLink>
       </div>
+
+      {/* Footer con versión */}
+      {!collapsed && (
+        <div className="p-4 border-t border-border text-center">
+          <p className="text-xs text-muted-foreground">Versión 0.0.1</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            Desarrollado por{" "}
+            <a 
+              href="https://diegoulloa.cl" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:underline"
+            >
+              diegoulloa.cl
+            </a>
+          </p>
+        </div>
+      )}
     </div>
   );
 }
