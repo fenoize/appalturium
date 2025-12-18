@@ -19,7 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Search, FolderKanban, LayoutGrid, List } from "lucide-react";
+import { Plus, Search, FolderKanban, LayoutGrid, List, Eye, Edit, Trash2 } from "lucide-react";
 import { 
   useProyectos, 
   useCrearProyecto, 
@@ -203,14 +203,14 @@ export default function Proyectos() {
                 <TableHead>Progreso</TableHead>
                 <TableHead>Fecha límite</TableHead>
                 <TableHead>Cliente</TableHead>
+                <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {proyectosFiltrados.map((proyecto) => (
                 <TableRow 
                   key={proyecto.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => setProyectoVer(proyecto)}
+                  className="hover:bg-muted/50"
                 >
                   <TableCell>
                     <div>
@@ -243,6 +243,38 @@ export default function Proyectos() {
                       (proyecto.cliente?.nombres 
                         ? `${proyecto.cliente.nombres} ${proyecto.cliente.apellidos || ''}`.trim() 
                         : "-")}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setProyectoVer(proyecto)}
+                        title="Ver detalles"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setProyectoEditar(proyecto);
+                          setFormOpen(true);
+                        }}
+                        title="Editar"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setProyectoEliminar(proyecto.id)}
+                        title="Eliminar"
+                        className="text-destructive hover:text-destructive"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}
