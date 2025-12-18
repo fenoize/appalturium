@@ -9,7 +9,9 @@ import {
   MoreVertical,
   Edit,
   Trash2,
-  MessageSquare
+  MessageSquare,
+  DollarSign,
+  AlertTriangle
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -17,10 +19,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { format, isPast, isToday } from "date-fns";
 import { es } from "date-fns/locale";
 import { Tarea } from "@/hooks/useTareas";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/hooks/use-toast";
 
 interface TareaCardProps {
   tarea: Tarea;
@@ -46,9 +55,24 @@ const prioridadConfig: Record<string, { label: string; className: string }> = {
 };
 
 export function TareaCard({ tarea, onEdit, onDelete, onToggleComplete, onViewComments }: TareaCardProps) {
+  const { toast } = useToast();
   const isCompleted = tarea.estado === 'completada';
   const isOverdue = tarea.fecha_vencimiento && isPast(new Date(tarea.fecha_vencimiento)) && !isCompleted;
   const isDueToday = tarea.fecha_vencimiento && isToday(new Date(tarea.fecha_vencimiento));
+  const canComplete = !!tarea.task_type_id;
+
+  const handleToggleComplete = () => {
+    // Block completion if no task type
+    if (!isCompleted && !canComplete) {
+      toast({
+        title: "Tipo de tarea requerido",
+        description: "Para completar esta tarea, primero debe asignar un Tipo de Tarea para el costeo.",
+        variant: "destructive",
+      });
+      return;
+    }
+    onToggleComplete?.(tarea);
+  };
 
   return (
     <Card className={cn(
@@ -57,11 +81,25 @@ export function TareaCard({ tarea, onEdit, onDelete, onToggleComplete, onViewCom
     )}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          <Checkbox
-            checked={isCompleted}
-            onCheckedChange={() => onToggleComplete?.(tarea)}
-            className="mt-1"
-          />
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <Checkbox
+                    checked={isCompleted}
+                    onCheckedChange={handleToggleComplete}
+                    className="mt-1"
+                    disabled={!isCompleted && !canComplete}
+                  />
+                </div>
+              </TooltipTrigger>
+              {!canComplete && !isCompleted && (
+                <TooltipContent>
+                  <p>Asigne un Tipo de Tarea para poder completar</p>
+                </TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
           
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between gap-2">
@@ -121,6 +159,24 @@ export function TareaCard({ tarea, onEdit, onDelete, onToggleComplete, onViewCom
             </div>
 
             <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-muted-foreground">
+              {/* Task Type & Cost */}
+              {tarea.task_type && (
+                <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <DollarSign className="h-3 w-3" />
+                  <span>{tarea.task_type.nombre}</span>
+                  {tarea.costo_aplicado && (
+                    <span className="font-medium">(${tarea.costo_aplicado.toLocaleString()})</span>
+                  )}
+                </div>
+              )}
+              
+              {!tarea.task_type_id && !isCompleted && (
+                <div className="flex items-center gap-1 text-orange-600 dark:text-orange-400">
+                  <AlertTriangle className="h-3 w-3" />
+                  <span>Sin tipo asignado</span>
+                </div>
+              )}
+
               {tarea.fecha_vencimiento && (
                 <div className={cn(
                   "flex items-center gap-1",

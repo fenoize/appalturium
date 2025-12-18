@@ -9,6 +9,7 @@ export interface Tarea {
   id: string;
   proyecto_id: string;
   fase_id: string | null;
+  task_type_id: string | null;
   titulo: string;
   descripcion: string | null;
   estado: EstadoTarea;
@@ -23,6 +24,8 @@ export interface Tarea {
   tarea_padre_id: string | null;
   etiquetas: string[];
   adjuntos: unknown[];
+  costo_aplicado: number | null;
+  cost_entry_id: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -32,11 +35,16 @@ export interface Tarea {
   asignado?: {
     nombre_completo: string;
   } | null;
+  task_type?: {
+    nombre: string;
+    costo_estandar: number;
+  } | null;
 }
 
 export interface TareaInput {
   proyecto_id: string;
   fase_id?: string;
+  task_type_id?: string;
   titulo: string;
   descripcion?: string;
   estado?: EstadoTarea;
@@ -59,7 +67,8 @@ export function useTareas(proyectoId?: string) {
         .select(`
           *,
           proyecto:proyectos(nombre),
-          asignado:personal_fichas(nombre_completo)
+          asignado:personal_fichas(nombre_completo),
+          task_type:task_types(nombre, costo_estandar)
         `)
         .order("orden", { ascending: true });
 

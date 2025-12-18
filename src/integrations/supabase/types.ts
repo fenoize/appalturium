@@ -1308,6 +1308,47 @@ export type Database = {
           },
         ]
       }
+      project_cost_entries: {
+        Row: {
+          created_at: string
+          descripcion: string
+          fecha: string
+          fuente: Database["public"]["Enums"]["fuente_costo"]
+          id: string
+          monto: number
+          proyecto_id: string
+          ref_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          descripcion: string
+          fecha?: string
+          fuente: Database["public"]["Enums"]["fuente_costo"]
+          id?: string
+          monto: number
+          proyecto_id: string
+          ref_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string
+          fecha?: string
+          fuente?: Database["public"]["Enums"]["fuente_costo"]
+          id?: string
+          monto?: number
+          proyecto_id?: string
+          ref_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_cost_entries_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_templates: {
         Row: {
           activo: boolean
@@ -1674,6 +1715,8 @@ export type Database = {
         Row: {
           adjuntos: Json | null
           asignado_a: string | null
+          cost_entry_id: string | null
+          costo_aplicado: number | null
           created_at: string | null
           created_by: string
           descripcion: string | null
@@ -1690,12 +1733,15 @@ export type Database = {
           prioridad: Database["public"]["Enums"]["prioridad_tarea"] | null
           proyecto_id: string
           tarea_padre_id: string | null
+          task_type_id: string | null
           titulo: string
           updated_at: string | null
         }
         Insert: {
           adjuntos?: Json | null
           asignado_a?: string | null
+          cost_entry_id?: string | null
+          costo_aplicado?: number | null
           created_at?: string | null
           created_by: string
           descripcion?: string | null
@@ -1712,12 +1758,15 @@ export type Database = {
           prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
           proyecto_id: string
           tarea_padre_id?: string | null
+          task_type_id?: string | null
           titulo: string
           updated_at?: string | null
         }
         Update: {
           adjuntos?: Json | null
           asignado_a?: string | null
+          cost_entry_id?: string | null
+          costo_aplicado?: number | null
           created_at?: string | null
           created_by?: string
           descripcion?: string | null
@@ -1734,6 +1783,7 @@ export type Database = {
           prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
           proyecto_id?: string
           tarea_padre_id?: string | null
+          task_type_id?: string | null
           titulo?: string
           updated_at?: string | null
         }
@@ -1744,6 +1794,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "personal_fichas"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "tareas_cost_entry_id_fkey"
+            columns: ["cost_entry_id"]
+            isOneToOne: false
+            referencedRelation: "project_cost_entries"
+            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "tareas_fase_id_fkey"
@@ -1766,7 +1823,44 @@ export type Database = {
             referencedRelation: "tareas"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tareas_task_type_id_fkey"
+            columns: ["task_type_id"]
+            isOneToOne: false
+            referencedRelation: "task_types"
+            referencedColumns: ["id"]
+          },
         ]
+      }
+      task_types: {
+        Row: {
+          activo: boolean
+          costo_estandar: number
+          created_at: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          costo_estandar?: number
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          costo_estandar?: number
+          created_at?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       template_fases: {
         Row: {
@@ -2208,6 +2302,7 @@ export type Database = {
         | "trimestral"
         | "semestral"
         | "anual"
+      fuente_costo: "compra" | "servicio" | "tarea_estandar" | "ajuste"
       metodo_pago: "transferencia" | "tarjeta" | "efectivo" | "cheque" | "otro"
       prioridad_ot: "baja" | "media" | "alta" | "urgente"
       prioridad_tarea: "baja" | "media" | "alta" | "urgente"
@@ -2422,6 +2517,7 @@ export const Constants = {
         "semestral",
         "anual",
       ],
+      fuente_costo: ["compra", "servicio", "tarea_estandar", "ajuste"],
       metodo_pago: ["transferencia", "tarjeta", "efectivo", "cheque", "otro"],
       prioridad_ot: ["baja", "media", "alta", "urgente"],
       prioridad_tarea: ["baja", "media", "alta", "urgente"],
