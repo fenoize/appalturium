@@ -8,6 +8,7 @@ export type PrioridadTarea = 'baja' | 'media' | 'alta' | 'urgente';
 export interface Tarea {
   id: string;
   proyecto_id: string;
+  fase_id: string | null;
   titulo: string;
   descripcion: string | null;
   estado: EstadoTarea;
@@ -35,6 +36,7 @@ export interface Tarea {
 
 export interface TareaInput {
   proyecto_id: string;
+  fase_id?: string;
   titulo: string;
   descripcion?: string;
   estado?: EstadoTarea;

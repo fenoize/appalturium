@@ -10,6 +10,8 @@ export interface Proyecto {
   nombre: string;
   descripcion: string | null;
   cliente_id: string | null;
+  trabajo_id: string | null;
+  template_id: string | null;
   estado: EstadoProyecto;
   fecha_inicio: string | null;
   fecha_fin_estimada: string | null;
@@ -38,6 +40,8 @@ export interface ProyectoInput {
   nombre: string;
   descripcion?: string;
   cliente_id?: string;
+  trabajo_id?: string;
+  template_id?: string;
   estado?: EstadoProyecto;
   fecha_inicio?: string;
   fecha_fin_estimada?: string;

@@ -465,6 +465,53 @@ export type Database = {
           },
         ]
       }
+      fases_proyecto: {
+        Row: {
+          created_at: string
+          created_by: string
+          estado: Database["public"]["Enums"]["estado_fase"]
+          fecha_fin_estimada: string | null
+          fecha_inicio: string | null
+          id: string
+          nombre: string
+          orden: number
+          proyecto_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          estado?: Database["public"]["Enums"]["estado_fase"]
+          fecha_fin_estimada?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre: string
+          orden?: number
+          proyecto_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          estado?: Database["public"]["Enums"]["estado_fase"]
+          fecha_fin_estimada?: string | null
+          fecha_inicio?: string | null
+          id?: string
+          nombre?: string
+          orden?: number
+          proyecto_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fases_proyecto_proyecto_id_fkey"
+            columns: ["proyecto_id"]
+            isOneToOne: false
+            referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       informes_finales: {
         Row: {
           created_at: string | null
@@ -1261,6 +1308,39 @@ export type Database = {
           },
         ]
       }
+      project_templates: {
+        Row: {
+          activo: boolean
+          created_at: string
+          created_by: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          tipo: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          created_by: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          tipo?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          created_by?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          tipo?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       proveedores: {
         Row: {
           activo: boolean | null
@@ -1352,6 +1432,8 @@ export type Database = {
           prioridad: Database["public"]["Enums"]["prioridad_tarea"] | null
           progreso: number | null
           responsable_id: string | null
+          template_id: string | null
+          trabajo_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1372,6 +1454,8 @@ export type Database = {
           prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
           progreso?: number | null
           responsable_id?: string | null
+          template_id?: string | null
+          trabajo_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1392,6 +1476,8 @@ export type Database = {
           prioridad?: Database["public"]["Enums"]["prioridad_tarea"] | null
           progreso?: number | null
           responsable_id?: string | null
+          template_id?: string | null
+          trabajo_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1408,6 +1494,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "personal_fichas"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "proyectos_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "project_templates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "proyectos_trabajo_id_fkey"
+            columns: ["trabajo_id"]
+            isOneToOne: false
+            referencedRelation: "trabajos"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -1579,6 +1679,7 @@ export type Database = {
           descripcion: string | null
           estado: Database["public"]["Enums"]["estado_tarea"]
           etiquetas: string[] | null
+          fase_id: string | null
           fecha_completada: string | null
           fecha_inicio: string | null
           fecha_vencimiento: string | null
@@ -1600,6 +1701,7 @@ export type Database = {
           descripcion?: string | null
           estado?: Database["public"]["Enums"]["estado_tarea"]
           etiquetas?: string[] | null
+          fase_id?: string | null
           fecha_completada?: string | null
           fecha_inicio?: string | null
           fecha_vencimiento?: string | null
@@ -1621,6 +1723,7 @@ export type Database = {
           descripcion?: string | null
           estado?: Database["public"]["Enums"]["estado_tarea"]
           etiquetas?: string[] | null
+          fase_id?: string | null
           fecha_completada?: string | null
           fecha_inicio?: string | null
           fecha_vencimiento?: string | null
@@ -1643,6 +1746,13 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
           {
+            foreignKeyName: "tareas_fase_id_fkey"
+            columns: ["fase_id"]
+            isOneToOne: false
+            referencedRelation: "fases_proyecto"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tareas_proyecto_id_fkey"
             columns: ["proyecto_id"]
             isOneToOne: false
@@ -1654,6 +1764,82 @@ export type Database = {
             columns: ["tarea_padre_id"]
             isOneToOne: false
             referencedRelation: "tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_fases: {
+        Row: {
+          created_at: string
+          duracion_dias: number | null
+          id: string
+          nombre: string
+          orden: number
+          template_id: string
+        }
+        Insert: {
+          created_at?: string
+          duracion_dias?: number | null
+          id?: string
+          nombre: string
+          orden?: number
+          template_id: string
+        }
+        Update: {
+          created_at?: string
+          duracion_dias?: number | null
+          id?: string
+          nombre?: string
+          orden?: number
+          template_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_fases_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "project_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      template_tareas: {
+        Row: {
+          created_at: string
+          descripcion: string | null
+          duracion_dias: number | null
+          id: string
+          orden: number
+          prioridad: Database["public"]["Enums"]["prioridad_tarea"]
+          template_fase_id: string
+          titulo: string
+        }
+        Insert: {
+          created_at?: string
+          descripcion?: string | null
+          duracion_dias?: number | null
+          id?: string
+          orden?: number
+          prioridad?: Database["public"]["Enums"]["prioridad_tarea"]
+          template_fase_id: string
+          titulo: string
+        }
+        Update: {
+          created_at?: string
+          descripcion?: string | null
+          duracion_dias?: number | null
+          id?: string
+          orden?: number
+          prioridad?: Database["public"]["Enums"]["prioridad_tarea"]
+          template_fase_id?: string
+          titulo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "template_tareas_template_fase_id_fkey"
+            columns: ["template_fase_id"]
+            isOneToOne: false
+            referencedRelation: "template_fases"
             referencedColumns: ["id"]
           },
         ]
@@ -1721,6 +1907,59 @@ export type Database = {
             columns: ["ot_id"]
             isOneToOne: false
             referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trabajos: {
+        Row: {
+          cliente_id: string
+          created_at: string
+          created_by: string
+          descripcion: string | null
+          estado: Database["public"]["Enums"]["estado_trabajo"]
+          fecha_fin_estimada: string | null
+          fecha_inicio_estimada: string | null
+          id: string
+          nombre_trabajo: string
+          oportunidad_id: string | null
+          tipo_trabajo: Database["public"]["Enums"]["tipo_trabajo"]
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          created_at?: string
+          created_by: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_trabajo"]
+          fecha_fin_estimada?: string | null
+          fecha_inicio_estimada?: string | null
+          id?: string
+          nombre_trabajo: string
+          oportunidad_id?: string | null
+          tipo_trabajo?: Database["public"]["Enums"]["tipo_trabajo"]
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          created_at?: string
+          created_by?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_trabajo"]
+          fecha_fin_estimada?: string | null
+          fecha_inicio_estimada?: string | null
+          id?: string
+          nombre_trabajo?: string
+          oportunidad_id?: string | null
+          tipo_trabajo?: Database["public"]["Enums"]["tipo_trabajo"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trabajos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
             referencedColumns: ["id"]
           },
         ]
@@ -1940,6 +2179,7 @@ export type Database = {
         | "divorciado"
         | "union_libre"
       estado_cliente: "activo" | "suspendido" | "inactivo"
+      estado_fase: "pendiente" | "en_progreso" | "completada"
       estado_orden_compra:
         | "borrador"
         | "enviada"
@@ -1960,6 +2200,7 @@ export type Database = {
         | "revision"
         | "completada"
         | "cancelada"
+      estado_trabajo: "pendiente" | "en_ejecucion" | "finalizado" | "cancelado"
       estatus_comunicacion: "pendiente" | "resuelto"
       frecuencia_facturacion:
         | "unico"
@@ -2013,6 +2254,7 @@ export type Database = {
         | "instalacion"
         | "capacitacion"
         | "otro"
+      tipo_trabajo: "simple" | "complejo" | "mantencion"
       tipo_ubicacion: "sucursal" | "domicilio"
     }
     CompositeTypes: {
@@ -2147,6 +2389,7 @@ export const Constants = {
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
       estado_civil: ["soltero", "casado", "viudo", "divorciado", "union_libre"],
       estado_cliente: ["activo", "suspendido", "inactivo"],
+      estado_fase: ["pendiente", "en_progreso", "completada"],
       estado_orden_compra: [
         "borrador",
         "enviada",
@@ -2170,6 +2413,7 @@ export const Constants = {
         "completada",
         "cancelada",
       ],
+      estado_trabajo: ["pendiente", "en_ejecucion", "finalizado", "cancelado"],
       estatus_comunicacion: ["pendiente", "resuelto"],
       frecuencia_facturacion: [
         "unico",
@@ -2230,6 +2474,7 @@ export const Constants = {
         "capacitacion",
         "otro",
       ],
+      tipo_trabajo: ["simple", "complejo", "mantencion"],
       tipo_ubicacion: ["sucursal", "domicilio"],
     },
   },
