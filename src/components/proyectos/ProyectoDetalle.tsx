@@ -37,6 +37,7 @@ import { useTareas, useCrearTarea, useActualizarTarea, useEliminarTarea, Tarea, 
 import { TareaCard } from "@/components/tareas/TareaCard";
 import { TareaForm } from "@/components/tareas/TareaForm";
 import { TareaKanban } from "@/components/tareas/TareaKanban";
+import { useToast } from "@/hooks/use-toast";
 
 interface ProyectoDetalleProps {
   open: boolean;
@@ -53,6 +54,7 @@ const estadoConfig: Record<string, { label: string; variant: "default" | "second
 };
 
 export function ProyectoDetalle({ open, onOpenChange, proyecto: proyectoInicial }: ProyectoDetalleProps) {
+  const { toast } = useToast();
   const [vistaKanban, setVistaKanban] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
   const [tareaEditar, setTareaEditar] = useState<Tarea | null>(null);
@@ -87,7 +89,19 @@ export function ProyectoDetalle({ open, onOpenChange, proyecto: proyectoInicial 
   };
 
   const handleToggleComplete = (tarea: Tarea) => {
-    const nuevoEstado = tarea.estado === 'completada' ? 'pendiente' : 'completada';
+    const isCompleting = tarea.estado !== 'completada';
+    
+    // Block completion without task type
+    if (isCompleting && !tarea.task_type_id) {
+      toast({
+        title: "Tipo de tarea requerido",
+        description: "Para completar esta tarea, primero debe asignar un Tipo de Tarea.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const nuevoEstado = isCompleting ? 'completada' : 'pendiente';
     actualizarTarea.mutate({ id: tarea.id, estado: nuevoEstado });
   };
 

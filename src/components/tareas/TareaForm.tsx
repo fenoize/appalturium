@@ -8,6 +8,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,9 +26,12 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tarea, TareaInput } from "@/hooks/useTareas";
+import { useTaskTypes } from "@/hooks/useTaskTypes";
+import { AlertTriangle, DollarSign } from "lucide-react";
 
 const formSchema = z.object({
   proyecto_id: z.string().min(1, "El proyecto es requerido"),
@@ -35,10 +39,20 @@ const formSchema = z.object({
   descripcion: z.string().optional(),
   estado: z.enum(["pendiente", "en_progreso", "revision", "completada", "cancelada"]),
   prioridad: z.enum(["baja", "media", "alta", "urgente"]),
+  task_type_id: z.string().optional(),
   asignado_a: z.string().optional(),
   fecha_inicio: z.string().optional(),
   fecha_vencimiento: z.string().optional(),
   horas_estimadas: z.coerce.number().min(0).optional(),
+}).refine((data) => {
+  // If estado is 'completada', task_type_id must be set
+  if (data.estado === 'completada' && !data.task_type_id) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Para marcar como completada, debe seleccionar un Tipo de Tarea para el cálculo del costo",
+  path: ["task_type_id"],
 });
 
 interface TareaFormProps {
@@ -51,6 +65,8 @@ interface TareaFormProps {
 }
 
 export function TareaForm({ open, onOpenChange, onSubmit, tarea, proyectoId, isLoading }: TareaFormProps) {
+  const { data: taskTypes } = useTaskTypes();
+  
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -59,12 +75,18 @@ export function TareaForm({ open, onOpenChange, onSubmit, tarea, proyectoId, isL
       descripcion: tarea?.descripcion || "",
       estado: tarea?.estado || "pendiente",
       prioridad: tarea?.prioridad || "media",
+      task_type_id: tarea?.task_type_id || "",
       asignado_a: tarea?.asignado_a || "",
       fecha_inicio: tarea?.fecha_inicio || "",
       fecha_vencimiento: tarea?.fecha_vencimiento || "",
       horas_estimadas: tarea?.horas_estimadas || 0,
     },
   });
+
+  const watchEstado = form.watch("estado");
+  const watchTaskTypeId = form.watch("task_type_id");
+  const selectedTaskType = taskTypes?.find(t => t.id === watchTaskTypeId);
+  const showCostWarning = watchEstado === "completada" && !watchTaskTypeId;
 
   const { data: proyectos } = useQuery({
     queryKey: ["proyectos-select"],
@@ -100,6 +122,7 @@ export function TareaForm({ open, onOpenChange, onSubmit, tarea, proyectoId, isL
       descripcion: values.descripcion || undefined,
       estado: values.estado,
       prioridad: values.prioridad,
+      task_type_id: values.task_type_id || undefined,
       asignado_a: values.asignado_a || undefined,
       fecha_inicio: values.fecha_inicio || undefined,
       fecha_vencimiento: values.fecha_vencimiento || undefined,
@@ -173,6 +196,49 @@ export function TareaForm({ open, onOpenChange, onSubmit, tarea, proyectoId, isL
                 </FormItem>
               )}
             />
+
+            {/* Task Type - for costing */}
+            <FormField
+              control={form.control}
+              name="task_type_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Tipo de Tarea (Costeo)
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Seleccionar tipo de tarea" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {taskTypes?.map((t) => (
+                        <SelectItem key={t.id} value={t.id}>
+                          {t.nombre} (${t.costo_estandar.toLocaleString()})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {selectedTaskType && (
+                    <FormDescription>
+                      Costo estándar: ${selectedTaskType.costo_estandar.toLocaleString()}
+                    </FormDescription>
+                  )}
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {showCostWarning && (
+              <Alert variant="destructive">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  Para completar una tarea, debe seleccionar un Tipo de Tarea para registrar el costo automáticamente.
+                </AlertDescription>
+              </Alert>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <FormField
@@ -293,6 +359,16 @@ export function TareaForm({ open, onOpenChange, onSubmit, tarea, proyectoId, isL
                 </FormItem>
               )}
             />
+
+            {/* Show applied cost if task is completed */}
+            {tarea?.costo_aplicado && (
+              <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                <p className="text-sm font-medium text-green-800 dark:text-green-200 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  Costo aplicado: ${tarea.costo_aplicado.toLocaleString()}
+                </p>
+              </div>
+            )}
 
             <div className="flex justify-end gap-2 pt-4">
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
