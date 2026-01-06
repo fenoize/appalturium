@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, User, Plus, Search, MapPin, Phone, Mail } from "lucide-react";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Building2, User, Plus, Search, MapPin, Phone, Mail, LayoutGrid, List } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Cliente = {
@@ -35,6 +36,7 @@ export default function Clientes() {
   const [tipoFilter, setTipoFilter] = useState<string>("todos");
   const [estadoFilter, setEstadoFilter] = useState<string>("todos");
   const [industriaFilter, setIndustriaFilter] = useState<string>("todos");
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
   useEffect(() => {
     fetchClientes();
@@ -91,10 +93,28 @@ export default function Clientes() {
             Gestiona empresas y personas naturales
           </p>
         </div>
-        <Button onClick={() => navigate("/clientes/nuevo")} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Nuevo Cliente
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="flex border rounded-lg">
+            <Button
+              variant={viewMode === "grid" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("grid")}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === "list" ? "default" : "ghost"}
+              size="icon"
+              onClick={() => setViewMode("list")}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button onClick={() => navigate("/clientes/nuevo")} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Nuevo Cliente
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -169,7 +189,7 @@ export default function Clientes() {
             </p>
           </CardContent>
         </Card>
-      ) : (
+      ) : viewMode === "grid" ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {filteredClientes.map((cliente) => (
             <Card
@@ -217,7 +237,7 @@ export default function Clientes() {
                     <span>{cliente.telefono}</span>
                   </div>
                 )}
-                {cliente.etiquetas.length > 0 && (
+                {cliente.etiquetas?.length > 0 && (
                   <div className="flex flex-wrap gap-1 mt-2">
                     {cliente.etiquetas.map((etiqueta, index) => (
                       <Badge key={index} variant="outline" className="text-xs">
@@ -230,6 +250,54 @@ export default function Clientes() {
             </Card>
           ))}
         </div>
+      ) : (
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Tipo</TableHead>
+                <TableHead>Nombre / Razón Social</TableHead>
+                <TableHead>RUT</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Teléfono</TableHead>
+                <TableHead>Estado</TableHead>
+                <TableHead>Industria</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredClientes.map((cliente) => (
+                <TableRow 
+                  key={cliente.id} 
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => navigate(`/clientes/${cliente.id}`)}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {cliente.tipo === "empresa" ? (
+                        <Building2 className="h-4 w-4 text-primary" />
+                      ) : (
+                        <User className="h-4 w-4 text-primary" />
+                      )}
+                      <Badge variant={cliente.tipo === "empresa" ? "default" : "secondary"}>
+                        {cliente.tipo === "empresa" ? "Empresa" : "Persona"}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">{getClienteName(cliente)}</TableCell>
+                  <TableCell>{cliente.rut}</TableCell>
+                  <TableCell>{cliente.email || "-"}</TableCell>
+                  <TableCell>{cliente.telefono || "-"}</TableCell>
+                  <TableCell>
+                    <Badge variant={cliente.estado_cliente === "activo" ? "default" : cliente.estado_cliente === "suspendido" ? "destructive" : "secondary"}>
+                      {cliente.estado_cliente}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{cliente.industria || "-"}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
       )}
     </div>
   );
