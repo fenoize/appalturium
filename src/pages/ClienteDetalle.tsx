@@ -6,12 +6,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit, Briefcase } from "lucide-react";
+import { ArrowLeft, Building2, User, MapPin, Phone, Mail, FileText, DollarSign, ClipboardList, Edit, Briefcase, Trash2, Archive } from "lucide-react";
 import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDialog";
 import { CrearAccesoPortalDialog } from "@/components/clientes/CrearAccesoPortalDialog";
 import { TrabajosList } from "@/components/trabajos/TrabajosList";
 import { OrdenesServicioList } from "@/components/ordenes/OrdenesServicioList";
 import { Trabajo } from "@/hooks/useTrabajos";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 type Cliente = {
   id: string;
@@ -87,6 +98,60 @@ export default function ClienteDetalle() {
   const [contactos, setContactos] = useState<Contacto[]>([]);
   const [ordenes, setOrdenes] = useState<OrdenServicio[]>([]);
   const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleArchivar = async () => {
+    try {
+      const { error } = await supabase
+        .from("clientes")
+        .update({ estado_cliente: "inactivo" })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Cliente archivado",
+        description: "El cliente ha sido archivado exitosamente.",
+      });
+      fetchClienteData();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error al archivar",
+        description: error.message,
+      });
+    }
+  };
+
+  const handleEliminar = async () => {
+    setDeleting(true);
+    try {
+      // Eliminar en orden: contactos, ubicaciones, cliente
+      await supabase.from("contactos").delete().eq("cliente_id", id);
+      await supabase.from("ubicaciones").delete().eq("cliente_id", id);
+      
+      const { error } = await supabase
+        .from("clientes")
+        .delete()
+        .eq("id", id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Cliente eliminado",
+        description: "El cliente ha sido eliminado permanentemente.",
+      });
+      navigate("/clientes");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Error al eliminar",
+        description: error.message,
+      });
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   useEffect(() => {
     if (id) {
@@ -193,6 +258,32 @@ export default function ClienteDetalle() {
               hasAccess={!!(cliente as any).user_id}
               onSuccess={fetchClienteData}
             />
+            <Button variant="outline" onClick={handleArchivar}>
+              <Archive className="h-4 w-4 mr-2" />
+              Archivar
+            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive">
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Eliminar
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>¿Eliminar cliente?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Esta acción no se puede deshacer. Se eliminarán permanentemente todos los datos del cliente, incluyendo ubicaciones, contactos y registros asociados.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleEliminar} disabled={deleting}>
+                    {deleting ? "Eliminando..." : "Eliminar"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <Button onClick={() => navigate(`/clientes/${id}/editar`)}>
               <Edit className="h-4 w-4 mr-2" />
               Editar Cliente

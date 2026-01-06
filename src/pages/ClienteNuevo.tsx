@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User, MapPin, Users, CreditCard } from "lucide-react";
+import { formatRut, cleanRut } from "@/lib/rut-utils";
 
 export default function ClienteNuevo() {
   const navigate = useNavigate();
@@ -86,6 +87,26 @@ export default function ClienteNuevo() {
       if (!formData.contacto_nombre || !formData.contacto_email) {
         throw new Error("Nombre y email del contacto principal son requeridos");
       }
+      if (!formData.rut) {
+        throw new Error("El RUT es requerido");
+      }
+
+      // Formatear RUT
+      const rutFormateado = formatRut(formData.rut);
+
+      // Verificar si el RUT ya existe
+      const { data: existingClient, error: checkError } = await supabase
+        .from("clientes")
+        .select("id, razon_social, nombres, apellidos")
+        .eq("rut", rutFormateado)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existingClient) {
+        const clienteName = existingClient.razon_social || `${existingClient.nombres} ${existingClient.apellidos}`;
+        throw new Error(`Ya existe un cliente con este RUT: ${clienteName}`);
+      }
 
       const { data: { user } } = await supabase.auth.getUser();
 
@@ -96,7 +117,7 @@ export default function ClienteNuevo() {
         giro: tipo === "empresa" ? formData.giro : null,
         nombres: tipo === "persona" ? formData.nombres : null,
         apellidos: tipo === "persona" ? formData.apellidos : null,
-        rut: formData.rut,
+        rut: rutFormateado,
         email: formData.email || null,
         telefono: formData.telefono || null,
         sitio_web: formData.sitio_web || null,
@@ -331,9 +352,15 @@ export default function ClienteNuevo() {
                       id="rut"
                       value={formData.rut}
                       onChange={(e) => setFormData({ ...formData, rut: e.target.value })}
+                      onBlur={(e) => {
+                        if (e.target.value) {
+                          setFormData({ ...formData, rut: formatRut(e.target.value) });
+                        }
+                      }}
                       placeholder="12.345.678-9"
                       required
                     />
+                    <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
                   </div>
 
                   <div className="space-y-2">
