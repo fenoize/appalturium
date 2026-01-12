@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCrearOrdenServicio } from "@/hooks/useOrdenesServicio";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
@@ -10,13 +10,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { ArrowLeft, ArrowRight, Save, ClipboardList, AlertCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, ClipboardList, AlertCircle, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { TrabajoForm } from "@/components/trabajos/TrabajoForm";
 
 export default function OrdenServicioNueva() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [paso, setPaso] = useState(1);
+  const [showTrabajoForm, setShowTrabajoForm] = useState(false);
   const crearOT = useCrearOrdenServicio();
   
   const [formData, setFormData] = useState({
@@ -281,12 +284,35 @@ export default function OrdenServicioNueva() {
                     ))}
                   </SelectContent>
                 </Select>
-                {(!trabajos || trabajos.length === 0) && (
-                  <p className="text-sm text-muted-foreground">
-                    No hay trabajos para este cliente. Primero debe crear un Trabajo desde la ficha del cliente.
-                  </p>
-                )}
               </div>
+              
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full"
+                onClick={() => setShowTrabajoForm(true)}
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Crear Nueva Orden de Trabajo
+              </Button>
+
+              {(!trabajos || trabajos.length === 0) && (
+                <p className="text-sm text-muted-foreground">
+                  No hay trabajos para este cliente. Usa el botón de arriba para crear uno nuevo.
+                </p>
+              )}
+
+              <TrabajoForm
+                open={showTrabajoForm}
+                onOpenChange={(open) => {
+                  setShowTrabajoForm(open);
+                  if (!open) {
+                    // Refrescar lista de trabajos al cerrar el formulario
+                    queryClient.invalidateQueries({ queryKey: ["trabajos", formData.cliente_id] });
+                  }
+                }}
+                clienteId={formData.cliente_id}
+              />
             </div>
           )}
 
