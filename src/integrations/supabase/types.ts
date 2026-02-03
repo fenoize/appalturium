@@ -632,6 +632,323 @@ export type Database = {
           },
         ]
       }
+      equipos: {
+        Row: {
+          activo: boolean | null
+          cliente_id: string | null
+          codigo_qr: string
+          costo_adquisicion: number | null
+          created_at: string | null
+          created_by: string
+          descripcion: string | null
+          estado: Database["public"]["Enums"]["estado_equipo"]
+          fecha_compra: string | null
+          fecha_garantia_fin: string | null
+          id: string
+          item_inventario_id: string | null
+          marca: string | null
+          modelo: string | null
+          notas: string | null
+          numero_serie: string | null
+          proveedor_id: string | null
+          tecnico_asignado_id: string | null
+          ubicacion_actual: string | null
+          ubicacion_cliente_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activo?: boolean | null
+          cliente_id?: string | null
+          codigo_qr: string
+          costo_adquisicion?: number | null
+          created_at?: string | null
+          created_by: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_equipo"]
+          fecha_compra?: string | null
+          fecha_garantia_fin?: string | null
+          id?: string
+          item_inventario_id?: string | null
+          marca?: string | null
+          modelo?: string | null
+          notas?: string | null
+          numero_serie?: string | null
+          proveedor_id?: string | null
+          tecnico_asignado_id?: string | null
+          ubicacion_actual?: string | null
+          ubicacion_cliente_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activo?: boolean | null
+          cliente_id?: string | null
+          codigo_qr?: string
+          costo_adquisicion?: number | null
+          created_at?: string | null
+          created_by?: string
+          descripcion?: string | null
+          estado?: Database["public"]["Enums"]["estado_equipo"]
+          fecha_compra?: string | null
+          fecha_garantia_fin?: string | null
+          id?: string
+          item_inventario_id?: string | null
+          marca?: string | null
+          modelo?: string | null
+          notas?: string | null
+          numero_serie?: string | null
+          proveedor_id?: string | null
+          tecnico_asignado_id?: string | null
+          ubicacion_actual?: string | null
+          ubicacion_cliente_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_item_inventario_id_fkey"
+            columns: ["item_inventario_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_proveedor_id_fkey"
+            columns: ["proveedor_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_tecnico_asignado_id_fkey"
+            columns: ["tecnico_asignado_id"]
+            isOneToOne: false
+            referencedRelation: "personal_fichas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_ubicacion_cliente_id_fkey"
+            columns: ["ubicacion_cliente_id"]
+            isOneToOne: false
+            referencedRelation: "ubicaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipos_intervenciones: {
+        Row: {
+          created_at: string | null
+          descripcion: string
+          equipo_id: string
+          estado_antes: string | null
+          estado_despues: string | null
+          evidencias_urls: Json | null
+          fecha: string | null
+          id: string
+          observaciones: string | null
+          ot_id: string | null
+          registrado_por: string
+          tecnico_id: string | null
+          tipo: Database["public"]["Enums"]["tipo_intervencion_equipo"]
+        }
+        Insert: {
+          created_at?: string | null
+          descripcion: string
+          equipo_id: string
+          estado_antes?: string | null
+          estado_despues?: string | null
+          evidencias_urls?: Json | null
+          fecha?: string | null
+          id?: string
+          observaciones?: string | null
+          ot_id?: string | null
+          registrado_por: string
+          tecnico_id?: string | null
+          tipo: Database["public"]["Enums"]["tipo_intervencion_equipo"]
+        }
+        Update: {
+          created_at?: string | null
+          descripcion?: string
+          equipo_id?: string
+          estado_antes?: string | null
+          estado_despues?: string | null
+          evidencias_urls?: Json | null
+          fecha?: string | null
+          id?: string
+          observaciones?: string | null
+          ot_id?: string | null
+          registrado_por?: string
+          tecnico_id?: string | null
+          tipo?: Database["public"]["Enums"]["tipo_intervencion_equipo"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipos_intervenciones_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: false
+            referencedRelation: "equipos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_intervenciones_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "equipos_intervenciones_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_intervenciones_tecnico_id_fkey"
+            columns: ["tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "personal_fichas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipos_materiales: {
+        Row: {
+          activo: boolean | null
+          cantidad: number
+          created_at: string | null
+          equipo_id: string
+          fecha_asociacion: string | null
+          id: string
+          item_inventario_id: string
+          notas: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          activo?: boolean | null
+          cantidad?: number
+          created_at?: string | null
+          equipo_id: string
+          fecha_asociacion?: string | null
+          id?: string
+          item_inventario_id: string
+          notas?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          activo?: boolean | null
+          cantidad?: number
+          created_at?: string | null
+          equipo_id?: string
+          fecha_asociacion?: string | null
+          id?: string
+          item_inventario_id?: string
+          notas?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipos_materiales_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: false
+            referencedRelation: "equipos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_materiales_item_inventario_id_fkey"
+            columns: ["item_inventario_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      equipos_movimientos: {
+        Row: {
+          cliente_id: string | null
+          created_at: string | null
+          equipo_id: string
+          fecha: string | null
+          id: string
+          notas: string | null
+          ot_id: string | null
+          registrado_por: string
+          tecnico_id: string | null
+          tipo: string
+          ubicacion_destino: string | null
+          ubicacion_origen: string | null
+        }
+        Insert: {
+          cliente_id?: string | null
+          created_at?: string | null
+          equipo_id: string
+          fecha?: string | null
+          id?: string
+          notas?: string | null
+          ot_id?: string | null
+          registrado_por: string
+          tecnico_id?: string | null
+          tipo: string
+          ubicacion_destino?: string | null
+          ubicacion_origen?: string | null
+        }
+        Update: {
+          cliente_id?: string | null
+          created_at?: string | null
+          equipo_id?: string
+          fecha?: string | null
+          id?: string
+          notas?: string | null
+          ot_id?: string | null
+          registrado_por?: string
+          tecnico_id?: string | null
+          tipo?: string
+          ubicacion_destino?: string | null
+          ubicacion_origen?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipos_movimientos_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_movimientos_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: false
+            referencedRelation: "equipos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_movimientos_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "equipos_movimientos_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "equipos_movimientos_tecnico_id_fkey"
+            columns: ["tecnico_id"]
+            isOneToOne: false
+            referencedRelation: "personal_fichas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fases_proyecto: {
         Row: {
           created_at: string
@@ -2435,6 +2752,7 @@ export type Database = {
         Args: { tiempo_servicio_min: number; tipo_trabajo: string }
         Returns: string
       }
+      generar_codigo_equipo: { Args: never; Returns: string }
       generar_numero_cotizacion: { Args: never; Returns: string }
       generar_numero_documento: {
         Args: { _tipo: Database["public"]["Enums"]["tipo_documento_venta"] }
@@ -2487,6 +2805,12 @@ export type Database = {
         | "aceptada"
         | "rechazada"
         | "asignada_ot"
+      estado_equipo:
+        | "en_bodega"
+        | "asignado_tecnico"
+        | "instalado"
+        | "en_mantenimiento"
+        | "dado_de_baja"
       estado_fase: "pendiente" | "en_progreso" | "completada"
       estado_orden_compra:
         | "borrador"
@@ -2543,7 +2867,13 @@ export type Database = {
         | "nota_credito"
         | "nota_debito"
         | "otro"
-      tipo_item_inventario: "material" | "producto" | "servicio"
+      tipo_intervencion_equipo:
+        | "instalacion"
+        | "mantenimiento_preventivo"
+        | "mantenimiento_correctivo"
+        | "cambio_equipo"
+        | "retiro"
+      tipo_item_inventario: "material" | "producto" | "servicio" | "equipo"
       tipo_moneda: "CLP" | "UF" | "USD"
       tipo_movimiento_inventario:
         | "entrada"
@@ -2705,6 +3035,13 @@ export const Constants = {
         "rechazada",
         "asignada_ot",
       ],
+      estado_equipo: [
+        "en_bodega",
+        "asignado_tecnico",
+        "instalado",
+        "en_mantenimiento",
+        "dado_de_baja",
+      ],
       estado_fase: ["pendiente", "en_progreso", "completada"],
       estado_orden_compra: [
         "borrador",
@@ -2768,7 +3105,14 @@ export const Constants = {
         "nota_debito",
         "otro",
       ],
-      tipo_item_inventario: ["material", "producto", "servicio"],
+      tipo_intervencion_equipo: [
+        "instalacion",
+        "mantenimiento_preventivo",
+        "mantenimiento_correctivo",
+        "cambio_equipo",
+        "retiro",
+      ],
+      tipo_item_inventario: ["material", "producto", "servicio", "equipo"],
       tipo_moneda: ["CLP", "UF", "USD"],
       tipo_movimiento_inventario: [
         "entrada",
