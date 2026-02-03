@@ -18,7 +18,8 @@ import {
   LayoutDashboard,
   GanttChart,
   Wrench,
-  Building2
+  Building2,
+  Receipt
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -41,7 +42,12 @@ const navigationItems = [
     href: "/ordenes-servicio" 
   },
   { 
-    title: "Calendario", 
+    title: "Cotizaciones", 
+    icon: Receipt, 
+    href: "/cotizaciones" 
+  },
+  { 
+    title: "Calendario",
     icon: Calendar, 
     href: "/calendario" 
   },

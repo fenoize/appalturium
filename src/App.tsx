@@ -36,6 +36,10 @@ import Proyectos from "./pages/Proyectos";
 import Tareas from "./pages/Tareas";
 import Gantt from "./pages/Gantt";
 import Servicios from "./pages/Servicios";
+import Cotizaciones from "./pages/Cotizaciones";
+import CotizacionNueva from "./pages/CotizacionNueva";
+import CotizacionDetalle from "./pages/CotizacionDetalle";
+import CotizacionPublica from "./pages/CotizacionPublica";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -51,6 +55,7 @@ const App = () => {
         <TooltipProvider>
           <Routes>
             <Route path="/auth" element={<Auth />} />
+            <Route path="/cotizacion-publica/:token" element={<CotizacionPublica />} />
             <Route
               path="/*"
               element={
@@ -93,6 +98,9 @@ const App = () => {
                           <Route path="/tareas" element={<Tareas />} />
                           <Route path="/gantt" element={<Gantt />} />
                           <Route path="/servicios" element={<Servicios />} />
+                          <Route path="/cotizaciones" element={<Cotizaciones />} />
+                          <Route path="/cotizaciones/nueva" element={<CotizacionNueva />} />
+                          <Route path="/cotizaciones/:id" element={<CotizacionDetalle />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
