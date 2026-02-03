@@ -405,6 +405,173 @@ export type Database = {
           },
         ]
       }
+      cotizacion_items: {
+        Row: {
+          cantidad: number
+          cotizacion_id: string
+          created_at: string
+          descripcion: string
+          descuento_pct: number
+          id: string
+          item_inventario_id: string | null
+          orden: number
+          precio_unitario: number
+          servicio_id: string | null
+          subtotal: number
+          tipo: string
+        }
+        Insert: {
+          cantidad?: number
+          cotizacion_id: string
+          created_at?: string
+          descripcion: string
+          descuento_pct?: number
+          id?: string
+          item_inventario_id?: string | null
+          orden?: number
+          precio_unitario?: number
+          servicio_id?: string | null
+          subtotal?: number
+          tipo: string
+        }
+        Update: {
+          cantidad?: number
+          cotizacion_id?: string
+          created_at?: string
+          descripcion?: string
+          descuento_pct?: number
+          id?: string
+          item_inventario_id?: string | null
+          orden?: number
+          precio_unitario?: number
+          servicio_id?: string | null
+          subtotal?: number
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotizacion_items_cotizacion_id_fkey"
+            columns: ["cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "cotizaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotizacion_items_item_inventario_id_fkey"
+            columns: ["item_inventario_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotizacion_items_servicio_id_fkey"
+            columns: ["servicio_id"]
+            isOneToOne: false
+            referencedRelation: "servicios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cotizaciones: {
+        Row: {
+          aceptada_por_email: string | null
+          aceptada_por_nombre: string | null
+          aceptada_ts: string | null
+          cliente_id: string | null
+          condiciones: string | null
+          created_at: string
+          created_by: string
+          estado: Database["public"]["Enums"]["estado_cotizacion"]
+          fecha_emision: string
+          fecha_vencimiento: string
+          id: string
+          impuestos: number
+          moneda: Database["public"]["Enums"]["tipo_moneda"]
+          notas: string | null
+          numero: string
+          ot_id: string | null
+          rechazada_ts: string | null
+          rechazo_motivo: string | null
+          subtotal: number
+          token_acceso: string | null
+          total: number
+          updated_at: string
+          validez_dias: number
+        }
+        Insert: {
+          aceptada_por_email?: string | null
+          aceptada_por_nombre?: string | null
+          aceptada_ts?: string | null
+          cliente_id?: string | null
+          condiciones?: string | null
+          created_at?: string
+          created_by: string
+          estado?: Database["public"]["Enums"]["estado_cotizacion"]
+          fecha_emision?: string
+          fecha_vencimiento?: string
+          id?: string
+          impuestos?: number
+          moneda?: Database["public"]["Enums"]["tipo_moneda"]
+          notas?: string | null
+          numero: string
+          ot_id?: string | null
+          rechazada_ts?: string | null
+          rechazo_motivo?: string | null
+          subtotal?: number
+          token_acceso?: string | null
+          total?: number
+          updated_at?: string
+          validez_dias?: number
+        }
+        Update: {
+          aceptada_por_email?: string | null
+          aceptada_por_nombre?: string | null
+          aceptada_ts?: string | null
+          cliente_id?: string | null
+          condiciones?: string | null
+          created_at?: string
+          created_by?: string
+          estado?: Database["public"]["Enums"]["estado_cotizacion"]
+          fecha_emision?: string
+          fecha_vencimiento?: string
+          id?: string
+          impuestos?: number
+          moneda?: Database["public"]["Enums"]["tipo_moneda"]
+          notas?: string | null
+          numero?: string
+          ot_id?: string | null
+          rechazada_ts?: string | null
+          rechazo_motivo?: string | null
+          subtotal?: number
+          token_acceso?: string | null
+          total?: number
+          updated_at?: string
+          validez_dias?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotizaciones_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotizaciones_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "cotizaciones_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       documentos_venta: {
         Row: {
           created_at: string | null
@@ -2268,6 +2435,7 @@ export type Database = {
         Args: { tiempo_servicio_min: number; tipo_trabajo: string }
         Returns: string
       }
+      generar_numero_cotizacion: { Args: never; Returns: string }
       generar_numero_documento: {
         Args: { _tipo: Database["public"]["Enums"]["tipo_documento_venta"] }
         Returns: string
@@ -2313,6 +2481,12 @@ export type Database = {
         | "divorciado"
         | "union_libre"
       estado_cliente: "activo" | "suspendido" | "inactivo"
+      estado_cotizacion:
+        | "borrador"
+        | "en_revision"
+        | "aceptada"
+        | "rechazada"
+        | "asignada_ot"
       estado_fase: "pendiente" | "en_progreso" | "completada"
       estado_orden_compra:
         | "borrador"
@@ -2524,6 +2698,13 @@ export const Constants = {
       estado_app: ["offline", "online", "en_ruta", "en_proceso"],
       estado_civil: ["soltero", "casado", "viudo", "divorciado", "union_libre"],
       estado_cliente: ["activo", "suspendido", "inactivo"],
+      estado_cotizacion: [
+        "borrador",
+        "en_revision",
+        "aceptada",
+        "rechazada",
+        "asignada_ot",
+      ],
       estado_fase: ["pendiente", "en_progreso", "completada"],
       estado_orden_compra: [
         "borrador",

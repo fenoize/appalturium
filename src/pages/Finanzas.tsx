@@ -1,12 +1,18 @@
+import { useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { 
   DollarSign, 
   TrendingUp, 
   CheckCircle, 
   XCircle,
   FileText,
-  PieChart,
+  Clock,
+  Eye,
+  Receipt
 } from "lucide-react";
 import {
   useResumenFinanzas,
@@ -14,7 +20,10 @@ import {
   usePresupuestosPorMoneda,
   useComparacionFinanciera,
 } from "@/hooks/useFinanzas";
+import { useCotizacionesPendientesPago } from "@/hooks/useCotizaciones";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
 import {
   BarChart,
   Bar,
@@ -40,10 +49,12 @@ const COLORS = {
 };
 
 export default function Finanzas() {
+  const navigate = useNavigate();
   const { data: resumen, isLoading: loadingResumen } = useResumenFinanzas();
   const { data: porEstado, isLoading: loadingEstado } = usePresupuestosPorEstado();
   const { data: porMoneda, isLoading: loadingMoneda } = usePresupuestosPorMoneda();
   const { data: comparacion, isLoading: loadingComparacion } = useComparacionFinanciera();
+  const { data: cotizacionesPendientes, isLoading: loadingCotizaciones } = useCotizacionesPendientesPago();
 
   if (loadingResumen) {
     return (
@@ -149,12 +160,129 @@ export default function Finanzas() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="estados" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="pagos_pendientes" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="pagos_pendientes">Pagos Pendientes</TabsTrigger>
           <TabsTrigger value="estados">Por Estado</TabsTrigger>
           <TabsTrigger value="monedas">Por Moneda</TabsTrigger>
           <TabsTrigger value="comparacion">Comparación</TabsTrigger>
         </TabsList>
+
+        {/* Tab: Pagos Pendientes */}
+        <TabsContent value="pagos_pendientes" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Cotizaciones Aceptadas - Pagos por Cobrar</CardTitle>
+              <Badge variant="outline" className="text-orange-600 border-orange-300">
+                <Clock className="h-3 w-3 mr-1" />
+                {cotizacionesPendientes?.length || 0} pendientes
+              </Badge>
+            </CardHeader>
+            <CardContent>
+              {loadingCotizaciones ? (
+                <div className="h-32 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : cotizacionesPendientes?.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  No hay cotizaciones pendientes de cobro
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Cotización</TableHead>
+                      <TableHead>Cliente</TableHead>
+                      <TableHead>Fecha Aceptación</TableHead>
+                      <TableHead>Estado</TableHead>
+                      <TableHead className="text-right">Monto</TableHead>
+                      <TableHead className="text-right">Acciones</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {cotizacionesPendientes?.map((cot) => {
+                      const clienteNombre = cot.cliente?.tipo === 'empresa' 
+                        ? cot.cliente?.razon_social 
+                        : `${cot.cliente?.nombres || ''} ${cot.cliente?.apellidos || ''}`.trim();
+                      
+                      return (
+                        <TableRow key={cot.id}>
+                          <TableCell className="font-medium">{cot.numero}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{clienteNombre || "Sin cliente"}</p>
+                              <p className="text-xs text-muted-foreground">{cot.cliente?.rut}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {cot.aceptada_ts 
+                              ? format(new Date(cot.aceptada_ts), "dd/MM/yyyy", { locale: es })
+                              : "-"
+                            }
+                          </TableCell>
+                          <TableCell>
+                            {cot.estado === 'aceptada' ? (
+                              <Badge className="bg-green-500 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Aceptada
+                              </Badge>
+                            ) : (
+                              <Badge className="bg-purple-500 text-white">
+                                <Receipt className="h-3 w-3 mr-1" />
+                                Asignada OT
+                              </Badge>
+                            )}
+                          </TableCell>
+                          <TableCell className="text-right font-bold">
+                            {formatCurrency(cot.total, cot.moneda)}
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/cotizaciones/${cot.id}`)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              )}
+              
+              {/* Resumen por moneda */}
+              {cotizacionesPendientes && cotizacionesPendientes.length > 0 && (
+                <div className="mt-6 pt-4 border-t">
+                  <h4 className="font-medium mb-3">Total Pendiente por Moneda</h4>
+                  <div className="grid grid-cols-3 gap-4">
+                    {["CLP", "UF", "USD"].map((moneda) => {
+                      const totalMoneda = cotizacionesPendientes
+                        .filter(c => c.moneda === moneda)
+                        .reduce((acc, c) => acc + c.total, 0);
+                      const cantidad = cotizacionesPendientes.filter(c => c.moneda === moneda).length;
+                      
+                      if (cantidad === 0) return null;
+                      
+                      return (
+                        <Card key={moneda}>
+                          <CardContent className="pt-4">
+                            <p className="text-sm text-muted-foreground">{moneda}</p>
+                            <p className="text-xl font-bold">
+                              {formatCurrency(totalMoneda, moneda as "CLP" | "UF" | "USD")}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{cantidad} cotizaciones</p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         {/* Tab: Estados */}
         <TabsContent value="estados" className="space-y-4">
