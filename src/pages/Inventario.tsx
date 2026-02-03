@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,7 +8,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { InventarioTable } from "@/components/inventario/InventarioTable";
 import { InventarioForm } from "@/components/inventario/InventarioForm";
 import { ReporteMovimientos } from "@/components/inventario/ReporteMovimientos";
+import { EquipoCard } from "@/components/equipos/EquipoCard";
 import { useInventario, useCategorias, useMovimientos, type ItemInventario } from "@/hooks/useInventario";
+import { useEquipos } from "@/hooks/useEquipos";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -20,6 +23,8 @@ import {
   ArrowUpDown,
   Box,
   BarChart3,
+  HardDrive,
+  QrCode,
 } from "lucide-react";
 
 export default function Inventario() {
@@ -29,6 +34,7 @@ export default function Inventario() {
   const { data: items = [], isLoading } = useInventario();
   const { data: categorias = [] } = useCategorias();
   const { data: movimientos = [] } = useMovimientos();
+  const { data: equipos = [], isLoading: loadingEquipos } = useEquipos();
 
   const activeItems = items.filter((i) => i.activo);
   const itemsBajoStock = activeItems.filter(
@@ -159,6 +165,10 @@ export default function Inventario() {
             <Tabs defaultValue="items" className="space-y-4">
               <TabsList>
                 <TabsTrigger value="items">Items</TabsTrigger>
+                <TabsTrigger value="equipos" className="gap-2">
+                  <HardDrive className="h-4 w-4" />
+                  Equipos
+                </TabsTrigger>
                 <TabsTrigger value="movimientos">Movimientos</TabsTrigger>
                 <TabsTrigger value="bajo-stock">Stock Bajo</TabsTrigger>
                 <TabsTrigger value="reportes" className="gap-2">
@@ -176,6 +186,54 @@ export default function Inventario() {
                 ) : (
                   <InventarioTable items={activeItems} onEdit={handleEdit} />
                 )}
+              </TabsContent>
+
+              <TabsContent value="equipos">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="h-5 w-5 text-muted-foreground" />
+                      <h3 className="font-semibold">Equipos con Ficha Técnica</h3>
+                      <Badge variant="secondary">{equipos.length}</Badge>
+                    </div>
+                    <Button asChild>
+                      <Link to="/inventario/equipos/nuevo">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nuevo Equipo
+                      </Link>
+                    </Button>
+                  </div>
+
+                  {loadingEquipos ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {[1, 2, 3].map((i) => (
+                        <Skeleton key={i} className="h-48" />
+                      ))}
+                    </div>
+                  ) : equipos.length === 0 ? (
+                    <Card>
+                      <CardContent className="py-12 text-center">
+                        <HardDrive className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                        <h3 className="text-lg font-semibold mb-2">No hay equipos registrados</h3>
+                        <p className="text-muted-foreground mb-4">
+                          Los equipos tienen ficha técnica con historial de movimientos e intervenciones
+                        </p>
+                        <Button asChild>
+                          <Link to="/inventario/equipos/nuevo">
+                            <Plus className="h-4 w-4 mr-2" />
+                            Registrar Primer Equipo
+                          </Link>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {equipos.map((equipo) => (
+                        <EquipoCard key={equipo.id} equipo={equipo} />
+                      ))}
+                    </div>
+                  )}
+                </div>
               </TabsContent>
 
               <TabsContent value="movimientos">

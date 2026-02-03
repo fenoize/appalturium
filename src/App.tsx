@@ -40,6 +40,10 @@ import Cotizaciones from "./pages/Cotizaciones";
 import CotizacionNueva from "./pages/CotizacionNueva";
 import CotizacionDetalle from "./pages/CotizacionDetalle";
 import CotizacionPublica from "./pages/CotizacionPublica";
+import EquipoNuevo from "./pages/EquipoNuevo";
+import EquipoFicha from "./pages/EquipoFicha";
+import EquipoEditar from "./pages/EquipoEditar";
+import EquipoPublico from "./pages/EquipoPublico";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +60,7 @@ const App = () => {
           <Routes>
             <Route path="/auth" element={<Auth />} />
             <Route path="/cotizacion-publica/:token" element={<CotizacionPublica />} />
+            <Route path="/equipo/:codigo" element={<EquipoPublico />} />
             <Route
               path="/*"
               element={
@@ -93,6 +98,9 @@ const App = () => {
                           <Route path="/portal-cliente/perfil" element={<PortalClientePerfil />} />
                           <Route path="/configuracion" element={<Configuracion />} />
                           <Route path="/inventario" element={<Inventario />} />
+                          <Route path="/inventario/equipos/nuevo" element={<EquipoNuevo />} />
+                          <Route path="/inventario/equipos/:id" element={<EquipoFicha />} />
+                          <Route path="/inventario/equipos/:id/editar" element={<EquipoEditar />} />
                           <Route path="/proveedores" element={<Proveedores />} />
                           <Route path="/proyectos" element={<Proyectos />} />
                           <Route path="/tareas" element={<Tareas />} />
