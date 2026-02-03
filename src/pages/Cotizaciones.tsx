@@ -219,11 +219,15 @@ export default function Cotizaciones() {
                               >
                                 <Eye className="h-4 w-4" />
                               </Button>
-                              {cot.estado === 'borrador' && (
+                              {(cot.estado === 'borrador' || cot.estado === 'en_revision') && (
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => navigate(`/cotizaciones/${cot.id}/editar`)}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    navigate(`/cotizaciones/${cot.id}/editar`);
+                                  }}
+                                  title="Editar cotización"
                                 >
                                   <FileText className="h-4 w-4" />
                                 </Button>

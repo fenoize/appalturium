@@ -139,68 +139,70 @@ export default function CotizacionDetalle() {
         </div>
         
         <div className="flex gap-2">
+          {/* Botón editar disponible hasta que se acepte */}
+          {(cotizacion.estado === 'borrador' || cotizacion.estado === 'en_revision') && (
+            <Button variant="outline" onClick={() => navigate(`/cotizaciones/${cotizacion.id}/editar`)}>
+              <Edit className="h-4 w-4 mr-2" />
+              Editar
+            </Button>
+          )}
+
           {cotizacion.estado === 'borrador' && (
-            <>
-              <Button variant="outline" onClick={() => navigate(`/cotizaciones/${cotizacion.id}/editar`)}>
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-              <Dialog open={showEnviar} onOpenChange={setShowEnviar}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Send className="h-4 w-4 mr-2" />
-                    Enviar al Cliente
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Enviar Cotización al Cliente</DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4">
-                    <p className="text-muted-foreground">
-                      Elige cómo quieres compartir esta cotización con el cliente:
-                    </p>
+            <Dialog open={showEnviar} onOpenChange={setShowEnviar}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Send className="h-4 w-4 mr-2" />
+                  Enviar al Cliente
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Enviar Cotización al Cliente</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <p className="text-muted-foreground">
+                    Elige cómo quieres compartir esta cotización con el cliente:
+                  </p>
+                  
+                  <div className="space-y-3">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={handleCopiarEnlace}
+                    >
+                      <Link className="h-4 w-4 mr-2" />
+                      Copiar enlace público
+                    </Button>
                     
-                    <div className="space-y-3">
+                    {cotizacion.cliente?.email && (
                       <Button 
                         variant="outline" 
                         className="w-full justify-start"
-                        onClick={handleCopiarEnlace}
+                        onClick={() => {
+                          const url = `${window.location.origin}/cotizacion-publica/${cotizacion.token_acceso}`;
+                          const subject = encodeURIComponent(`Cotización ${cotizacion.numero}`);
+                          const body = encodeURIComponent(`Hola,\n\nPuedes revisar y aceptar la cotización en el siguiente enlace:\n${url}\n\nSaludos.`);
+                          window.open(`mailto:${cotizacion.cliente?.email}?subject=${subject}&body=${body}`);
+                        }}
                       >
-                        <Link className="h-4 w-4 mr-2" />
-                        Copiar enlace público
+                        <Mail className="h-4 w-4 mr-2" />
+                        Abrir cliente de correo
                       </Button>
-                      
-                      {cotizacion.cliente?.email && (
-                        <Button 
-                          variant="outline" 
-                          className="w-full justify-start"
-                          onClick={() => {
-                            const url = `${window.location.origin}/cotizacion-publica/${cotizacion.token_acceso}`;
-                            const subject = encodeURIComponent(`Cotización ${cotizacion.numero}`);
-                            const body = encodeURIComponent(`Hola,\n\nPuedes revisar y aceptar la cotización en el siguiente enlace:\n${url}\n\nSaludos.`);
-                            window.open(`mailto:${cotizacion.cliente?.email}?subject=${subject}&body=${body}`);
-                          }}
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          Abrir cliente de correo
-                        </Button>
-                      )}
-                    </div>
-
-                    <Separator />
-                    
-                    <p className="text-sm text-muted-foreground">
-                      El cliente podrá aceptar o rechazar la cotización sin necesidad de iniciar sesión.
-                    </p>
-
-                    <Button onClick={handleEnviarRevision} className="w-full">
-                      Marcar como "En Revisión"
-                    </Button>
+                    )}
                   </div>
-                </DialogContent>
-              </Dialog>
-            </>
+
+                  <Separator />
+                  
+                  <p className="text-sm text-muted-foreground">
+                    El cliente podrá aceptar o rechazar la cotización sin necesidad de iniciar sesión.
+                  </p>
+
+                  <Button onClick={handleEnviarRevision} className="w-full">
+                    Marcar como "En Revisión"
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
 
           {cotizacion.estado === 'aceptada' && (
