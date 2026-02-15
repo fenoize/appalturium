@@ -39,6 +39,7 @@ import Servicios from "./pages/Servicios";
 import Cotizaciones from "./pages/Cotizaciones";
 import CotizacionNueva from "./pages/CotizacionNueva";
 import CotizacionDetalle from "./pages/CotizacionDetalle";
+import CotizacionEditar from "./pages/CotizacionEditar";
 import CotizacionPublica from "./pages/CotizacionPublica";
 import EquipoNuevo from "./pages/EquipoNuevo";
 import EquipoFicha from "./pages/EquipoFicha";
@@ -109,6 +110,7 @@ const App = () => {
                           <Route path="/cotizaciones" element={<Cotizaciones />} />
                           <Route path="/cotizaciones/nueva" element={<CotizacionNueva />} />
                           <Route path="/cotizaciones/:id" element={<CotizacionDetalle />} />
+                          <Route path="/cotizaciones/:id/editar" element={<CotizacionEditar />} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
