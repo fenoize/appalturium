@@ -19,7 +19,7 @@ export function useNotificationsPush() {
   const checkExistingSubscription = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
-      const existingSub = await registration.pushManager.getSubscription();
+      const existingSub = await (registration as any).pushManager.getSubscription();
       setSubscription(existingSub);
     } catch (error) {
       console.error("Error al verificar suscripción:", error);
@@ -54,7 +54,7 @@ export function useNotificationsPush() {
 
       // Nota: Para producción, necesitarás configurar VAPID keys
       // Por ahora usamos userVisibleOnly sin applicationServerKey
-      const sub = await registration.pushManager.subscribe({
+      const sub = await (registration as any).pushManager.subscribe({
         userVisibleOnly: true,
       });
 
