@@ -19,7 +19,7 @@ export function useNotificationsPush() {
   const checkExistingSubscription = async () => {
     try {
       const registration = await navigator.serviceWorker.ready;
-      const existingSub = await registration.pushManager.getSubscription();
+      const existingSub = await (registration as any).pushManager.getSubscription();
       setSubscription(existingSub);
     } catch (error) {
       console.error("Error al verificar suscripción:", error);
