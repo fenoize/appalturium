@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User } from "lucide-react";
-import { formatRut } from "@/lib/rut-utils";
+import { formatRut, validateRut } from "@/lib/rut-utils";
 
 type Cliente = {
   id: string;
