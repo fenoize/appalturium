@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCrearCotizacion, CotizacionItem, calcularSubtotalItem, calcularTotalesCotizacion } from "@/hooks/useCotizaciones";
 import { useInventario } from "@/hooks/useInventario";
 import { useServicios } from "@/hooks/useServicios";
-import { formatRut, cleanRut } from "@/lib/rut-utils";
+import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
