@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,16 +10,39 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { NotificacionesPreferences } from "@/components/notificaciones/NotificacionesPreferences";
 import { IntegracionesConfig } from "@/components/configuracion/IntegracionesConfig";
 import { GestionUsuarios } from "@/components/configuracion/GestionUsuarios";
-import { 
-  Settings, 
-  Building, 
-  Users, 
-  Shield, 
+import { useConfiguracionEmpresa, ConfiguracionEmpresa } from "@/hooks/useConfiguracionEmpresa";
+import {
+  Settings,
+  Building,
+  Users,
+  Shield,
   Database,
   Palette
 } from "lucide-react";
 
 const Configuracion = () => {
+  const { data: empresaData, isLoading: loadingEmpresa, guardar, isSaving } = useConfiguracionEmpresa();
+  const [empresa, setEmpresa] = useState<ConfiguracionEmpresa>({
+    nombre: "",
+    rut: "",
+    direccion: "",
+    telefono: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    if (empresaData) setEmpresa(empresaData);
+  }, [empresaData]);
+
+  const handleGuardarEmpresa = async () => {
+    try {
+      await guardar(empresa);
+      toast.success("Información de la empresa actualizada");
+    } catch (err: any) {
+      toast.error("Error al guardar", { description: err.message });
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Page Header */}
