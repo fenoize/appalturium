@@ -46,6 +46,15 @@ import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
 import EquipoPublico from "./pages/EquipoPublico";
 import NotFound from "./pages/NotFound";
+import AccesoDenegado from "./pages/AccesoDenegado";
+import { RoleProtectedRoute } from "@/components/RoleProtectedRoute";
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => (
+  <RoleProtectedRoute allowedRoles={["admin", "supervisor"]}>{children}</RoleProtectedRoute>
+);
+const ClienteRoute = ({ children }: { children: React.ReactNode }) => (
+  <RoleProtectedRoute allowedRoles={["cliente"]}>{children}</RoleProtectedRoute>
+);
 
 const queryClient = new QueryClient();
 
@@ -75,42 +84,43 @@ const App = () => {
                       <Header />
                       <main className="flex-1 overflow-auto p-6">
                         <Routes>
-                          <Route path="/" element={<Index />} />
-                          <Route path="/clientes" element={<Clientes />} />
-                          <Route path="/clientes/nuevo" element={<ClienteNuevo />} />
-                          <Route path="/clientes/:id" element={<ClienteDetalle />} />
-                          <Route path="/clientes/:id/editar" element={<ClienteEditar />} />
-                          <Route path="/ordenes-servicio" element={<OrdenesServicio />} />
-                          <Route path="/ordenes-servicio/nueva" element={<OrdenServicioNueva />} />
-                          <Route path="/ordenes-servicio/:id" element={<OrdenServicioDetalle />} />
-                          <Route path="/calendario" element={<Calendario />} />
-                          <Route path="/geolocalizacion" element={<Geolocalizacion />} />
-                          <Route path="/reportes" element={<Reportes />} />
-                          <Route path="/personal" element={<Personal />} />
-                          <Route path="/empleados" element={<Personal />} />
-                          <Route path="/empleados/:id" element={<EmpleadoDetalle />} />
-                          <Route path="/finanzas" element={<Finanzas />} />
-                          <Route path="/usuarios" element={<Usuarios />} />
-                          <Route path="/portal-cliente" element={<PortalCliente />} />
-                          <Route path="/portal-cliente/ordenes" element={<PortalClienteOrdenes />} />
-                          <Route path="/portal-cliente/ordenes/:id" element={<PortalClienteOrdenDetalle />} />
-                          <Route path="/portal-cliente/solicitar-mantencion" element={<PortalClienteSolicitarMantencion />} />
-                          <Route path="/portal-cliente/documentos" element={<PortalClienteDocumentos />} />
-                          <Route path="/portal-cliente/perfil" element={<PortalClientePerfil />} />
-                          <Route path="/configuracion" element={<Configuracion />} />
-                          <Route path="/inventario" element={<Inventario />} />
-                          <Route path="/inventario/equipos/nuevo" element={<EquipoNuevo />} />
-                          <Route path="/inventario/equipos/:id" element={<EquipoFicha />} />
-                          <Route path="/inventario/equipos/:id/editar" element={<EquipoEditar />} />
-                          <Route path="/proveedores" element={<Proveedores />} />
-                          <Route path="/proyectos" element={<Proyectos />} />
-                          <Route path="/tareas" element={<Tareas />} />
-                          <Route path="/gantt" element={<Gantt />} />
-                          <Route path="/servicios" element={<Servicios />} />
-                          <Route path="/cotizaciones" element={<Cotizaciones />} />
-                          <Route path="/cotizaciones/nueva" element={<CotizacionNueva />} />
-                          <Route path="/cotizaciones/:id" element={<CotizacionDetalle />} />
-                          <Route path="/cotizaciones/:id/editar" element={<CotizacionEditar />} />
+                          <Route path="/" element={<AdminRoute><Index /></AdminRoute>} />
+                          <Route path="/acceso-denegado" element={<AccesoDenegado />} />
+                          <Route path="/clientes" element={<AdminRoute><Clientes /></AdminRoute>} />
+                          <Route path="/clientes/nuevo" element={<AdminRoute><ClienteNuevo /></AdminRoute>} />
+                          <Route path="/clientes/:id" element={<AdminRoute><ClienteDetalle /></AdminRoute>} />
+                          <Route path="/clientes/:id/editar" element={<AdminRoute><ClienteEditar /></AdminRoute>} />
+                          <Route path="/ordenes-servicio" element={<AdminRoute><OrdenesServicio /></AdminRoute>} />
+                          <Route path="/ordenes-servicio/nueva" element={<AdminRoute><OrdenServicioNueva /></AdminRoute>} />
+                          <Route path="/ordenes-servicio/:id" element={<AdminRoute><OrdenServicioDetalle /></AdminRoute>} />
+                          <Route path="/calendario" element={<AdminRoute><Calendario /></AdminRoute>} />
+                          <Route path="/geolocalizacion" element={<AdminRoute><Geolocalizacion /></AdminRoute>} />
+                          <Route path="/reportes" element={<AdminRoute><Reportes /></AdminRoute>} />
+                          <Route path="/personal" element={<AdminRoute><Personal /></AdminRoute>} />
+                          <Route path="/empleados" element={<AdminRoute><Personal /></AdminRoute>} />
+                          <Route path="/empleados/:id" element={<AdminRoute><EmpleadoDetalle /></AdminRoute>} />
+                          <Route path="/finanzas" element={<AdminRoute><Finanzas /></AdminRoute>} />
+                          <Route path="/usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
+                          <Route path="/portal-cliente" element={<ClienteRoute><PortalCliente /></ClienteRoute>} />
+                          <Route path="/portal-cliente/ordenes" element={<ClienteRoute><PortalClienteOrdenes /></ClienteRoute>} />
+                          <Route path="/portal-cliente/ordenes/:id" element={<ClienteRoute><PortalClienteOrdenDetalle /></ClienteRoute>} />
+                          <Route path="/portal-cliente/solicitar-mantencion" element={<ClienteRoute><PortalClienteSolicitarMantencion /></ClienteRoute>} />
+                          <Route path="/portal-cliente/documentos" element={<ClienteRoute><PortalClienteDocumentos /></ClienteRoute>} />
+                          <Route path="/portal-cliente/perfil" element={<ClienteRoute><PortalClientePerfil /></ClienteRoute>} />
+                          <Route path="/configuracion" element={<AdminRoute><Configuracion /></AdminRoute>} />
+                          <Route path="/inventario" element={<AdminRoute><Inventario /></AdminRoute>} />
+                          <Route path="/inventario/equipos/nuevo" element={<AdminRoute><EquipoNuevo /></AdminRoute>} />
+                          <Route path="/inventario/equipos/:id" element={<AdminRoute><EquipoFicha /></AdminRoute>} />
+                          <Route path="/inventario/equipos/:id/editar" element={<AdminRoute><EquipoEditar /></AdminRoute>} />
+                          <Route path="/proveedores" element={<AdminRoute><Proveedores /></AdminRoute>} />
+                          <Route path="/proyectos" element={<AdminRoute><Proyectos /></AdminRoute>} />
+                          <Route path="/tareas" element={<AdminRoute><Tareas /></AdminRoute>} />
+                          <Route path="/gantt" element={<AdminRoute><Gantt /></AdminRoute>} />
+                          <Route path="/servicios" element={<AdminRoute><Servicios /></AdminRoute>} />
+                          <Route path="/cotizaciones" element={<AdminRoute><Cotizaciones /></AdminRoute>} />
+                          <Route path="/cotizaciones/nueva" element={<AdminRoute><CotizacionNueva /></AdminRoute>} />
+                          <Route path="/cotizaciones/:id" element={<AdminRoute><CotizacionDetalle /></AdminRoute>} />
+                          <Route path="/cotizaciones/:id/editar" element={<AdminRoute><CotizacionEditar /></AdminRoute>} />
                           <Route path="*" element={<NotFound />} />
                         </Routes>
                       </main>
