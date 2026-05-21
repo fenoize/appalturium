@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { PortalClienteLayout } from "@/components/layout/PortalClienteLayout";
 import Index from "./pages/Index";
 import Configuracion from "./pages/Configuracion";
 import Auth from "./pages/Auth";
@@ -68,9 +69,31 @@ const App = () => {
       <BrowserRouter>
         <TooltipProvider>
           <Routes>
+            {/* Rutas públicas */}
             <Route path="/auth" element={<Auth />} />
             <Route path="/cotizacion-publica/:token" element={<CotizacionPublica />} />
             <Route path="/equipo/:codigo" element={<EquipoPublico />} />
+
+            {/* Portal del Cliente */}
+            <Route
+              path="/portal-cliente/*"
+              element={
+                <ProtectedRoute>
+                  <ClienteRoute>
+                    <PortalClienteLayout />
+                  </ClienteRoute>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<PortalCliente />} />
+              <Route path="ordenes" element={<PortalClienteOrdenes />} />
+              <Route path="ordenes/:id" element={<PortalClienteOrdenDetalle />} />
+              <Route path="solicitar-mantencion" element={<PortalClienteSolicitarMantencion />} />
+              <Route path="documentos" element={<PortalClienteDocumentos />} />
+              <Route path="perfil" element={<PortalClientePerfil />} />
+            </Route>
+
+            {/* Layout de Administración */}
             <Route
               path="/*"
               element={
@@ -101,12 +124,6 @@ const App = () => {
                           <Route path="/empleados/:id" element={<AdminRoute><EmpleadoDetalle /></AdminRoute>} />
                           <Route path="/finanzas" element={<AdminRoute><Finanzas /></AdminRoute>} />
                           <Route path="/usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
-                          <Route path="/portal-cliente" element={<ClienteRoute><PortalCliente /></ClienteRoute>} />
-                          <Route path="/portal-cliente/ordenes" element={<ClienteRoute><PortalClienteOrdenes /></ClienteRoute>} />
-                          <Route path="/portal-cliente/ordenes/:id" element={<ClienteRoute><PortalClienteOrdenDetalle /></ClienteRoute>} />
-                          <Route path="/portal-cliente/solicitar-mantencion" element={<ClienteRoute><PortalClienteSolicitarMantencion /></ClienteRoute>} />
-                          <Route path="/portal-cliente/documentos" element={<ClienteRoute><PortalClienteDocumentos /></ClienteRoute>} />
-                          <Route path="/portal-cliente/perfil" element={<ClienteRoute><PortalClientePerfil /></ClienteRoute>} />
                           <Route path="/configuracion" element={<AdminRoute><Configuracion /></AdminRoute>} />
                           <Route path="/inventario" element={<AdminRoute><Inventario /></AdminRoute>} />
                           <Route path="/inventario/equipos/nuevo" element={<AdminRoute><EquipoNuevo /></AdminRoute>} />
