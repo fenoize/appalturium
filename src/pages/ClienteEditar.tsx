@@ -649,7 +649,7 @@ export default function ClienteEditar() {
 
         {/* Botones de acción */}
         <div className="flex gap-4">
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving || !formData.rut || !validateRut(formData.rut)}>
             {saving ? "Guardando..." : "Guardar Cambios"}
           </Button>
           <Button 
