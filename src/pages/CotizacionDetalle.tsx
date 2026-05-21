@@ -85,6 +85,7 @@ export default function CotizacionDetalle() {
     }
   }, [ubicaciones]);
 
+  if (isLoading) {
     return <div className="p-8 text-center">Cargando cotización...</div>;
   }
 
