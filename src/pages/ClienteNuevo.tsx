@@ -798,7 +798,7 @@ export default function ClienteNuevo() {
         </Tabs>
 
         <div className="flex gap-4">
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading || !formData.rut || !validateRut(formData.rut)}>
             {loading ? "Creando..." : "Crear Cliente"}
           </Button>
           <Button type="button" variant="outline" onClick={() => navigate("/clientes")}>
