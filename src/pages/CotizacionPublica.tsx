@@ -106,6 +106,32 @@ export default function CotizacionPublica() {
     }
   };
 
+  const responder = async (accion: "aceptar" | "rechazar") => {
+    const { data, error } = await supabase.functions.invoke("respond-cotizacion", {
+      body: {
+        token_acceso: token,
+        accion,
+        nombre: accion === "aceptar" ? nombre : undefined,
+        email: accion === "aceptar" ? email : undefined,
+        motivo_rechazo: accion === "rechazar" ? motivoRechazo : undefined,
+      },
+    });
+    if (error) {
+      // Intentar extraer mensaje del body si vino como FunctionsHttpError
+      let msg = error.message;
+      try {
+        const ctx: any = (error as any).context;
+        if (ctx && typeof ctx.json === "function") {
+          const body = await ctx.json();
+          if (body?.error) msg = body.error;
+        }
+      } catch { /* ignore */ }
+      throw new Error(msg);
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+
   const handleAceptar = async () => {
     if (!nombre || !email) {
       toast({ title: "Complete todos los campos", variant: "destructive" });
@@ -114,18 +140,7 @@ export default function CotizacionPublica() {
 
     setProcesando(true);
     try {
-      const { error } = await supabase
-        .from("cotizaciones")
-        .update({
-          estado: 'aceptada',
-          aceptada_ts: new Date().toISOString(),
-          aceptada_por_nombre: nombre,
-          aceptada_por_email: email,
-        })
-        .eq("token_acceso", token);
-
-      if (error) throw error;
-
+      await responder("aceptar");
       toast({ title: "¡Cotización aceptada exitosamente!" });
       setShowAceptar(false);
       cargarCotizacion();
@@ -139,17 +154,7 @@ export default function CotizacionPublica() {
   const handleRechazar = async () => {
     setProcesando(true);
     try {
-      const { error } = await supabase
-        .from("cotizaciones")
-        .update({
-          estado: 'rechazada',
-          rechazada_ts: new Date().toISOString(),
-          rechazo_motivo: motivoRechazo || null,
-        })
-        .eq("token_acceso", token);
-
-      if (error) throw error;
-
+      await responder("rechazar");
       toast({ title: "Cotización rechazada" });
       setShowRechazar(false);
       cargarCotizacion();
