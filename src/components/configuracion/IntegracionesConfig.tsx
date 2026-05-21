@@ -13,7 +13,7 @@ interface IntegrationStatus {
   lastChecked?: Date;
 }
 
-const DEFAULT_CONFIG: IntegracionesConfig = {
+const DEFAULT_CONFIG: IntegracionesConfigType = {
   mapbox_token: "",
   whatsapp_token: "",
   whatsapp_phone_id: "",
