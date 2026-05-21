@@ -46,6 +46,15 @@ import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
 import EquipoPublico from "./pages/EquipoPublico";
 import NotFound from "./pages/NotFound";
+import AccesoDenegado from "./pages/AccesoDenegado";
+import { RoleProtectedRoute } from "@/components/RoleProtectedRoute";
+
+const AdminRoute = ({ children }: { children: React.ReactNode }) => (
+  <RoleProtectedRoute allowedRoles={["admin", "supervisor"]}>{children}</RoleProtectedRoute>
+);
+const ClienteRoute = ({ children }: { children: React.ReactNode }) => (
+  <RoleProtectedRoute allowedRoles={["cliente"]}>{children}</RoleProtectedRoute>
+);
 
 const queryClient = new QueryClient();
 
