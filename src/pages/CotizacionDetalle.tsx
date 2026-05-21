@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 import { useCotizacion, useCambiarEstadoCotizacion, useAsignarOTaCotizacion, EstadoCotizacion } from "@/hooks/useCotizaciones";
 import { useCrearOrdenServicio } from "@/hooks/useOrdenesServicio";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -11,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { 
@@ -49,6 +52,38 @@ export default function CotizacionDetalle() {
   const [showEnviar, setShowEnviar] = useState(false);
   const [showCrearOT, setShowCrearOT] = useState(false);
   const [otDescripcion, setOtDescripcion] = useState("");
+  const [otUbicacionId, setOtUbicacionId] = useState<string>("");
+  const [otTipoTrabajo, setOtTipoTrabajo] = useState<string>("Servicio");
+  const [otPrioridad, setOtPrioridad] = useState<"baja" | "media" | "alta" | "urgente">("media");
+
+  const clienteId = cotizacion?.cliente?.id;
+
+  const { data: ubicaciones } = useQuery({
+    queryKey: ["ubicaciones", clienteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ubicaciones")
+        .select("*")
+        .eq("cliente_id", clienteId!);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!clienteId && showCrearOT,
+  });
+
+  useEffect(() => {
+    if (showCrearOT && cotizacion && !otDescripcion) {
+      const itemsDesc = cotizacion.items?.map(i => i.descripcion).join(", ") || "";
+      setOtDescripcion(`Cotización ${cotizacion.numero}${itemsDesc ? `: ${itemsDesc}` : ""}`);
+    }
+  }, [showCrearOT, cotizacion]);
+
+  useEffect(() => {
+    if (ubicaciones && ubicaciones.length > 0 && !otUbicacionId) {
+      const principal = ubicaciones.find((u: any) => u.es_principal) || ubicaciones[0];
+      setOtUbicacionId(principal.id);
+    }
+  }, [ubicaciones]);
 
   if (isLoading) {
     return <div className="p-8 text-center">Cargando cotización...</div>;
@@ -91,19 +126,20 @@ export default function CotizacionDetalle() {
       toast({ title: "La cotización debe tener un cliente asignado", variant: "destructive" });
       return;
     }
+    if (!otUbicacionId) {
+      toast({ title: "Selecciona una ubicación", variant: "destructive" });
+      return;
+    }
 
     try {
-      // Crear descripción basada en los items
-      const itemsDesc = cotizacion.items?.map(i => i.descripcion).join(", ") || "";
-      
       const nuevaOT = await crearOT.mutateAsync({
         cliente_id: cotizacion.cliente.id,
-        tipo_trabajo: "Servicio",
-        descripcion: otDescripcion || `Cotización ${cotizacion.numero}: ${itemsDesc}`,
-        prioridad: "normal",
-      });
+        ubicacion_id: otUbicacionId,
+        tipo_trabajo: otTipoTrabajo,
+        descripcion: otDescripcion,
+        prioridad: otPrioridad,
+      } as any);
 
-      // Asignar OT a la cotización
       await asignarOT.mutateAsync({
         cotizacionId: cotizacion.id,
         otId: nuevaOT.id,
@@ -111,10 +147,12 @@ export default function CotizacionDetalle() {
 
       setShowCrearOT(false);
       toast({ title: "Orden de servicio creada y asignada" });
+      navigate(`/ordenes-servicio/${nuevaOT.id}`);
     } catch (error) {
       // Error manejado en hook
     }
   };
+
 
   return (
     <div className="space-y-6">
@@ -205,38 +243,89 @@ export default function CotizacionDetalle() {
             </Dialog>
           )}
 
-          {cotizacion.estado === 'aceptada' && (
+          {cotizacion.estado === 'aceptada' && !cotizacion.ot_id && (
             <Dialog open={showCrearOT} onOpenChange={setShowCrearOT}>
               <DialogTrigger asChild>
-                <Button>
+                <Button size="lg" className="shadow-md">
                   <ClipboardList className="h-4 w-4 mr-2" />
-                  Crear Orden de Servicio
+                  Crear Orden de Servicio desde esta Cotización
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Crear Orden de Servicio</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
-                    Se creará una nueva orden de servicio asociada a esta cotización.
+                  <p className="text-sm text-muted-foreground">
+                    Se creará una OT vinculada a la cotización <span className="font-medium">{cotizacion.numero}</span> para el cliente <span className="font-medium">{getClienteNombre()}</span>.
                   </p>
-                  <div>
+
+                  <div className="space-y-2">
+                    <Label>Ubicación *</Label>
+                    <Select value={otUbicacionId} onValueChange={setOtUbicacionId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={ubicaciones?.length ? "Selecciona una ubicación" : "El cliente no tiene ubicaciones"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ubicaciones?.map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.alias} - {u.direccion}{u.comuna ? `, ${u.comuna}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Tipo de trabajo</Label>
+                      <Input
+                        value={otTipoTrabajo}
+                        onChange={(e) => setOtTipoTrabajo(e.target.value)}
+                        placeholder="Servicio"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Prioridad</Label>
+                      <Select value={otPrioridad} onValueChange={(v: any) => setOtPrioridad(v)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="baja">Baja</SelectItem>
+                          <SelectItem value="media">Media</SelectItem>
+                          <SelectItem value="alta">Alta</SelectItem>
+                          <SelectItem value="urgente">Urgente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>Descripción de la OT</Label>
                     <Textarea
                       value={otDescripcion}
                       onChange={(e) => setOtDescripcion(e.target.value)}
                       placeholder="Descripción del trabajo a realizar..."
-                      rows={3}
+                      rows={4}
                     />
                   </div>
-                  <Button onClick={handleCrearOT} className="w-full" disabled={crearOT.isPending}>
-                    {crearOT.isPending ? "Creando..." : "Crear Orden de Servicio"}
-                  </Button>
                 </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCrearOT(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCrearOT}
+                    disabled={crearOT.isPending || asignarOT.isPending || !otUbicacionId}
+                  >
+                    {crearOT.isPending || asignarOT.isPending ? "Creando..." : "Crear y Vincular OT"}
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           )}
+
 
           {cotizacion.estado === 'en_revision' && (
             <Button variant="outline" onClick={handleCopiarEnlace}>
