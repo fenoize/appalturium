@@ -80,27 +80,60 @@ const Configuracion = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="company-name">Nombre de la Empresa</Label>
-                  <Input id="company-name" defaultValue="ALTURIUM" />
+                  <Input
+                    id="company-name"
+                    value={empresa.nombre}
+                    onChange={(e) => setEmpresa({ ...empresa, nombre: e.target.value })}
+                    disabled={loadingEmpresa}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-rut">RUT</Label>
-                  <Input id="company-rut" placeholder="12.345.678-9" />
+                  <Input
+                    id="company-rut"
+                    placeholder="12.345.678-9"
+                    value={empresa.rut}
+                    onChange={(e) => setEmpresa({ ...empresa, rut: e.target.value })}
+                    disabled={loadingEmpresa}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-address">Dirección</Label>
-                  <Input id="company-address" placeholder="Dirección de la empresa" />
+                  <Input
+                    id="company-address"
+                    placeholder="Dirección de la empresa"
+                    value={empresa.direccion}
+                    onChange={(e) => setEmpresa({ ...empresa, direccion: e.target.value })}
+                    disabled={loadingEmpresa}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-phone">Teléfono</Label>
-                  <Input id="company-phone" placeholder="+56 9 1234 5678" />
+                  <Input
+                    id="company-phone"
+                    placeholder="+56 9 1234 5678"
+                    value={empresa.telefono}
+                    onChange={(e) => setEmpresa({ ...empresa, telefono: e.target.value })}
+                    disabled={loadingEmpresa}
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="company-email">Email</Label>
-                  <Input id="company-email" type="email" placeholder="info@alturium.cl" />
+                  <Input
+                    id="company-email"
+                    type="email"
+                    placeholder="info@alturium.cl"
+                    value={empresa.email}
+                    onChange={(e) => setEmpresa({ ...empresa, email: e.target.value })}
+                    disabled={loadingEmpresa}
+                  />
                 </div>
-                <Button className="w-full">Guardar Cambios</Button>
+                <Button className="w-full" onClick={handleGuardarEmpresa} disabled={isSaving || loadingEmpresa}>
+                  {isSaving ? "Guardando..." : "Guardar Cambios"}
+                </Button>
               </CardContent>
             </Card>
+
 
             {/* System Preferences */}
             <Card>
