@@ -36,6 +36,11 @@ import {
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ordenes/StatusBadge";
 import { PriorityBadge } from "@/components/ordenes/PriorityBadge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useParametrosSistema } from "@/hooks/useParametrosSistema";
+import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
