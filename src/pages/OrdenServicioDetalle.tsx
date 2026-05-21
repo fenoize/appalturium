@@ -61,6 +61,45 @@ export default function OrdenServicioDetalle() {
   const crearDocumento = useCrearDocumento();
   const registrarPago = useRegistrarPago();
   const eliminarPago = useEliminarPago();
+  const queryClient = useQueryClient();
+  const { data: estadosOT } = useParametrosSistema("service_statuses");
+  const [cambiandoEstado, setCambiandoEstado] = useState(false);
+
+  const handleCambiarEstado = async (nuevoEstado: string) => {
+    if (!ordenServicio || nuevoEstado === ordenServicio.estado) return;
+    setCambiandoEstado(true);
+    const estadoAnterior = ordenServicio.estado;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No autenticado");
+
+      const { error: updError } = await supabase
+        .from("ordenes_servicio")
+        .update({ estado: nuevoEstado })
+        .eq("id", ordenServicio.id);
+      if (updError) throw updError;
+
+      const { error: logError } = await supabase
+        .from("ot_estado_logs")
+        .insert({
+          ot_id: ordenServicio.id,
+          estado_anterior: estadoAnterior,
+          estado_nuevo: nuevoEstado,
+          cambio_realizado_por: user.id,
+        });
+      if (logError) throw logError;
+
+      await queryClient.invalidateQueries({ queryKey: ["orden_servicio_detalle", ordenServicio.id] });
+      await queryClient.invalidateQueries({ queryKey: ["ordenes_servicio"] });
+      toast.success("Estado actualizado", {
+        description: `La OT pasó de "${estadoAnterior}" a "${nuevoEstado}"`,
+      });
+    } catch (err: any) {
+      toast.error("Error al cambiar estado", { description: err.message });
+    } finally {
+      setCambiandoEstado(false);
+    }
+  };
 
   if (loadingOT) {
     return (
