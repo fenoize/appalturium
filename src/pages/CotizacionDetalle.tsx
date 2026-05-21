@@ -243,38 +243,89 @@ export default function CotizacionDetalle() {
             </Dialog>
           )}
 
-          {cotizacion.estado === 'aceptada' && (
+          {cotizacion.estado === 'aceptada' && !cotizacion.ot_id && (
             <Dialog open={showCrearOT} onOpenChange={setShowCrearOT}>
               <DialogTrigger asChild>
-                <Button>
+                <Button size="lg" className="shadow-md">
                   <ClipboardList className="h-4 w-4 mr-2" />
-                  Crear Orden de Servicio
+                  Crear Orden de Servicio desde esta Cotización
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-lg">
                 <DialogHeader>
                   <DialogTitle>Crear Orden de Servicio</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
-                    Se creará una nueva orden de servicio asociada a esta cotización.
+                  <p className="text-sm text-muted-foreground">
+                    Se creará una OT vinculada a la cotización <span className="font-medium">{cotizacion.numero}</span> para el cliente <span className="font-medium">{getClienteNombre()}</span>.
                   </p>
-                  <div>
+
+                  <div className="space-y-2">
+                    <Label>Ubicación *</Label>
+                    <Select value={otUbicacionId} onValueChange={setOtUbicacionId}>
+                      <SelectTrigger>
+                        <SelectValue placeholder={ubicaciones?.length ? "Selecciona una ubicación" : "El cliente no tiene ubicaciones"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {ubicaciones?.map((u: any) => (
+                          <SelectItem key={u.id} value={u.id}>
+                            {u.alias} - {u.direccion}{u.comuna ? `, ${u.comuna}` : ""}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-2">
+                      <Label>Tipo de trabajo</Label>
+                      <Input
+                        value={otTipoTrabajo}
+                        onChange={(e) => setOtTipoTrabajo(e.target.value)}
+                        placeholder="Servicio"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Prioridad</Label>
+                      <Select value={otPrioridad} onValueChange={(v: any) => setOtPrioridad(v)}>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="baja">Baja</SelectItem>
+                          <SelectItem value="media">Media</SelectItem>
+                          <SelectItem value="alta">Alta</SelectItem>
+                          <SelectItem value="urgente">Urgente</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label>Descripción de la OT</Label>
                     <Textarea
                       value={otDescripcion}
                       onChange={(e) => setOtDescripcion(e.target.value)}
                       placeholder="Descripción del trabajo a realizar..."
-                      rows={3}
+                      rows={4}
                     />
                   </div>
-                  <Button onClick={handleCrearOT} className="w-full" disabled={crearOT.isPending}>
-                    {crearOT.isPending ? "Creando..." : "Crear Orden de Servicio"}
-                  </Button>
                 </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setShowCrearOT(false)}>
+                    Cancelar
+                  </Button>
+                  <Button
+                    onClick={handleCrearOT}
+                    disabled={crearOT.isPending || asignarOT.isPending || !otUbicacionId}
+                  >
+                    {crearOT.isPending || asignarOT.isPending ? "Creando..." : "Crear y Vincular OT"}
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           )}
+
 
           {cotizacion.estado === 'en_revision' && (
             <Button variant="outline" onClick={handleCopiarEnlace}>
