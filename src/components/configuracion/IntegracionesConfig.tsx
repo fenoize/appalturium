@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Map, MessageCircle, Mail, Code, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { useIntegraciones, type IntegracionesConfig } from "@/hooks/useIntegraciones";
+import { useIntegraciones, type IntegracionesConfig as IntegracionesConfigType } from "@/hooks/useIntegraciones";
 
 interface IntegrationStatus {
   configured: boolean;
