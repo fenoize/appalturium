@@ -44,40 +44,15 @@ export function useClienteOrdenes() {
         .from("ordenes_servicio")
         .select(`
           *,
-          ubicaciones (
-            alias,
-            direccion,
-            comuna,
-            ciudad
-          )
+          ubicaciones(alias, direccion, comuna, ciudad),
+          presupuestos(id, estado, total, validez_dias),
+          informes_finales(id, created_at)
         `)
         .eq("cliente_id", cliente.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      
-      // Obtener presupuestos e informes por separado
-      const ordenesConDatos = await Promise.all(
-        (data || []).map(async (orden) => {
-          const { data: presupuestos } = await supabase
-            .from("presupuestos")
-            .select("id, estado, total, validez_dias")
-            .eq("ot_id", orden.id);
-
-          const { data: informes } = await supabase
-            .from("informes_finales")
-            .select("id, created_at")
-            .eq("ot_id", orden.id);
-
-          return {
-            ...orden,
-            presupuestos: presupuestos || [],
-            informes_finales: informes?.[0] || null,
-          };
-        })
-      );
-
-      return ordenesConDatos;
+      return data || [];
     },
   });
 }
