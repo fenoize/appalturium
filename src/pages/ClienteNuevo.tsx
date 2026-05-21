@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User, MapPin, Users, CreditCard } from "lucide-react";
-import { formatRut, cleanRut } from "@/lib/rut-utils";
+import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
 
 export default function ClienteNuevo() {
   const navigate = useNavigate();
@@ -360,7 +360,11 @@ export default function ClienteNuevo() {
                       placeholder="12.345.678-9"
                       required
                     />
-                    <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
+                    {formData.rut && !validateRut(formData.rut) ? (
+                      <p className="text-xs text-destructive">RUT inválido. Verifica el dígito verificador.</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -794,7 +798,7 @@ export default function ClienteNuevo() {
         </Tabs>
 
         <div className="flex gap-4">
-          <Button type="submit" disabled={loading}>
+          <Button type="submit" disabled={loading || !formData.rut || !validateRut(formData.rut)}>
             {loading ? "Creando..." : "Crear Cliente"}
           </Button>
           <Button type="button" variant="outline" onClick={() => navigate("/clientes")}>

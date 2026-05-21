@@ -12,7 +12,7 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User } from "lucide-react";
-import { formatRut } from "@/lib/rut-utils";
+import { formatRut, validateRut } from "@/lib/rut-utils";
 
 type Cliente = {
   id: string;
@@ -377,7 +377,11 @@ export default function ClienteEditar() {
                       placeholder="12.345.678-9"
                       required
                     />
-                    <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
+                    {formData.rut && !validateRut(formData.rut) ? (
+                      <p className="text-xs text-destructive">RUT inválido. Verifica el dígito verificador.</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -645,7 +649,7 @@ export default function ClienteEditar() {
 
         {/* Botones de acción */}
         <div className="flex gap-4">
-          <Button type="submit" disabled={saving}>
+          <Button type="submit" disabled={saving || !formData.rut || !validateRut(formData.rut)}>
             {saving ? "Guardando..." : "Guardar Cambios"}
           </Button>
           <Button 

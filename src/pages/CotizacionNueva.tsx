@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCrearCotizacion, CotizacionItem, calcularSubtotalItem, calcularTotalesCotizacion } from "@/hooks/useCotizaciones";
 import { useInventario } from "@/hooks/useInventario";
 import { useServicios } from "@/hooks/useServicios";
-import { formatRut, cleanRut } from "@/lib/rut-utils";
+import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -356,6 +356,9 @@ export default function CotizacionNueva() {
                           onBlur={(e) => setNuevoCliente({ ...nuevoCliente, rut: formatRut(e.target.value) })}
                           placeholder="12.345.678-9"
                         />
+                        {nuevoCliente.rut && !validateRut(nuevoCliente.rut) && (
+                          <p className="text-xs text-destructive mt-1">RUT inválido. Verifica el dígito verificador.</p>
+                        )}
                       </div>
                       {nuevoCliente.tipo === "persona" ? (
                         <>
@@ -393,7 +396,7 @@ export default function CotizacionNueva() {
                       </div>
                       <Button 
                         onClick={handleCrearCliente} 
-                        disabled={creandoCliente || !nuevoCliente.rut}
+                        disabled={creandoCliente || !nuevoCliente.rut || !validateRut(nuevoCliente.rut)}
                         className="w-full"
                       >
                         {creandoCliente ? "Creando..." : "Crear Cliente"}
