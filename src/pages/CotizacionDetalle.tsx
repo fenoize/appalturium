@@ -126,19 +126,20 @@ export default function CotizacionDetalle() {
       toast({ title: "La cotización debe tener un cliente asignado", variant: "destructive" });
       return;
     }
+    if (!otUbicacionId) {
+      toast({ title: "Selecciona una ubicación", variant: "destructive" });
+      return;
+    }
 
     try {
-      // Crear descripción basada en los items
-      const itemsDesc = cotizacion.items?.map(i => i.descripcion).join(", ") || "";
-      
       const nuevaOT = await crearOT.mutateAsync({
         cliente_id: cotizacion.cliente.id,
-        tipo_trabajo: "Servicio",
-        descripcion: otDescripcion || `Cotización ${cotizacion.numero}: ${itemsDesc}`,
-        prioridad: "normal",
-      });
+        ubicacion_id: otUbicacionId,
+        tipo_trabajo: otTipoTrabajo,
+        descripcion: otDescripcion,
+        prioridad: otPrioridad,
+      } as any);
 
-      // Asignar OT a la cotización
       await asignarOT.mutateAsync({
         cotizacionId: cotizacion.id,
         otId: nuevaOT.id,
@@ -146,10 +147,12 @@ export default function CotizacionDetalle() {
 
       setShowCrearOT(false);
       toast({ title: "Orden de servicio creada y asignada" });
+      navigate(`/ordenes-servicio/${nuevaOT.id}`);
     } catch (error) {
       // Error manejado en hook
     }
   };
+
 
   return (
     <div className="space-y-6">
