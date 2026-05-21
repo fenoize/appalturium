@@ -56,18 +56,37 @@ export function useSolicitarMantencion() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
+      // Obtener número de OT vía RPC
+      const { data: numeroOT, error: numeroError } = await supabase
+        .rpc("generar_numero_ot");
+      if (numeroError) throw numeroError;
+
+      // Crear trabajo asociado a la solicitud del portal
+      const { data: trabajo, error: trabajoError } = await supabase
+        .from("trabajos")
+        .insert([{
+          cliente_id: datos.cliente_id,
+          nombre_trabajo: `Solicitud Portal - ${datos.tipo_trabajo}`,
+          tipo_trabajo: "mantencion",
+          created_by: user.id,
+        }])
+        .select()
+        .single();
+      if (trabajoError) throw trabajoError;
+
       const { data, error } = await supabase
         .from("ordenes_servicio")
         .insert([{
           cliente_id: datos.cliente_id,
           ubicacion_id: datos.ubicacion_id,
+          trabajo_id: trabajo.id,
           tipo_trabajo: datos.tipo_trabajo,
           descripcion: datos.descripcion,
           prioridad: datos.prioridad as any,
           fecha_programada_inicio: datos.fecha_programada_inicio,
           estado: "draft",
           created_by_user_id: user.id,
-          numero: "", // Se generará automáticamente por el trigger
+          numero: numeroOT as string,
         }])
         .select()
         .single();
