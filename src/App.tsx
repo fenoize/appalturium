@@ -7,6 +7,7 @@ import { useState } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
+import { PortalClienteLayout } from "@/components/layout/PortalClienteLayout";
 import Index from "./pages/Index";
 import Configuracion from "./pages/Configuracion";
 import Auth from "./pages/Auth";
