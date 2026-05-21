@@ -52,8 +52,39 @@ export default function CotizacionDetalle() {
   const [showEnviar, setShowEnviar] = useState(false);
   const [showCrearOT, setShowCrearOT] = useState(false);
   const [otDescripcion, setOtDescripcion] = useState("");
+  const [otUbicacionId, setOtUbicacionId] = useState<string>("");
+  const [otTipoTrabajo, setOtTipoTrabajo] = useState<string>("Servicio");
+  const [otPrioridad, setOtPrioridad] = useState<"baja" | "media" | "alta" | "urgente">("media");
 
-  if (isLoading) {
+  const clienteId = cotizacion?.cliente?.id;
+
+  const { data: ubicaciones } = useQuery({
+    queryKey: ["ubicaciones", clienteId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("ubicaciones")
+        .select("*")
+        .eq("cliente_id", clienteId!);
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!clienteId && showCrearOT,
+  });
+
+  useEffect(() => {
+    if (showCrearOT && cotizacion && !otDescripcion) {
+      const itemsDesc = cotizacion.items?.map(i => i.descripcion).join(", ") || "";
+      setOtDescripcion(`Cotización ${cotizacion.numero}${itemsDesc ? `: ${itemsDesc}` : ""}`);
+    }
+  }, [showCrearOT, cotizacion]);
+
+  useEffect(() => {
+    if (ubicaciones && ubicaciones.length > 0 && !otUbicacionId) {
+      const principal = ubicaciones.find((u: any) => u.es_principal) || ubicaciones[0];
+      setOtUbicacionId(principal.id);
+    }
+  }, [ubicaciones]);
+
     return <div className="p-8 text-center">Cargando cotización...</div>;
   }
 
