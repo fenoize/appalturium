@@ -1,240 +1,275 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Calendar, dateFnsLocalizer, Views, View, SlotInfo } from "react-big-calendar";
+import withDragAndDrop, { withDragAndDropProps } from "react-big-calendar/lib/addons/dragAndDrop";
+import { format, parse, startOfWeek, getDay, addHours, differenceInMilliseconds } from "date-fns";
+import { es } from "date-fns/locale";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
+
+import { supabase } from "@/integrations/supabase/client";
 import { useOrdenesServicio } from "@/hooks/useOrdenesServicio";
-import { useCalendario } from "@/hooks/useCalendario";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarioSemanal } from "@/components/calendario/CalendarioSemanal";
-import { CalendarioMensual } from "@/components/calendario/CalendarioMensual";
-import { GanttView } from "@/components/calendario/GanttView";
-import { 
-  Calendar as CalendarIcon, 
-  ChevronLeft, 
-  ChevronRight,
-  LayoutGrid,
-  List
-} from "lucide-react";
-import { format, addDays, addWeeks, addMonths } from "date-fns";
-import { es } from "date-fns/locale";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { toast } from "sonner";
+
+const locales = { es };
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek: (date: Date) => startOfWeek(date, { weekStartsOn: 1 }),
+  getDay,
+  locales,
+});
+
+const DnDCalendar = withDragAndDrop(Calendar as any);
+
+interface OTEvent {
+  id: string;
+  title: string;
+  start: Date;
+  end: Date;
+  resource: any;
+}
 
 export default function Calendario() {
-  const [filtros, setFiltros] = useState({
-    estado: "todos",
-    tipo_trabajo: "todos",
-  });
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
-  const {
-    view,
-    setView,
-    currentDate,
-    setCurrentDate,
-    getVisibleDateRange,
-    getDaysInView,
-    reprogramarOT,
-  } = useCalendario();
+  const [filtros, setFiltros] = useState({ estado: "todos", tipo_trabajo: "todos" });
+  const [tecnicoId, setTecnicoId] = useState<string>("todos");
+  const [view, setView] = useState<View>(Views.WEEK);
+  const [date, setDate] = useState<Date>(new Date());
 
   const { data: ordenes, isLoading } = useOrdenesServicio(filtros);
   const { data: estados } = useParametrosSistema("service_statuses");
   const { data: tipos } = useParametrosSistema("work_types");
 
-  const handlePrevious = () => {
-    switch (view) {
-      case "day":
-        setCurrentDate(addDays(currentDate, -1));
-        break;
-      case "week":
-        setCurrentDate(addWeeks(currentDate, -1));
-        break;
-      case "month":
-      case "gantt":
-        setCurrentDate(addMonths(currentDate, -1));
-        break;
+  // Técnicos disponibles
+  const { data: tecnicos } = useQuery({
+    queryKey: ["personal_fichas_calendario"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("personal_fichas")
+        .select("user_id, nombre_completo")
+        .eq("activo", true)
+        .order("nombre_completo");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  // Asignaciones para filtrar por técnico
+  const { data: asignaciones } = useQuery({
+    queryKey: ["asignaciones_ot_calendario"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("asignaciones_ot")
+        .select("ot_id, personal_id");
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const asignacionesPorOT = useMemo(() => {
+    const map = new Map<string, string[]>();
+    (asignaciones ?? []).forEach((a) => {
+      const prev = map.get(a.ot_id) ?? [];
+      prev.push(a.personal_id);
+      map.set(a.ot_id, prev);
+    });
+    return map;
+  }, [asignaciones]);
+
+  const reprogramarOT = useMutation({
+    mutationFn: async ({
+      otId,
+      inicio,
+      fin,
+    }: {
+      otId: string;
+      inicio: Date;
+      fin: Date;
+    }) => {
+      const { error } = await supabase
+        .from("ordenes_servicio")
+        .update({
+          fecha_programada_inicio: inicio.toISOString(),
+          fecha_programada_fin: fin.toISOString(),
+        })
+        .eq("id", otId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["ordenes_servicio"] });
+      toast.success("OT reprogramada");
+    },
+    onError: (err: any) => {
+      toast.error("Error al reprogramar", { description: err.message });
+    },
+  });
+
+  const events: OTEvent[] = useMemo(() => {
+    if (!ordenes) return [];
+    return ordenes
+      .filter((ot: any) => ot.fecha_programada_inicio)
+      .filter((ot: any) => {
+        if (tecnicoId === "todos") return true;
+        const ids = asignacionesPorOT.get(ot.id) ?? [];
+        return ids.includes(tecnicoId);
+      })
+      .map((ot: any) => {
+        const start = new Date(ot.fecha_programada_inicio);
+        const end = ot.fecha_programada_fin
+          ? new Date(ot.fecha_programada_fin)
+          : addHours(start, 1);
+        const cliente = ot.clientes
+          ? ot.clientes.razon_social ||
+            `${ot.clientes.nombres ?? ""} ${ot.clientes.apellidos ?? ""}`.trim()
+          : "";
+        return {
+          id: ot.id,
+          title: `${ot.numero} · ${cliente || ot.tipo_trabajo}`,
+          start,
+          end,
+          resource: ot,
+        };
+      });
+  }, [ordenes, tecnicoId, asignacionesPorOT]);
+
+  const handleEventDrop: withDragAndDropProps["onEventDrop"] = ({ event, start, end }) => {
+    const ev = event as OTEvent;
+    const s = start instanceof Date ? start : new Date(start);
+    let e = end instanceof Date ? end : new Date(end);
+    // Preserve duration if end missing
+    if (!e || differenceInMilliseconds(e, s) <= 0) {
+      e = addHours(s, 1);
     }
+    reprogramarOT.mutate({ otId: ev.id, inicio: s, fin: e });
   };
 
-  const handleNext = () => {
-    switch (view) {
-      case "day":
-        setCurrentDate(addDays(currentDate, 1));
-        break;
-      case "week":
-        setCurrentDate(addWeeks(currentDate, 1));
-        break;
-      case "month":
-      case "gantt":
-        setCurrentDate(addMonths(currentDate, 1));
-        break;
-    }
+  const handleEventResize: withDragAndDropProps["onEventResize"] = ({ event, start, end }) => {
+    const ev = event as OTEvent;
+    const s = start instanceof Date ? start : new Date(start);
+    const e = end instanceof Date ? end : new Date(end);
+    reprogramarOT.mutate({ otId: ev.id, inicio: s, fin: e });
   };
 
-  const handleToday = () => {
-    setCurrentDate(new Date());
-  };
-
-  const handleReprogramar = (otId: string, nuevaFecha: Date, duracion: number) => {
-    reprogramarOT.mutate({ otId, nuevaFechaInicio: nuevaFecha, duracionDias: duracion });
-  };
-
-  const handleDiaClick = (fecha: Date) => {
-    setCurrentDate(fecha);
-    setView("day");
-  };
-
-  const getTituloFecha = () => {
-    switch (view) {
-      case "day":
-        return format(currentDate, "EEEE, d 'de' MMMM yyyy", { locale: es });
-      case "week":
-        const range = getVisibleDateRange();
-        return `${format(range.start, "d MMM", { locale: es })} - ${format(range.end, "d MMM yyyy", { locale: es })}`;
-      case "month":
-      case "gantt":
-        return format(currentDate, "MMMM yyyy", { locale: es });
-    }
+  const handleSelectEvent = (event: object) => {
+    const ev = event as OTEvent;
+    navigate(`/ordenes-servicio/${ev.id}`);
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <CalendarIcon className="h-8 w-8" />
-            <div>
-              <h1 className="text-3xl font-bold">Calendario de Servicios</h1>
-              <p className="text-primary-foreground/80">
-                Programa y gestiona las órdenes de servicio
-              </p>
-            </div>
+        <div className="flex items-center space-x-3">
+          <CalendarIcon className="h-8 w-8" />
+          <div>
+            <h1 className="text-3xl font-bold">Calendario de Servicios</h1>
+            <p className="text-primary-foreground/80">
+              Arrastra una OT para reprogramarla. Haz click para ver el detalle.
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Controles */}
       <Card>
         <CardContent className="pt-6">
-          <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-            {/* Navegación de fecha */}
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={handlePrevious}>
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" onClick={handleToday}>
-                Hoy
-              </Button>
-              <Button variant="outline" size="icon" onClick={handleNext}>
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <div className="text-lg font-semibold ml-4 capitalize">
-                {getTituloFecha()}
-              </div>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <Select
+              value={filtros.estado}
+              onValueChange={(value) => setFiltros((p) => ({ ...p, estado: value }))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Estado" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los estados</SelectItem>
+                {estados?.map((e) => (
+                  <SelectItem key={e.key} value={e.key}>
+                    {e.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-            {/* Vista y Filtros */}
-            <div className="flex flex-wrap gap-2">
-              <Select value={view} onValueChange={(v: any) => setView(v)}>
-                <SelectTrigger className="w-[140px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="day">
-                    <div className="flex items-center gap-2">
-                      <LayoutGrid className="h-4 w-4" />
-                      Día
-                    </div>
+            <Select
+              value={filtros.tipo_trabajo}
+              onValueChange={(value) => setFiltros((p) => ({ ...p, tipo_trabajo: value }))}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los tipos</SelectItem>
+                {tipos?.map((t) => (
+                  <SelectItem key={t.key} value={t.key}>
+                    {t.label}
                   </SelectItem>
-                  <SelectItem value="week">
-                    <div className="flex items-center gap-2">
-                      <LayoutGrid className="h-4 w-4" />
-                      Semana
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="month">
-                    <div className="flex items-center gap-2">
-                      <CalendarIcon className="h-4 w-4" />
-                      Mes
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="gantt">
-                    <div className="flex items-center gap-2">
-                      <List className="h-4 w-4" />
-                      Gantt
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+                ))}
+              </SelectContent>
+            </Select>
 
-              <Select
-                value={filtros.estado}
-                onValueChange={(value) => setFiltros(prev => ({ ...prev, estado: value }))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filtrar por estado" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los estados</SelectItem>
-                  {estados?.map((estado) => (
-                    <SelectItem key={estado.key} value={estado.key}>
-                      {estado.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={filtros.tipo_trabajo}
-                onValueChange={(value) => setFiltros(prev => ({ ...prev, tipo_trabajo: value }))}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Filtrar por tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="todos">Todos los tipos</SelectItem>
-                  {tipos?.map((tipo) => (
-                    <SelectItem key={tipo.key} value={tipo.key}>
-                      {tipo.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Select value={tecnicoId} onValueChange={setTecnicoId}>
+              <SelectTrigger className="w-[220px]">
+                <SelectValue placeholder="Técnico" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="todos">Todos los técnicos</SelectItem>
+                {tecnicos?.map((t) => (
+                  <SelectItem key={t.user_id} value={t.user_id}>
+                    {t.nombre_completo}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardContent>
       </Card>
 
-      {/* Vista del calendario */}
       <Card>
         <CardContent className="pt-6">
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">
-              Cargando calendario...
+            <div className="text-center py-12 text-muted-foreground">Cargando calendario...</div>
+          ) : (
+            <div style={{ height: "70vh" }}>
+              <DnDCalendar
+                localizer={localizer}
+                events={events}
+                startAccessor="start"
+                endAccessor="end"
+                view={view}
+                onView={setView}
+                date={date}
+                onNavigate={setDate}
+                views={[Views.MONTH, Views.WEEK, Views.DAY, Views.AGENDA]}
+                onEventDrop={handleEventDrop}
+                onEventResize={handleEventResize}
+                onSelectEvent={handleSelectEvent}
+                resizable
+                popup
+                culture="es"
+                messages={{
+                  today: "Hoy",
+                  previous: "Anterior",
+                  next: "Siguiente",
+                  month: "Mes",
+                  week: "Semana",
+                  day: "Día",
+                  agenda: "Agenda",
+                  date: "Fecha",
+                  time: "Hora",
+                  event: "Evento",
+                  noEventsInRange: "Sin OT programadas en este rango",
+                  showMore: (n) => `+${n} más`,
+                }}
+              />
             </div>
-          ) : ordenes ? (
-            <>
-              {(view === "day" || view === "week") && (
-                <CalendarioSemanal
-                  ordenes={ordenes}
-                  dias={getDaysInView()}
-                  onReprogramar={handleReprogramar}
-                />
-              )}
-              {view === "month" && (
-                <CalendarioMensual
-                  ordenes={ordenes}
-                  dias={getDaysInView()}
-                  currentDate={currentDate}
-                  onDiaClick={handleDiaClick}
-                />
-              )}
-              {view === "gantt" && (
-                <GanttView
-                  ordenes={ordenes}
-                  rangoFechas={getVisibleDateRange()}
-                />
-              )}
-            </>
-          ) : null}
+          )}
         </CardContent>
       </Card>
     </div>
