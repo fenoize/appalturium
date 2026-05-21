@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,14 +6,26 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, Map, MessageCircle, Mail, Code, CheckCircle, XCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useIntegraciones, type IntegracionesConfig as IntegracionesConfigType } from "@/hooks/useIntegraciones";
 
 interface IntegrationStatus {
   configured: boolean;
   lastChecked?: Date;
 }
 
+const DEFAULT_CONFIG: IntegracionesConfigType = {
+  mapbox_token: "",
+  whatsapp_token: "",
+  whatsapp_phone_id: "",
+  resend_api_key: "",
+  resend_from_email: "",
+};
+
 export const IntegracionesConfig = () => {
   const { toast } = useToast();
+  const { data, isLoading, guardar, isSaving } = useIntegraciones();
+
+  const [form, setForm] = useState<IntegracionesConfigType>(DEFAULT_CONFIG);
   const [showTokens, setShowTokens] = useState<Record<string, boolean>>({});
   const [integrations, setIntegrations] = useState<Record<string, IntegrationStatus>>({
     mapbox: { configured: false },
@@ -21,19 +33,48 @@ export const IntegracionesConfig = () => {
     resend: { configured: false },
   });
 
+  // Sync form with loaded data
+  useEffect(() => {
+    if (data) {
+      setForm({ ...DEFAULT_CONFIG, ...data });
+      setIntegrations({
+        mapbox: { configured: !!(data.mapbox_token), lastChecked: new Date() },
+        whatsapp: { configured: !!(data.whatsapp_token && data.whatsapp_phone_id), lastChecked: new Date() },
+        resend: { configured: !!(data.resend_api_key && data.resend_from_email), lastChecked: new Date() },
+      });
+    }
+  }, [data]);
+
   const toggleTokenVisibility = (key: string) => {
-    setShowTokens(prev => ({ ...prev, [key]: !prev[key] }));
+    setShowTokens((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const handleSaveIntegration = (integrationName: string) => {
-    toast({
-      title: "Integración guardada",
-      description: `La configuración de ${integrationName} se ha guardado correctamente.`,
-    });
-    setIntegrations(prev => ({
-      ...prev,
-      [integrationName]: { configured: true, lastChecked: new Date() }
-    }));
+  const updateField = (field: keyof IntegracionesConfigType, value: string) => {
+    setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSaveIntegration = async (integrationName: string, fieldsToSave: (keyof IntegracionesConfigType)[]) => {
+    try {
+      const payload: Partial<IntegracionesConfigType> = {};
+      for (const f of fieldsToSave) {
+        payload[f] = form[f];
+      }
+      await guardar({ ...DEFAULT_CONFIG, ...payload } as IntegracionesConfigType);
+      toast({
+        title: "Integración guardada",
+        description: `La configuración de ${integrationName} se ha guardado correctamente.`,
+      });
+      setIntegrations((prev) => ({
+        ...prev,
+        [integrationName.toLowerCase()]: { configured: true, lastChecked: new Date() },
+      }));
+    } catch (e: any) {
+      toast({
+        title: "Error al guardar",
+        description: e?.message || "No se pudo guardar la configuración.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleTestIntegration = (integrationName: string) => {
@@ -65,9 +106,9 @@ export const IntegracionesConfig = () => {
             <Label htmlFor="mapbox-token">API Token Público</Label>
             <p className="text-xs text-muted-foreground mb-2">
               Obtén tu token en{" "}
-              <a 
-                href="https://account.mapbox.com/access-tokens/" 
-                target="_blank" 
+              <a
+                href="https://account.mapbox.com/access-tokens/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
@@ -79,6 +120,9 @@ export const IntegracionesConfig = () => {
                 id="mapbox-token"
                 type={showTokens.mapbox ? "text" : "password"}
                 placeholder="pk.eyJ1..."
+                value={form.mapbox_token}
+                onChange={(e) => updateField("mapbox_token", e.target.value)}
+                disabled={isLoading}
               />
               <Button
                 type="button"
@@ -95,18 +139,19 @@ export const IntegracionesConfig = () => {
           <Separator />
 
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1"
               onClick={() => handleTestIntegration("Mapbox")}
             >
               Probar Conexión
             </Button>
-            <Button 
+            <Button
               className="flex-1"
-              onClick={() => handleSaveIntegration("mapbox")}
+              disabled={isSaving || isLoading}
+              onClick={() => handleSaveIntegration("Mapbox", ["mapbox_token"])}
             >
-              Guardar
+              {isSaving ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </CardContent>
@@ -132,9 +177,9 @@ export const IntegracionesConfig = () => {
             <Label htmlFor="whatsapp-token">Access Token</Label>
             <p className="text-xs text-muted-foreground mb-2">
               Configura tu API en{" "}
-              <a 
-                href="https://developers.facebook.com/" 
-                target="_blank" 
+              <a
+                href="https://developers.facebook.com/"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
@@ -146,6 +191,9 @@ export const IntegracionesConfig = () => {
                 id="whatsapp-token"
                 type={showTokens.whatsapp ? "text" : "password"}
                 placeholder="EAAG..."
+                value={form.whatsapp_token}
+                onChange={(e) => updateField("whatsapp_token", e.target.value)}
+                disabled={isLoading}
               />
               <Button
                 type="button"
@@ -164,6 +212,9 @@ export const IntegracionesConfig = () => {
             <Input
               id="whatsapp-phone-id"
               placeholder="123456789012345"
+              value={form.whatsapp_phone_id}
+              onChange={(e) => updateField("whatsapp_phone_id", e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
@@ -172,24 +223,28 @@ export const IntegracionesConfig = () => {
             <Input
               id="whatsapp-business-id"
               placeholder="123456789012345"
+              disabled={isLoading}
             />
           </div>
 
           <Separator />
 
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1"
               onClick={() => handleTestIntegration("WhatsApp")}
             >
               Probar Conexión
             </Button>
-            <Button 
+            <Button
               className="flex-1"
-              onClick={() => handleSaveIntegration("whatsapp")}
+              disabled={isSaving || isLoading}
+              onClick={() =>
+                handleSaveIntegration("WhatsApp", ["whatsapp_token", "whatsapp_phone_id"])
+              }
             >
-              Guardar
+              {isSaving ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </CardContent>
@@ -215,9 +270,9 @@ export const IntegracionesConfig = () => {
             <Label htmlFor="resend-token">API Key</Label>
             <p className="text-xs text-muted-foreground mb-2">
               Obtén tu API key en{" "}
-              <a 
-                href="https://resend.com/api-keys" 
-                target="_blank" 
+              <a
+                href="https://resend.com/api-keys"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="text-primary hover:underline"
               >
@@ -229,6 +284,9 @@ export const IntegracionesConfig = () => {
                 id="resend-token"
                 type={showTokens.resend ? "text" : "password"}
                 placeholder="re_..."
+                value={form.resend_api_key}
+                onChange={(e) => updateField("resend_api_key", e.target.value)}
+                disabled={isLoading}
               />
               <Button
                 type="button"
@@ -248,6 +306,9 @@ export const IntegracionesConfig = () => {
               id="resend-from-email"
               type="email"
               placeholder="notificaciones@alturium.cl"
+              value={form.resend_from_email}
+              onChange={(e) => updateField("resend_from_email", e.target.value)}
+              disabled={isLoading}
             />
           </div>
 
@@ -256,24 +317,28 @@ export const IntegracionesConfig = () => {
             <Input
               id="resend-from-name"
               placeholder="ALTURIUM"
+              disabled={isLoading}
             />
           </div>
 
           <Separator />
 
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1"
               onClick={() => handleTestIntegration("Resend")}
             >
               Enviar Email de Prueba
             </Button>
-            <Button 
+            <Button
               className="flex-1"
-              onClick={() => handleSaveIntegration("resend")}
+              disabled={isSaving || isLoading}
+              onClick={() =>
+                handleSaveIntegration("Resend", ["resend_api_key", "resend_from_email"])
+              }
             >
-              Guardar
+              {isSaving ? "Guardando..." : "Guardar"}
             </Button>
           </div>
         </CardContent>
@@ -293,6 +358,7 @@ export const IntegracionesConfig = () => {
             <Input
               id="custom-api-name"
               placeholder="Mi API Externa"
+              disabled={isLoading}
             />
           </div>
 
@@ -302,6 +368,7 @@ export const IntegracionesConfig = () => {
               id="custom-api-url"
               type="url"
               placeholder="https://api.ejemplo.com"
+              disabled={isLoading}
             />
           </div>
 
@@ -312,6 +379,7 @@ export const IntegracionesConfig = () => {
                 id="custom-api-key"
                 type={showTokens.custom ? "text" : "password"}
                 placeholder="Bearer token o API key"
+                disabled={isLoading}
               />
               <Button
                 type="button"
@@ -328,14 +396,14 @@ export const IntegracionesConfig = () => {
           <Separator />
 
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex-1"
               onClick={() => handleTestIntegration("API Personalizada")}
             >
               Probar Conexión
             </Button>
-            <Button className="flex-1">
+            <Button className="flex-1" disabled={isLoading}>
               Guardar
             </Button>
           </div>
