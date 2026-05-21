@@ -25,7 +25,7 @@ export const IntegracionesConfig = () => {
   const { toast } = useToast();
   const { data, isLoading, guardar, isSaving } = useIntegraciones();
 
-  const [form, setForm] = useState<IntegracionesConfig>(DEFAULT_CONFIG);
+  const [form, setForm] = useState<IntegracionesConfigType>(DEFAULT_CONFIG);
   const [showTokens, setShowTokens] = useState<Record<string, boolean>>({});
   const [integrations, setIntegrations] = useState<Record<string, IntegrationStatus>>({
     mapbox: { configured: false },
