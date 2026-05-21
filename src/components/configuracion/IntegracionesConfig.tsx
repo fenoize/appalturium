@@ -49,17 +49,17 @@ export const IntegracionesConfig = () => {
     setShowTokens((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  const updateField = (field: keyof IntegracionesConfig, value: string) => {
+  const updateField = (field: keyof IntegracionesConfigType, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSaveIntegration = async (integrationName: string, fieldsToSave: (keyof IntegracionesConfig)[]) => {
+  const handleSaveIntegration = async (integrationName: string, fieldsToSave: (keyof IntegracionesConfigType)[]) => {
     try {
-      const payload: Partial<IntegracionesConfig> = {};
+      const payload: Partial<IntegracionesConfigType> = {};
       for (const f of fieldsToSave) {
         payload[f] = form[f];
       }
-      await guardar({ ...DEFAULT_CONFIG, ...payload } as IntegracionesConfig);
+      await guardar({ ...DEFAULT_CONFIG, ...payload } as IntegracionesConfigType);
       toast({
         title: "Integración guardada",
         description: `La configuración de ${integrationName} se ha guardado correctamente.`,
