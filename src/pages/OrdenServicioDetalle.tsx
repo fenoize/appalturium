@@ -198,9 +198,25 @@ export default function OrdenServicioDetalle() {
               {ordenServicio.ubicaciones?.alias} - {ordenServicio.ubicaciones?.direccion}
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <StatusBadge status={ordenServicio.estado} />
             <PriorityBadge priority={ordenServicio.prioridad} />
+            <Select
+              value={ordenServicio.estado}
+              onValueChange={handleCambiarEstado}
+              disabled={cambiandoEstado}
+            >
+              <SelectTrigger className="w-[200px] h-8">
+                <SelectValue placeholder="Cambiar estado" />
+              </SelectTrigger>
+              <SelectContent>
+                {estadosOT?.map((estado) => (
+                  <SelectItem key={estado.key} value={estado.key}>
+                    {estado.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
