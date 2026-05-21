@@ -360,7 +360,11 @@ export default function ClienteNuevo() {
                       placeholder="12.345.678-9"
                       required
                     />
-                    <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
+                    {formData.rut && !validateRut(formData.rut) ? (
+                      <p className="text-xs text-destructive">RUT inválido. Verifica el dígito verificador.</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground">Se formateará automáticamente</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
