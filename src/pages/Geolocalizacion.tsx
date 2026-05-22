@@ -16,7 +16,8 @@ import {
 
 export default function Geolocalizacion() {
   const [otSeleccionada, setOtSeleccionada] = useState<string>("");
-  const { data: ordenes } = useOrdenesServicio({ estado: "scheduled" });
+  const { data: ordenesResp } = useOrdenesServicio({ estado: "scheduled" });
+  const ordenes = ordenesResp?.data;
 
   const ordenSeleccionada = ordenes?.find((o) => o.id === otSeleccionada);
 

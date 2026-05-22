@@ -44,7 +44,8 @@ export default function Calendario() {
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState<Date>(new Date());
 
-  const { data: ordenes, isLoading } = useOrdenesServicio(filtros);
+  const { data: ordenesResp, isLoading } = useOrdenesServicio(filtros);
+  const ordenes = ordenesResp?.data;
   const { data: estados } = useParametrosSistema("service_statuses");
   const { data: tipos } = useParametrosSistema("work_types");
 

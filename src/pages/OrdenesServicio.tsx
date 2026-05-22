@@ -5,6 +5,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { StatusBadge } from "@/components/ordenes/StatusBadge";
 import { PriorityBadge } from "@/components/ordenes/PriorityBadge";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
@@ -20,17 +28,25 @@ import {
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+const PAGE_SIZE = 20;
+
 export default function OrdenesServicio() {
+  const [page, setPage] = useState(1);
   const [filtros, setFiltros] = useState({
     estado: "todos",
     prioridad: "todos",
     busqueda: "",
   });
 
-  const { data: ordenes, isLoading } = useOrdenesServicio(filtros);
+  const { data: resp, isLoading } = useOrdenesServicio({ ...filtros, page, pageSize: PAGE_SIZE });
+  const ordenes = resp?.data || [];
+  const total = resp?.total || 1;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
   const { data: estados } = useParametrosSistema("service_statuses");
 
   const handleFiltroChange = (key: string, value: string) => {
+    setPage(1);
     setFiltros(prev => ({ ...prev, [key]: value }));
   };
 
@@ -42,6 +58,11 @@ export default function OrdenesServicio() {
       return `${orden.clientes.nombres} ${orden.clientes.apellidos}`;
     }
     return "Cliente sin nombre";
+  };
+
+  const limpiarFiltros = () => {
+    setFiltros({ estado: "todos", prioridad: "todos", busqueda: "" });
+    setPage(1);
   };
 
   return (
@@ -116,7 +137,7 @@ export default function OrdenesServicio() {
 
             <Button
               variant="outline"
-              onClick={() => setFiltros({ estado: "todos", prioridad: "todos", busqueda: "" })}
+              onClick={limpiarFiltros}
             >
               Limpiar filtros
             </Button>
@@ -132,7 +153,7 @@ export default function OrdenesServicio() {
               <p className="text-muted-foreground">Cargando órdenes de servicio...</p>
             </CardContent>
           </Card>
-        ) : ordenes && ordenes.length > 0 ? (
+        ) : ordenes.length > 0 ? (
           ordenes.map((orden) => (
             <Card key={orden.id} className="hover:shadow-md transition-shadow">
               <CardHeader className="pb-3">
@@ -197,6 +218,46 @@ export default function OrdenesServicio() {
           </Card>
         )}
       </div>
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page > 1) setPage(page - 1);
+                }}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <PaginationItem key={p}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === p}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(p);
+                  }}
+                >
+                  {p}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page < totalPages) setPage(page + 1);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
     </div>
   );
 }
