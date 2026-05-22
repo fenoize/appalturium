@@ -83,7 +83,7 @@ export function MapaTecnicos() {
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${getEstadoColor(ubicacion.estado_app)}`} />
                         <div>
-                          <p className="font-medium">Técnico {ubicacion.personal_id.slice(0, 8)}</p>
+                          <p className="font-medium">{ubicacion.personal?.nombre_completo || `Técnico ${ubicacion.personal_id.slice(0, 8)}`}</p>
                           <p className="text-sm text-muted-foreground">
                             {ubicacion.estado_app === "en_ruta" && "En ruta"}
                             {ubicacion.estado_app === "en_proceso" && "En proceso"}
