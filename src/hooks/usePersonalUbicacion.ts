@@ -53,7 +53,7 @@ export function usePersonalUbicaciones() {
 
       // Obtener nombres de técnicos desde personal_fichas
       const personalIds = [...new Set(ubicacionesUnicas.map((u) => u.personal_id))];
-      if (personalIds.length >  0) {
+      if (personalIds.length > 0) {
         const { data: fichas } = await supabase
           .from("personal_fichas")
           .select("user_id, nombre_completo, rol_operativo")
