@@ -25,7 +25,8 @@ export function OrdenesServicioList({
   showCreateButton = false 
 }: OrdenesServicioListProps) {
   const navigate = useNavigate();
-  const { data: ordenes, isLoading } = useOrdenesServicio({ cliente_id: clienteId });
+  const { data: ordenesResp, isLoading } = useOrdenesServicio({ cliente_id: clienteId });
+  const ordenes = ordenesResp?.data;
 
   // Filter by proyecto or tarea if specified
   let filteredOrdenes = ordenes || [];
