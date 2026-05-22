@@ -697,6 +697,17 @@ export default function CotizacionNueva() {
                 </div>
               </div>
 
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label>Fecha de emisión</Label>
+                  <Input value={fechaEmision} readOnly className="bg-muted" />
+                </div>
+                <div>
+                  <Label>Válida hasta</Label>
+                  <Input value={fechaVencimiento} readOnly className="bg-muted" />
+                </div>
+              </div>
+
               <div className="border-t pt-4 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Subtotal</span>
