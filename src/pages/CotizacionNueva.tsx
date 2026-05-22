@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useCrearCotizacion, CotizacionItem, calcularSubtotalItem, calcularTotalesCotizacion } from "@/hooks/useCotizaciones";
+import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { useInventario } from "@/hooks/useInventario";
 import { useServicios } from "@/hooks/useServicios";
 import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
@@ -98,7 +99,13 @@ export default function CotizacionNueva() {
   const { data: servicios } = useServicios();
 
   const clienteSeleccionado = clientes?.find(c => c.id === clienteId);
-  const totales = calcularTotalesCotizacion(items);
+  const { data: paramsFacturacion } = useParametrosSistema("facturacion");
+  const ivaPct = (() => {
+    const p = paramsFacturacion?.find((x) => x.key === "iva_porcentaje");
+    const v = p?.descripcion ? Number(p.descripcion) : NaN;
+    return Number.isFinite(v) ? v / 100 : 0.19;
+  })();
+  const totales = calcularTotalesCotizacion(items, ivaPct);
 
   const fechaEmision = useMemo(() => format(new Date(), "dd/MM/yyyy"), []);
   const fechaVencimiento = useMemo(() => format(addDays(new Date(), validezDias), "dd/MM/yyyy"), [validezDias]);
