@@ -49,22 +49,36 @@ interface FiltrosOT {
   cliente_id?: string;
   tipo_trabajo?: string;
   busqueda?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+interface OrdenesPaginated {
+  data: OrdenServicio[];
+  total: number;
 }
 
 export function useOrdenesServicio(filtros?: FiltrosOT) {
-  return useQuery({
+  const page = filtros?.page ?? 1;
+  const pageSize = filtros?.pageSize ?? 20;
+  const offset = (page - 1) * pageSize;
+
+  return useQuery<OrdenesPaginated>({
     queryKey: ["ordenes_servicio", filtros],
     queryFn: async () => {
       let query = supabase
         .from("ordenes_servicio")
-        .select(`
+        .select(
+          `
           *,
           clientes (razon_social, nombres, apellidos),
           ubicaciones (alias, direccion),
           trabajos (nombre_trabajo),
           proyectos (nombre),
           tareas (titulo)
-        `)
+        `,
+          { count: "exact" }
+        )
         .order("created_at", { ascending: false });
 
       if (filtros?.estado && filtros.estado !== "todos") {
@@ -80,13 +94,17 @@ export function useOrdenesServicio(filtros?: FiltrosOT) {
         query = query.eq("tipo_trabajo", filtros.tipo_trabajo);
       }
       if (filtros?.busqueda) {
-        query = query.or(`numero.ilike.%${filtros.busqueda}%,descripcion.ilike.%${filtros.busqueda}%`);
+        query = query.or(
+          `numero.ilike.%${filtros.busqueda}%,descripcion.ilike.%${filtros.busqueda}%`
+        );
       }
 
-      const { data, error } = await query;
+      query = query.range(offset, offset + pageSize - 1);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
-      return data as OrdenServicio[];
+      return { data: (data as OrdenServicio[]) || [], total: count || 0 };
     },
   });
 }
