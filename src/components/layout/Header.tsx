@@ -32,13 +32,7 @@ export function Header() {
       <div className="flex h-16 items-center justify-between px-6">
         {/* Search */}
         <div className="flex items-center space-x-4 flex-1 max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Buscar clientes, proyectos, contratos..."
-              className="pl-10 w-96"
-            />
-          </div>
+          <GlobalSearch />
         </div>
 
         {/* Actions */}
