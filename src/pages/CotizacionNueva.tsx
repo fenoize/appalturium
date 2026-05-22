@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useCrearCotizacion, CotizacionItem, calcularSubtotalItem, calcularTotalesCotizacion } from "@/hooks/useCotizaciones";
+import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { useInventario } from "@/hooks/useInventario";
 import { useServicios } from "@/hooks/useServicios";
 import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
