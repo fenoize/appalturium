@@ -172,19 +172,17 @@ export default function Clientes() {
               </SelectContent>
             </Select>
             
-            <Select value={industriaFilter} onValueChange={setIndustriaFilter}>
+            <Select value={industriaFilter} onValueChange={setIndustriaFilter} disabled={industriasLoading}>
               <SelectTrigger>
-                <SelectValue placeholder="Industria" />
+                <SelectValue placeholder={industriasLoading ? "Cargando..." : "Industria"} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todas las industrias</SelectItem>
-                <SelectItem value="climatizacion">Climatización</SelectItem>
-                <SelectItem value="retail">Retail</SelectItem>
-                <SelectItem value="residencial">Residencial</SelectItem>
-                <SelectItem value="industrial">Industrial</SelectItem>
-                <SelectItem value="hospitalaria">Hospitalaria</SelectItem>
-                <SelectItem value="educacion">Educación</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
+                {industrias?.map((industria) => (
+                  <SelectItem key={industria} value={industria}>
+                    {industria.charAt(1).toUpperCase() + industria.slice(1)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
