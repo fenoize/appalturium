@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ordenes/StatusBadge";
 import { PriorityBadge } from "@/components/ordenes/PriorityBadge";
+import { InformeFinalForm } from "@/components/ordenes/InformeFinalForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { supabase } from "@/integrations/supabase/client";
@@ -382,13 +383,7 @@ export default function OrdenServicioDetalle() {
 
         {/* Tab: Informe */}
         <TabsContent value="informe">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground text-center py-8">
-                Funcionalidad de informes finales disponible próximamente
-              </p>
-            </CardContent>
-          </Card>
+          <InformeFinalForm otId={id!} />
         </TabsContent>
       </Tabs>
 
