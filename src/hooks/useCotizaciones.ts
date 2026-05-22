@@ -82,9 +82,12 @@ export function calcularSubtotalItem(cantidad: number, precio_unitario: number, 
 }
 
 // Calcular totales de cotización
-export function calcularTotalesCotizacion(items: CotizacionItem[]): { subtotal: number; impuestos: number; total: number } {
+export function calcularTotalesCotizacion(
+  items: CotizacionItem[],
+  ivaPct: number = 0.19
+): { subtotal: number; impuestos: number; total: number } {
   const subtotal = items.reduce((acc, item) => acc + item.subtotal, 0);
-  const impuestos = Math.round(subtotal * 0.19 * 100) / 100; // IVA 19%
+  const impuestos = Math.round(subtotal * ivaPct * 100) / 100;
   const total = subtotal + impuestos;
   return { subtotal, impuestos, total };
 }
