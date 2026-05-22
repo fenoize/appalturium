@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -6,38 +6,41 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Building2, User, Plus, Search, MapPin, Phone, Mail, LayoutGrid, List } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { useClientes } from "@/hooks/useClientes";
 
-type Cliente = {
-  id: string;
-  tipo: "empresa" | "persona";
-  razon_social: string | null;
-  giro: string | null;
-  nombres: string | null;
-  apellidos: string | null;
-  rut: string;
-  email: string | null;
-  telefono: string | null;
-  industria: string | null;
-  segmento: string | null;
-  estado_cliente: string;
-  etiquetas: string[];
-  created_at: string;
-};
+const PAGE_SIZE = 20;
 
 export default function Clientes() {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [clientes, setClientes] = useState<Cliente[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [tipoFilter, setTipoFilter] = useState<string>("todos");
   const [estadoFilter, setEstadoFilter] = useState<string>("todos");
   const [industriaFilter, setIndustriaFilter] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const { data: resp, isLoading } = useClientes({
+    busqueda: searchTerm || undefined,
+    tipo: tipoFilter,
+    estado: estadoFilter,
+    industria: industriaFilter,
+    page,
+    pageSize: PAGE_SIZE,
+  });
+  const clientes = resp?.data || [];
+  const total = resp?.total || 1;
+  const totalPages = Math.ceil(total / PAGE_SIZE);
 
   const { data: industrias, isLoading: industriasLoading } = useQuery({
     queryKey: ["industrias-clientes"],
@@ -52,50 +55,19 @@ export default function Clientes() {
     },
   });
 
-  useEffect(() => {
-    fetchClientes();
-  }, []);
-
-  const fetchClientes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("clientes")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-      setClientes(data as any || []);
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Error al cargar clientes",
-        description: error.message,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const filteredClientes = clientes.filter((cliente) => {
-    const matchesSearch =
-      cliente.rut.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (cliente.email?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-      (cliente.razon_social?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-      (cliente.nombres?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
-      (cliente.apellidos?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
-
-    const matchesTipo = tipoFilter === "todos" || cliente.tipo === tipoFilter;
-    const matchesEstado = estadoFilter === "todos" || cliente.estado_cliente === estadoFilter;
-    const matchesIndustria = industriaFilter === "todos" || cliente.industria === industriaFilter;
-
-    return matchesSearch && matchesTipo && matchesEstado && matchesIndustria;
-  });
-
-  const getClienteName = (cliente: Cliente) => {
+  const getClienteName = (cliente: any) => {
     if (cliente.tipo === "empresa") {
       return cliente.razon_social || "Sin nombre";
     }
     return `${cliente.nombres} ${cliente.apellidos}`;
+  };
+
+  const limpiarFiltros = () => {
+    setSearchTerm("");
+    setTipoFilter("todos");
+    setEstadoFilter("todos");
+    setIndustriaFilter("todos");
+    setPage(1);
   };
 
   return (
@@ -143,13 +115,13 @@ export default function Clientes() {
               <Input
                 placeholder="Buscar por RUT, email o nombre..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => { setPage(1); setSearchTerm(e.target.value); }}
                 className="pl-10"
               />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <Select value={tipoFilter} onValueChange={setTipoFilter}>
+            <Select value={tipoFilter} onValueChange={(v) => { setPage(1); setTipoFilter(v); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Tipo de cliente" />
               </SelectTrigger>
@@ -160,7 +132,7 @@ export default function Clientes() {
               </SelectContent>
             </Select>
             
-            <Select value={estadoFilter} onValueChange={setEstadoFilter}>
+            <Select value={estadoFilter} onValueChange={(v) => { setPage(1); setEstadoFilter(v); }}>
               <SelectTrigger>
                 <SelectValue placeholder="Estado" />
               </SelectTrigger>
@@ -172,7 +144,7 @@ export default function Clientes() {
               </SelectContent>
             </Select>
             
-            <Select value={industriaFilter} onValueChange={setIndustriaFilter} disabled={industriasLoading}>
+            <Select value={industriaFilter} onValueChange={(v) => { setPage(1); setIndustriaFilter(v); }} disabled={industriasLoading}>
               <SelectTrigger>
                 <SelectValue placeholder={industriasLoading ? "Cargando..." : "Industria"} />
               </SelectTrigger>
@@ -180,30 +152,33 @@ export default function Clientes() {
                 <SelectItem value="todos">Todas las industrias</SelectItem>
                 {industrias?.map((industria) => (
                   <SelectItem key={industria} value={industria}>
-                    {industria.charAt(1).toUpperCase() + industria.slice(1)}
+                    {industria.charAt(0).toUpperCase() + industria.slice(1)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
+          </<div>
         </CardContent>
       </Card>
 
-      {loading ? (
+      {isLoading ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground">Cargando clientes...</p>
         </div>
-      ) : filteredClientes.length === 0 ? (
+      ) : clientes.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">
               No se encontraron clientes.
             </p>
+            <Button variant="outline" className="mt-4" onClick={limpiarFiltros}>
+              Limpiar filtros
+            </Button>
           </CardContent>
         </Card>
       ) : viewMode === "grid" ? (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {filteredClientes.map((cliente) => (
+          {clientes.map((cliente) => (
             <Card
               key={cliente.id}
               className="hover:shadow-lg transition-shadow cursor-pointer"
@@ -277,7 +252,7 @@ export default function Clientes() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredClientes.map((cliente) => (
+              {clientes.map((cliente) => (
                 <TableRow 
                   key={cliente.id} 
                   className="cursor-pointer hover:bg-muted/50"
@@ -310,6 +285,46 @@ export default function Clientes() {
             </TableBody>
           </Table>
         </Card>
+      )}
+
+      {/* Paginación */}
+      {totalPages > 1 && (
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page > 1) setPage(page - 1);
+                }}
+              />
+            </PaginationItem>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+              <PaginationItem key={p}>
+                <PaginationLink
+                  href="#"
+                  isActive={page === p}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setPage(p);
+                  }}
+                >
+                  {p}
+                </PaginationLink>
+              </PaginationItem>
+            ))}
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (page < totalPages) setPage(page + 1);
+                }}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
     </div>
   );
