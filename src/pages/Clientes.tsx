@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,19 @@ export default function Clientes() {
   const [estadoFilter, setEstadoFilter] = useState<string>("todos");
   const [industriaFilter, setIndustriaFilter] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+  const { data: industrias, isLoading: industriasLoading } = useQuery({
+    queryKey: ["industrias-clientes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clientes")
+        .select("industria")
+        .neq("industria", null);
+      if (error) throw error;
+      const unicas = [...new Set((data || []).map((c) => c.industria))];
+      return unicas as string[];
+    },
+  });
 
   useEffect(() => {
     fetchClientes();
@@ -158,19 +172,17 @@ export default function Clientes() {
               </SelectContent>
             </Select>
             
-            <Select value={industriaFilter} onValueChange={setIndustriaFilter}>
+            <Select value={industriaFilter} onValueChange={setIndustriaFilter} disabled={industriasLoading}>
               <SelectTrigger>
-                <SelectValue placeholder="Industria" />
+                <SelectValue placeholder={industriasLoading ? "Cargando..." : "Industria"} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="todos">Todas las industrias</SelectItem>
-                <SelectItem value="climatizacion">Climatización</SelectItem>
-                <SelectItem value="retail">Retail</SelectItem>
-                <SelectItem value="residencial">Residencial</SelectItem>
-                <SelectItem value="industrial">Industrial</SelectItem>
-                <SelectItem value="hospitalaria">Hospitalaria</SelectItem>
-                <SelectItem value="educacion">Educación</SelectItem>
-                <SelectItem value="otro">Otro</SelectItem>
+                {industrias?.map((industria) => (
+                  <SelectItem key={industria} value={industria}>
+                    {industria.charAt(1).toUpperCase() + industria.slice(1)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
