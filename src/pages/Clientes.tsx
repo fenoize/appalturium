@@ -157,7 +157,7 @@ export default function Clientes() {
                 ))}
               </SelectContent>
             </Select>
-          </<div>
+          </div>
         </CardContent>
       </Card>
 
