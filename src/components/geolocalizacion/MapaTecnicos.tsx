@@ -5,9 +5,10 @@ import { useOrdenesServicio } from "@/hooks/useOrdenesServicio";
 
 export function MapaTecnicos() {
   const { data: ubicaciones, isLoading: loadingUbicaciones } = usePersonalUbicaciones();
-  const { data: ordenes, isLoading: loadingOrdenes } = useOrdenesServicio({
+  const { data: ordenesResp, isLoading: loadingOrdenes } = useOrdenesServicio({
     estado: "scheduled",
   });
+  const ordenes = ordenesResp?.data;
 
   if (loadingUbicaciones || loadingOrdenes) {
     return (
