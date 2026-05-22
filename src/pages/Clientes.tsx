@@ -39,6 +39,19 @@ export default function Clientes() {
   const [industriaFilter, setIndustriaFilter] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
+  const { data: industrias, isLoading: industriasLoading } = useQuery({
+    queryKey: ["industrias-clientes"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("clientes")
+        .select("industria")
+        .neq("industria", null);
+      if (error) throw error;
+      const unicas = [...new Set((data || []).map((c) => c.industria))];
+      return unicas as string[];
+    },
+  });
+
   useEffect(() => {
     fetchClientes();
   }, []);
