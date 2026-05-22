@@ -382,13 +382,7 @@ export default function OrdenServicioDetalle() {
 
         {/* Tab: Informe */}
         <TabsContent value="informe">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground text-center py-8">
-                Funcionalidad de informes finales disponible próximamente
-              </p>
-            </CardContent>
-          </Card>
+          <InformeFinalForm otId={id!} />
         </TabsContent>
       </Tabs>
 
