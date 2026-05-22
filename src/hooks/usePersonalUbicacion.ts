@@ -13,6 +13,10 @@ export interface PersonalUbicacion {
   captured_at: string;
   estado_app: EstadoApp;
   created_at: string;
+  personal?: {
+    nombre_completo: string;
+    rol_operativo: string;
+  };
 }
 
 export interface TecnicoCercano {
@@ -32,7 +36,7 @@ export function usePersonalUbicaciones() {
       // Obtener la última ubicación de cada personal
       const { data, error } = await supabase
         .from("personal_ubicacion")
-        .select("*")
+        .select("*, personal:personal_fichas(nombre_completo, rol_operativo)")
         .order("captured_at", { ascending: false });
 
       if (error) throw error;
