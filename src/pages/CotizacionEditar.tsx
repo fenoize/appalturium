@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useCotizacion, useActualizarCotizacion, CotizacionItem, calcularSubtotalItem, calcularTotalesCotizacion } from "@/hooks/useCotizaciones";
+import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { useInventario } from "@/hooks/useInventario";
 import { useServicios } from "@/hooks/useServicios";
 import { formatCurrency } from "@/lib/formatCurrency";
