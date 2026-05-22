@@ -36,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { StatusBadge } from "@/components/ordenes/StatusBadge";
 import { PriorityBadge } from "@/components/ordenes/PriorityBadge";
+import { InformeFinalForm } from "@/components/ordenes/InformeFinalForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { supabase } from "@/integrations/supabase/client";
