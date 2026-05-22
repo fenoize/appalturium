@@ -46,10 +46,10 @@ export function useClientes(filtros?: FiltrosClientes) {
         .order("created_at", { ascending: false });
 
       if (filtros?.tipo && filtros.tipo !== "todos") {
-        query = query.eq("tipo", filtros.tipo);
+        query = query.eq("tipo", filtros.tipo as any);
       }
       if (filtros?.estado && filtros.estado !== "todos") {
-        query = query.eq("estado_cliente", filtros.estado);
+        query = query.eq("estado_cliente", filtros.estado as any);
       }
       if (filtros?.industria && filtros.industria !== "todos") {
         query = query.eq("industria", filtros.industria);
