@@ -34,22 +34,47 @@ export function usePersonalUbicaciones() {
     queryKey: ["personal_ubicaciones"],
     queryFn: async () => {
       // Obtener la última ubicación de cada personal
-      const { data, error } = await supabase
+      const { data: ubicaciones, error } = await supabase
         .from("personal_ubicacion")
-        .select("*, personal:personal_fichas(nombre_completo, rol_operativo)")
+        .select("*")
         .order("captured_at", { ascending: false });
 
       if (error) throw error;
 
       // Filtrar para obtener solo la última ubicación de cada personal
       const ubicacionesPorPersonal = new Map<string, PersonalUbicacion>();
-      (data as PersonalUbicacion[]).forEach((ubicacion) => {
+      (ubicaciones as PersonalUbicacion[]).forEach((ubicacion) => {
         if (!ubicacionesPorPersonal.has(ubicacion.personal_id)) {
           ubicacionesPorPersonal.set(ubicacion.personal_id, ubicacion);
         }
       });
 
-      return Array.from(ubicacionesPorPersonal.values());
+      const ubicacionesUnicas = Array.from(ubicacionesPorPersonal.values());
+
+      // Obtener nombres de técnicos desde personal_fichas
+      const personalIds = [...new Set(ubicacionesUnicas.map((u) => u.personal_id))];
+      if (personalIds.length >  0) {
+        const { data: fichas } = await supabase
+          .from("personal_fichas")
+          .select("user_id, nombre_completo, rol_operativo")
+          .in("user_id", personalIds);
+
+        const fichasMap = new Map(
+          (fichas || []).map((f) => [f.user_id, f])
+        );
+
+        ubicacionesUnicas.forEach((u) => {
+          const ficha = fichasMap.get(u.personal_id);
+          if (ficha) {
+            u.personal = {
+              nombre_completo: ficha.nombre_completo,
+              rol_operativo: ficha.rol_operativo,
+            };
+          }
+        });
+      }
+
+      return ubicacionesUnicas;
     },
   });
 }
