@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.get_dashboard_metrics() FROM public, anon;
