@@ -2760,6 +2760,7 @@ export type Database = {
       }
       generar_numero_oc: { Args: never; Returns: string }
       generar_numero_ot: { Args: never; Returns: string }
+      get_dashboard_metrics: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
