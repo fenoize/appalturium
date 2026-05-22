@@ -100,6 +100,9 @@ export default function CotizacionNueva() {
   const clienteSeleccionado = clientes?.find(c => c.id === clienteId);
   const totales = calcularTotalesCotizacion(items);
 
+  const fechaEmision = useMemo(() => format(new Date(), "dd/MM/yyyy"), []);
+  const fechaVencimiento = useMemo(() => format(addDays(new Date(), validezDias), "dd/MM/yyyy"), [validezDias]);
+
   // Filtrar productos y servicios
   const productosFiltrados = inventario?.filter(p => 
     p.activo && 
