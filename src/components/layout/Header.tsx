@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Bell, Search, User, LogOut } from "lucide-react";
+import { Bell, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
+import { GlobalSearch } from "./GlobalSearch";
 
 export function Header() {
   const navigate = useNavigate();
