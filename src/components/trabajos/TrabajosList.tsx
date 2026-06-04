@@ -98,11 +98,16 @@ export function TrabajosList({ clienteId, onCreateProject }: TrabajosListProps) 
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <CardTitle className="text-lg">{trabajo.nombre_trabajo}</CardTitle>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Badge variant="outline">{tipoLabels[trabajo.tipo_trabajo]}</Badge>
                       <Badge className={estadoColors[trabajo.estado]}>
                         {estadoLabels[trabajo.estado]}
                       </Badge>
+                      {trabajo.origen === "portal" && (
+                        <Badge className="bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-400 border-orange-300">
+                          Portal
+                        </Badge>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-1">

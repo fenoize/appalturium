@@ -68,8 +68,10 @@ export function useSolicitarMantencion() {
           cliente_id: datos.cliente_id,
           nombre_trabajo: `Solicitud Portal - ${datos.tipo_trabajo}`,
           tipo_trabajo: "mantencion",
+          descripcion: datos.descripcion,
+          origen: "portal",
           created_by: user.id,
-        }])
+        } as any])
         .select()
         .single();
       if (trabajoError) throw trabajoError;
@@ -92,6 +94,27 @@ export function useSolicitarMantencion() {
         .single();
 
       if (error) throw error;
+
+      // Crear cotización borrador vinculada (no bloqueante si falla)
+      try {
+        const { data: numeroCot } = await supabase.rpc("generar_numero_cotizacion");
+        await supabase.from("cotizaciones").insert([{
+          numero: numeroCot as string,
+          cliente_id: datos.cliente_id,
+          fecha_emision: new Date().toISOString().slice(0, 10),
+          estado: "en_revision",
+          moneda: "CLP",
+          subtotal: 0,
+          impuestos: 0,
+          total: 0,
+          notas: `Cotización borrador generada desde portal cliente. OT: ${numeroOT}. Solicitud: ${datos.descripcion}`,
+          ot_id: data.id,
+          created_by: user.id,
+        } as any]);
+      } catch (cotErr) {
+        console.warn("No se pudo crear cotización borrador:", cotErr);
+      }
+
       return data;
     },
     onSuccess: () => {
