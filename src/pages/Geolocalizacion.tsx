@@ -41,7 +41,26 @@ export default function Geolocalizacion() {
         </TabsList>
 
         <TabsContent value="mapa" className="space-y-6">
-          <MapaTecnicos />
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2 max-w-xs">
+                <Label>Filtrar OTs por estado</Label>
+                <Select value={estadoFiltro} onValueChange={setEstadoFiltro}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {estadosOT?.map((estado) => (
+                      <SelectItem key={estado.key} value={estado.key}>
+                        {estado.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+          <MapaTecnicos estadoFiltro={estadoFiltro} />
         </TabsContent>
 
         <TabsContent value="personal" className="space-y-6">
