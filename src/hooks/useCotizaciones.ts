@@ -269,7 +269,9 @@ export function useActualizarCotizacion() {
 
       // Si hay items, recalcular totales
       if (data.items) {
-        const totales = calcularTotalesCotizacion(data.items);
+        const ivaPct = await obtenerIvaPct();
+        const totales = calcularTotalesCotizacion(data.items, ivaPct);
+
         updateData = {
           ...updateData,
           subtotal: totales.subtotal,
