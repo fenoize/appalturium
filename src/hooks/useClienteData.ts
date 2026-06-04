@@ -31,24 +31,17 @@ export function useClienteOrdenes() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
-      // Primero obtener el cliente
-      const { data: cliente } = await supabase
-        .from("clientes")
-        .select("id")
-        .eq("user_id", user.id)
-        .single();
-
-      if (!cliente) throw new Error("Cliente no encontrado");
-
+      // Una sola query usando inner join al cliente para filtrar por user_id.
       const { data, error } = await supabase
         .from("ordenes_servicio")
         .select(`
           *,
+          clientes!inner(id, user_id),
           ubicaciones(alias, direccion, comuna, ciudad),
           presupuestos(id, estado, total, validez_dias),
           informes_finales(id, created_at)
         `)
-        .eq("cliente_id", cliente.id)
+        .eq("clientes.user_id", user.id)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -56,6 +49,7 @@ export function useClienteOrdenes() {
     },
   });
 }
+
 
 export function useClienteDocumentos() {
   return useQuery({
