@@ -3,12 +3,27 @@ import { MapPin, Users, Wrench } from "lucide-react";
 import { usePersonalUbicaciones } from "@/hooks/usePersonalUbicacion";
 import { useOrdenesServicio } from "@/hooks/useOrdenesServicio";
 
-export function MapaTecnicos() {
+interface MapaTecnicosProps {
+  estadoFiltro?: string;
+}
+
+export function MapaTecnicos({ estadoFiltro = "scheduled" }: MapaTecnicosProps) {
   const { data: ubicaciones, isLoading: loadingUbicaciones } = usePersonalUbicaciones();
   const { data: ordenesResp, isLoading: loadingOrdenes } = useOrdenesServicio({
-    estado: "scheduled",
+    estado: estadoFiltro,
   });
-  const ordenes = ordenesResp?.data;
+
+  // Filtrar OTs programadas para hoy (entre inicio y fin del día)
+  const inicioDia = new Date();
+  inicioDia.setHours(0, 0, 0, 0);
+  const finDia = new Date();
+  finDia.setHours(23, 59, 59, 999);
+
+  const ordenesDelDia = (ordenesResp?.data ?? []).filter((o) => {
+    if (!o.fecha_programada_inicio) return false;
+    const fecha = new Date(o.fecha_programada_inicio);
+    return fecha >= inicioDia && fecha <= finDia;
+  });
 
   if (loadingUbicaciones || loadingOrdenes) {
     return (
@@ -44,7 +59,7 @@ export function MapaTecnicos() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-5 w-5" />
-          Mapa de Técnicos y OT
+          Mapa de Técnicos y OT del día
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -63,8 +78,8 @@ export function MapaTecnicos() {
             <div className="flex items-center gap-2 p-3 bg-muted rounded-lg">
               <Wrench className="h-5 w-5 text-primary" />
               <div>
-                <p className="text-sm text-muted-foreground">OT Programadas</p>
-                <p className="text-2xl font-bold">{ordenes?.length || 0}</p>
+                <p className="text-sm text-muted-foreground">OT del día</p>
+                <p className="text-2xl font-bold">{ordenesDelDia.length}</p>
               </div>
             </div>
           </div>
@@ -106,12 +121,12 @@ export function MapaTecnicos() {
             </div>
           </div>
 
-          {/* OT Pendientes */}
+          {/* OT del día */}
           <div>
-            <h3 className="font-semibold mb-3">OT Programadas</h3>
+            <h3 className="font-semibold mb-3">OT programadas hoy</h3>
             <div className="space-y-2">
-              {ordenes && ordenes.length > 0 ? (
-                ordenes.slice(0, 5).map((orden) => (
+              {ordenesDelDia.length > 0 ? (
+                ordenesDelDia.slice(0, 5).map((orden) => (
                   <div key={orden.id} className="p-3 border rounded-lg">
                     <p className="font-medium">{orden.numero}</p>
                     <p className="text-sm text-muted-foreground">{orden.descripcion}</p>
@@ -122,7 +137,7 @@ export function MapaTecnicos() {
                 ))
               ) : (
                 <p className="text-muted-foreground text-center py-4">
-                  No hay OT programadas
+                  No hay OT programadas para hoy
                 </p>
               )}
             </div>

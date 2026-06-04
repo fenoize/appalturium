@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapaTecnicos } from "@/components/geolocalizacion/MapaTecnicos";
 import { BotonesEstadoPersonal } from "@/components/geolocalizacion/BotonesEstadoPersonal";
 import { TecnicosCercanos } from "@/components/geolocalizacion/TecnicosCercanos";
 import { useOrdenesServicio } from "@/hooks/useOrdenesServicio";
+import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import {
   Select,
   SelectContent,
@@ -16,7 +17,9 @@ import {
 
 export default function Geolocalizacion() {
   const [otSeleccionada, setOtSeleccionada] = useState<string>("");
-  const { data: ordenesResp } = useOrdenesServicio({ estado: "scheduled" });
+  const [estadoFiltro, setEstadoFiltro] = useState<string>("scheduled");
+  const { data: estadosOT } = useParametrosSistema("service_statuses");
+  const { data: ordenesResp } = useOrdenesServicio({ estado: estadoFiltro });
   const ordenes = ordenesResp?.data;
 
   const ordenSeleccionada = ordenes?.find((o) => o.id === otSeleccionada);
