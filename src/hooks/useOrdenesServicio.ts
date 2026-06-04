@@ -31,6 +31,8 @@ export interface OrdenServicio {
   ubicaciones?: {
     alias: string;
     direccion: string;
+    lat?: number | null;
+    lng?: number | null;
   };
   trabajos?: {
     nombre_trabajo: string;
@@ -72,7 +74,7 @@ export function useOrdenesServicio(filtros?: FiltrosOT) {
           `
           *,
           clientes (razon_social, nombres, apellidos),
-          ubicaciones (alias, direccion),
+          ubicaciones (alias, direccion, lat, lng),
           trabajos (nombre_trabajo),
           proyectos (nombre),
           tareas (titulo)
