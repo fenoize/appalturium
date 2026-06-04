@@ -97,6 +97,27 @@ function generateToken(): string {
   return crypto.randomUUID().replace(/-/g, '') + crypto.randomUUID().replace(/-/g, '');
 }
 
+/**
+ * Obtiene la tasa de IVA desde parametros_sistema (categoria='tax_config', key='iva').
+ * El valor puede estar guardado como número (0.19) o como porcentaje (19) en el
+ * campo `descripcion` (jsonb) bajo la clave `value`. Fallback: 0.19.
+ */
+async function obtenerIvaPct(): Promise<number> {
+  const { data } = await supabase
+    .from("parametros_sistema")
+    .select("descripcion")
+    .eq("categoria", "tax_config")
+    .eq("key", "iva")
+    .eq("activo", true)
+    .maybeSingle();
+
+  const raw = (data?.descripcion as any)?.value;
+  const num = typeof raw === "number" ? raw : parseFloat(raw);
+  if (!isFinite(num) || num <= 0) return 0.19;
+  return num > 1 ? num / 100 : num;
+}
+
+
 export function useCotizaciones(filtros?: { estado?: EstadoCotizacion; clienteId?: string }) {
   return useQuery({
     queryKey: ["cotizaciones", filtros],
@@ -171,10 +192,13 @@ export function useCrearCotizacion() {
       
       if (numeroError) throw numeroError;
 
-      const totales = calcularTotalesCotizacion(data.items);
+      const ivaPct = await obtenerIvaPct();
+      const totales = calcularTotalesCotizacion(data.items, ivaPct);
       const token = generateToken();
       const fechaEmision = data.cotizacion.fecha_emision || new Date().toISOString();
       const validezDias = data.cotizacion.validez_dias || 30;
+
+
       const fechaVencimiento = new Date(fechaEmision);
       fechaVencimiento.setDate(fechaVencimiento.getDate() + validezDias);
 
@@ -245,7 +269,9 @@ export function useActualizarCotizacion() {
 
       // Si hay items, recalcular totales
       if (data.items) {
-        const totales = calcularTotalesCotizacion(data.items);
+        const ivaPct = await obtenerIvaPct();
+        const totales = calcularTotalesCotizacion(data.items, ivaPct);
+
         updateData = {
           ...updateData,
           subtotal: totales.subtotal,

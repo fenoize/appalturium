@@ -1,6 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+/**
+ * Hook consolidado: trae la OT con todos los joins necesarios
+ * (cliente, ubicación, trabajo, presupuestos, comunicaciones, informe final,
+ * logs de estado y asignaciones) en un solo round-trip.
+ */
 export function useOrdenServicioDetalle(id: string) {
   return useQuery({
     queryKey: ["orden_servicio_detalle", id],
@@ -10,25 +15,32 @@ export function useOrdenServicioDetalle(id: string) {
         .select(`
           *,
           clientes (
-            id,
-            razon_social,
-            nombres,
-            apellidos,
-            rut,
-            email,
-            telefono
+            id, razon_social, nombres, apellidos, rut, email, telefono
           ),
           ubicaciones (
-            id,
-            alias,
-            direccion,
-            comuna,
-            ciudad,
-            region
+            id, alias, direccion, comuna, ciudad, region
+          ),
+          trabajos (
+            id, nombre_trabajo, descripcion, estado
+          ),
+          presupuestos (
+            id, estado, total, validez_dias, created_at
+          ),
+          comunicaciones (
+            id, tipo, asunto, mensaje, created_at
+          ),
+          informes_finales (
+            id, created_at, firma_cliente, observaciones
+          ),
+          ot_estado_logs (
+            id, estado_anterior, estado_nuevo, cambio_realizado_por, created_at
+          ),
+          asignaciones_ot (
+            id, personal_id, rol_en_ot, horario_inicio, horario_fin
           )
         `)
         .eq("id", id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       return data;
