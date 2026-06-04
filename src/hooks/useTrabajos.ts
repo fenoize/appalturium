@@ -15,6 +15,7 @@ export interface Trabajo {
   fecha_inicio_estimada: string | null;
   fecha_fin_estimada: string | null;
   estado: EstadoTrabajo;
+  origen?: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
