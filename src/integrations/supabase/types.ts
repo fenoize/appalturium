@@ -1717,6 +1717,64 @@ export type Database = {
         }
         Relationships: []
       }
+      planes_mantenimiento: {
+        Row: {
+          activo: boolean
+          created_at: string
+          equipo_id: string
+          frecuencia: string
+          id: string
+          notas: string | null
+          proxima_fecha: string
+          ultimo_ot_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          activo?: boolean
+          created_at?: string
+          equipo_id: string
+          frecuencia: string
+          id?: string
+          notas?: string | null
+          proxima_fecha: string
+          ultimo_ot_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          activo?: boolean
+          created_at?: string
+          equipo_id?: string
+          frecuencia?: string
+          id?: string
+          notas?: string | null
+          proxima_fecha?: string
+          ultimo_ot_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "planes_mantenimiento_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: true
+            referencedRelation: "equipos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "planes_mantenimiento_ultimo_ot_id_fkey"
+            columns: ["ultimo_ot_id"]
+            isOneToOne: false
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "planes_mantenimiento_ultimo_ot_id_fkey"
+            columns: ["ultimo_ot_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       plantillas_email: {
         Row: {
           activa: boolean | null
@@ -2541,6 +2599,7 @@ export type Database = {
           id: string
           nombre_trabajo: string
           oportunidad_id: string | null
+          origen: string
           tipo_trabajo: Database["public"]["Enums"]["tipo_trabajo"]
           updated_at: string
         }
@@ -2555,6 +2614,7 @@ export type Database = {
           id?: string
           nombre_trabajo: string
           oportunidad_id?: string | null
+          origen?: string
           tipo_trabajo?: Database["public"]["Enums"]["tipo_trabajo"]
           updated_at?: string
         }
@@ -2569,6 +2629,7 @@ export type Database = {
           id?: string
           nombre_trabajo?: string
           oportunidad_id?: string | null
+          origen?: string
           tipo_trabajo?: Database["public"]["Enums"]["tipo_trabajo"]
           updated_at?: string
         }
