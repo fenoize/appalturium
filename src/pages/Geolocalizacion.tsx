@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MapaTecnicos } from "@/components/geolocalizacion/MapaTecnicos";
 import { BotonesEstadoPersonal } from "@/components/geolocalizacion/BotonesEstadoPersonal";
 import { TecnicosCercanos } from "@/components/geolocalizacion/TecnicosCercanos";
 import { useOrdenesServicio } from "@/hooks/useOrdenesServicio";
+import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import {
   Select,
   SelectContent,
@@ -16,7 +17,9 @@ import {
 
 export default function Geolocalizacion() {
   const [otSeleccionada, setOtSeleccionada] = useState<string>("");
-  const { data: ordenesResp } = useOrdenesServicio({ estado: "scheduled" });
+  const [estadoFiltro, setEstadoFiltro] = useState<string>("scheduled");
+  const { data: estadosOT } = useParametrosSistema("service_statuses");
+  const { data: ordenesResp } = useOrdenesServicio({ estado: estadoFiltro });
   const ordenes = ordenesResp?.data;
 
   const ordenSeleccionada = ordenes?.find((o) => o.id === otSeleccionada);
@@ -38,7 +41,26 @@ export default function Geolocalizacion() {
         </TabsList>
 
         <TabsContent value="mapa" className="space-y-6">
-          <MapaTecnicos />
+          <Card>
+            <CardContent className="pt-6">
+              <div className="space-y-2 max-w-xs">
+                <Label>Filtrar OTs por estado</Label>
+                <Select value={estadoFiltro} onValueChange={setEstadoFiltro}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {estadosOT?.map((estado) => (
+                      <SelectItem key={estado.key} value={estado.key}>
+                        {estado.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+          <MapaTecnicos estadoFiltro={estadoFiltro} />
         </TabsContent>
 
         <TabsContent value="personal" className="space-y-6">

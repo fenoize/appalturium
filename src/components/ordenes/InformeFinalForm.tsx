@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eraser, MapPin, Save } from "lucide-react";
+import { Eraser, MapPin, Save, Info } from "lucide-react";
 
 interface InformeFinalFormProps {
   otId: string;
@@ -25,6 +26,8 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
     lng: null,
   });
   const [yaExiste, setYaExiste] = useState(false);
+  const [firmaPreviaUrl, setFirmaPreviaUrl] = useState<string | null>(null);
+  const [mantenerFirma, setMantenerFirma] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -39,8 +42,9 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         setRecomendaciones(data.recomendaciones ?? "");
         setObservaciones(data.observaciones_cliente ?? "");
         setCoords({ lat: data.geocierre_lat as any, lng: data.geocierre_lng as any });
-        if (data.firma_cliente && sigRef.current) {
-          // intencionalmente no precargamos la firma en el canvas
+        if (data.firma_cliente) {
+          setFirmaPreviaUrl(data.firma_cliente);
+          setMantenerFirma(true);
         }
       }
     })();
@@ -67,12 +71,14 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
     return new Blob([arr], { type: mime });
   };
 
+  const usandoFirmaPrevia = yaExiste && firmaPreviaUrl && mantenerFirma;
+
   const handleGuardar = async () => {
     if (!resumen.trim()) {
       toast.error("El resumen técnico es obligatorio");
       return;
     }
-    if (!sigRef.current || sigRef.current.isEmpty()) {
+    if (!usandoFirmaPrevia && (!sigRef.current || sigRef.current.isEmpty())) {
       toast.error("La firma del cliente es obligatoria");
       return;
     }
@@ -82,23 +88,24 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
-      // 1) Subir firma a Storage
-      const dataUrl = sigRef.current.getCanvas().toDataURL("image/png");
-      const blob = dataURLtoBlob(dataUrl);
-      const path = `${otId}/${Date.now()}.png`;
-      const { error: upErr } = await supabase.storage
-        .from("firmas")
-        .upload(path, blob, { contentType: "image/png", upsert: true });
-      if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("firmas").getPublicUrl(path);
-      const firmaUrl = pub.publicUrl;
+      let firmaUrl = firmaPreviaUrl;
 
-      // 2) Capturar geolocalización
+      if (!usandoFirmaPrevia) {
+        const dataUrl = sigRef.current!.getCanvas().toDataURL("image/png");
+        const blob = dataURLtoBlob(dataUrl);
+        const path = `${otId}/${Date.now()}.png`;
+        const { error: upErr } = await supabase.storage
+          .from("firmas")
+          .upload(path, blob, { contentType: "image/png", upsert: true });
+        if (upErr) throw upErr;
+        const { data: pub } = supabase.storage.from("firmas").getPublicUrl(path);
+        firmaUrl = pub.publicUrl;
+      }
+
       const geo = await obtenerUbicacion();
       if (geo) setCoords(geo);
-      else toast.warning("No se pudo obtener la ubicación");
+      else if (!yaExiste) toast.warning("No se pudo obtener la ubicación");
 
-      // 3) Persistir informe
       const payload: any = {
         ot_id: otId,
         resumen_tecnico: resumen,
@@ -106,10 +113,17 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         observaciones_cliente: observaciones || null,
         firma_cliente: firmaUrl,
         responsable_personal_id: user.id,
-        geocierre_lat: geo?.lat ?? null,
-        geocierre_lng: geo?.lng ?? null,
-        geocierre_timestamp: geo ? new Date().toISOString() : null,
       };
+
+      if (geo) {
+        payload.geocierre_lat = geo.lat;
+        payload.geocierre_lng = geo.lng;
+        payload.geocierre_timestamp = new Date().toISOString();
+      } else if (!yaExiste) {
+        payload.geocierre_lat = null;
+        payload.geocierre_lng = null;
+        payload.geocierre_timestamp = null;
+      }
 
       if (yaExiste) {
         const { error } = await supabase
@@ -123,7 +137,8 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         setYaExiste(true);
       }
 
-      toast.success("Informe final guardado");
+      if (firmaUrl) setFirmaPreviaUrl(firmaUrl);
+      toast.success(yaExiste ? "Informe actualizado" : "Informe final guardado");
       onSaved?.();
     } catch (err: any) {
       toast.error("Error al guardar informe", { description: err.message });
@@ -135,9 +150,18 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Informe Final</CardTitle>
+        <CardTitle>{yaExiste ? "Editar Informe Final" : "Informe Final"}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
+        {yaExiste && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              Estás editando un informe existente. Puedes mantener la firma previa o capturar una nueva.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="space-y-2">
           <Label htmlFor="resumen">Resumen técnico *</Label>
           <Textarea
@@ -172,21 +196,46 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label>Firma del cliente *</Label>
-            <Button type="button" variant="ghost" size="sm" onClick={limpiarFirma}>
-              <Eraser className="h-4 w-4 mr-2" />
-              Limpiar
-            </Button>
+            {!usandoFirmaPrevia && (
+              <Button type="button" variant="ghost" size="sm" onClick={limpiarFirma}>
+                <Eraser className="h-4 w-4 mr-2" />
+                Limpiar
+              </Button>
+            )}
           </div>
-          <div className="border rounded-md bg-background overflow-hidden">
-            <SignatureCanvas
-              ref={sigRef}
-              penColor="hsl(var(--foreground))"
-              canvasProps={{
-                className: "w-full touch-none",
-                style: { width: "100%", height: 200 },
-              }}
-            />
-          </div>
+
+          {yaExiste && firmaPreviaUrl && (
+            <div className="flex items-center justify-between rounded-md border p-3">
+              <div className="space-y-0.5">
+                <p className="text-sm font-medium">Mantener firma existente</p>
+                <p className="text-xs text-muted-foreground">
+                  Desactiva para capturar una nueva firma.
+                </p>
+              </div>
+              <Switch checked={mantenerFirma} onCheckedChange={setMantenerFirma} />
+            </div>
+          )}
+
+          {usandoFirmaPrevia ? (
+            <div className="border rounded-md bg-background p-3 flex items-center justify-center">
+              <img
+                src={firmaPreviaUrl!}
+                alt="Firma del cliente registrada"
+                className="max-h-48 object-contain"
+              />
+            </div>
+          ) : (
+            <div className="border rounded-md bg-background overflow-hidden">
+              <SignatureCanvas
+                ref={sigRef}
+                penColor="hsl(var(--foreground))"
+                canvasProps={{
+                  className: "w-full touch-none",
+                  style: { width: "100%", height: 200 },
+                }}
+              />
+            </div>
+          )}
         </div>
 
         {(coords.lat ?? null) !== null && (
@@ -199,7 +248,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         <div className="flex justify-end">
           <Button onClick={handleGuardar} disabled={guardando}>
             <Save className="h-4 w-4 mr-2" />
-            {guardando ? "Guardando..." : "Guardar informe"}
+            {guardando ? "Guardando..." : yaExiste ? "Actualizar informe" : "Guardar informe"}
           </Button>
         </div>
       </CardContent>
