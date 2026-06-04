@@ -196,6 +196,8 @@ export function useCrearCotizacion() {
       const totales = calcularTotalesCotizacion(data.items, ivaPct);
       const token = generateToken();
       const fechaEmision = data.cotizacion.fecha_emision || new Date().toISOString();
+      const validezDias = data.cotizacion.validez_dias || 30;
+
 
       const fechaVencimiento = new Date(fechaEmision);
       fechaVencimiento.setDate(fechaVencimiento.getDate() + validezDias);
