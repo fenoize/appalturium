@@ -28,8 +28,10 @@ import {
   Mail,
   Link,
   ClipboardList,
-  Edit
+  Edit,
+  Download
 } from "lucide-react";
+import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -176,7 +178,29 @@ export default function CotizacionDetalle() {
           </div>
         </div>
         
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
+          <Button
+            variant="outline"
+            onClick={() =>
+              generarCotizacionPDF({
+                numero: cotizacion.numero,
+                created_at: cotizacion.created_at,
+                estado: cotizacion.estado,
+                moneda: cotizacion.moneda as any,
+                subtotal: cotizacion.subtotal,
+                iva: cotizacion.impuestos,
+                total: cotizacion.total,
+                notas: cotizacion.notas,
+                condiciones: cotizacion.condiciones,
+                cliente: cotizacion.cliente as any,
+                items: cotizacion.items as any,
+              })
+            }
+          >
+            <Download className="h-4 w-4 mr-2" />
+            PDF
+          </Button>
+
           {/* Botón editar disponible hasta que se acepte */}
           {(cotizacion.estado === 'borrador' || cotizacion.estado === 'en_revision') && (
             <Button variant="outline" onClick={() => navigate(`/cotizaciones/${cotizacion.id}/editar`)}>

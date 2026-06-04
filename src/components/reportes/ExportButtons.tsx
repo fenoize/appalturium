@@ -4,6 +4,8 @@ import { KPIData } from "@/hooks/useReportes";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 interface ExportButtonsProps {
   data: KPIData[];
@@ -103,9 +105,65 @@ export function ExportButtons({ data }: ExportButtonsProps) {
   };
 
   const exportToPDF = () => {
+    if (data.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Sin datos",
+        description: "No hay datos para exportar",
+      });
+      return;
+    }
+
+    const doc = new jsPDF({ unit: "pt", format: "a4", orientation: "landscape" });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Reporte de KPIs - Órdenes de Servicio", 40, 40);
+    doc.setFontSize(9);
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(120);
+    doc.text(
+      `Generado: ${format(new Date(), "dd/MM/yyyy HH:mm", { locale: es })}`,
+      40,
+      56
+    );
+    doc.setTextColor(0);
+
+    autoTable(doc, {
+      startY: 75,
+      head: [["OT", "Fecha", "Cliente", "Tipo", "TTR", "TTS", "Cumpl.", "Facturado", "Margen"]],
+      body: data.map((row) => [
+        row.ot_numero,
+        format(new Date(row.fecha_creacion), "dd/MM/yy"),
+        (row.cliente_razon_social || row.cliente_nombre || "N/A").slice(0, 30),
+        row.tipo_trabajo,
+        formatMinutes(row.tiempo_respuesta_min),
+        formatMinutes(row.tiempo_servicio_min),
+        getSemaforoLabel(row.semaforo),
+        `$${(row.facturado || 0).toLocaleString("es-CL")}`,
+        `$${(row.margen || 0).toLocaleString("es-CL")}`,
+      ]),
+      styles: { fontSize: 8, cellPadding: 4 },
+      headStyles: { fillColor: [30, 41, 59], textColor: 255 },
+      margin: { left: 40, right: 40 },
+    });
+
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text(
+      "Alturium · desarrollado por diegoulloa.cl",
+      pageWidth / 2,
+      pageHeight - 20,
+      { align: "center" }
+    );
+
+    doc.save(`reporte_kpis_${format(new Date(), "yyyy-MM-dd_HHmm")}.pdf`);
+
     toast({
-      title: "Función en desarrollo",
-      description: "La exportación a PDF estará disponible próximamente",
+      title: "Exportado exitosamente",
+      description: `Se exportaron ${data.length} registros a PDF`,
     });
   };
 
@@ -115,7 +173,7 @@ export function ExportButtons({ data }: ExportButtonsProps) {
         <Download className="w-4 h-4 mr-2" />
         Exportar CSV
       </Button>
-      <Button onClick={exportToPDF} variant="outline" size="sm" disabled>
+      <Button onClick={exportToPDF} variant="outline" size="sm">
         <FileText className="w-4 h-4 mr-2" />
         Exportar PDF
       </Button>
