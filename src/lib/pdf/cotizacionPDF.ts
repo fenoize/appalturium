@@ -17,7 +17,7 @@ interface CotizacionPDFInput {
   numero: string;
   created_at: string;
   estado: string;
-  moneda: string;
+  moneda: "CLP" | "UF" | "USD";
   subtotal?: number | null;
   iva?: number | null;
   total: number;
