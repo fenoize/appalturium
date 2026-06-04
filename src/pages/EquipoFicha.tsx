@@ -22,6 +22,7 @@ import { EquipoQRCode } from "@/components/equipos/EquipoQRCode";
 import { EquipoMovimientos } from "@/components/equipos/EquipoMovimientos";
 import { EquipoIntervenciones } from "@/components/equipos/EquipoIntervenciones";
 import { EquipoMateriales } from "@/components/equipos/EquipoMateriales";
+import { PlanMantenimientoCard } from "@/components/equipos/PlanMantenimientoCard";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 const estadoColors: Record<string, string> = {
@@ -230,13 +231,14 @@ export default function EquipoFicha() {
           </Tabs>
         </div>
 
-        {/* Columna lateral - QR */}
+        {/* Columna lateral */}
         <div className="space-y-6">
           <EquipoQRCode
             codigo={equipo.codigo_qr}
             marca={equipo.marca}
             modelo={equipo.modelo}
           />
+          <PlanMantenimientoCard equipoId={equipo.id} />
         </div>
       </div>
     </div>
