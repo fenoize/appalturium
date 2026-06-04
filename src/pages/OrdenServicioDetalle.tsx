@@ -80,15 +80,8 @@ export default function OrdenServicioDetalle() {
         .eq("id", ordenServicio.id);
       if (updError) throw updError;
 
-      const { error: logError } = await supabase
-        .from("ot_estado_logs")
-        .insert({
-          ot_id: ordenServicio.id,
-          estado_anterior: estadoAnterior,
-          estado_nuevo: nuevoEstado,
-          cambio_realizado_por: user.id,
-        });
-      if (logError) throw logError;
+      // El log de cambio de estado lo inserta automáticamente el trigger
+      // `ot_log_cambio_estado` en la base de datos. No insertar aquí para evitar duplicados.
 
       await queryClient.invalidateQueries({ queryKey: ["orden_servicio_detalle", ordenServicio.id] });
       await queryClient.invalidateQueries({ queryKey: ["ordenes_servicio"] });

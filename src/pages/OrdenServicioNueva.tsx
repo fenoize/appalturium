@@ -204,7 +204,7 @@ export default function OrdenServicioNueva() {
   const puedeAvanzar = () => {
     switch (paso) {
       case 1: return formData.cliente_id !== "";
-      case 2: return formData.trabajo_id !== "";
+      case 2: return true; // trabajo opcional
       case 3: return formData.ubicacion_id !== "";
       case 4: return formData.tipo_trabajo !== "" && formData.descripcion !== "";
       default: return false;
@@ -238,7 +238,7 @@ export default function OrdenServicioNueva() {
           </CardTitle>
           <CardDescription>
             {paso === 1 && "Elige el cliente para esta orden de servicio"}
-            {paso === 2 && "Selecciona el trabajo asociado (requerido)"}
+            {paso === 2 && "Asocia un trabajo existente (opcional)"}
             {paso === 3 && "Selecciona la ubicación donde se realizará el servicio"}
             {paso === 4 && "Describe el trabajo, fechas y costos. Asocia a un proyecto si aplica."}
           </CardDescription>
@@ -267,16 +267,20 @@ export default function OrdenServicioNueva() {
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Una OT debe estar asociada a un Trabajo existente. El trabajo representa el acuerdo comercial con el cliente.
+                  Puedes asociar esta OT a un Trabajo existente o continuar sin asociar uno. Este paso es opcional.
                 </AlertDescription>
               </Alert>
               <div className="space-y-2">
-                <Label htmlFor="trabajo">Trabajo *</Label>
-                <Select value={formData.trabajo_id} onValueChange={(value) => handleChange("trabajo_id", value)}>
+                <Label htmlFor="trabajo">Trabajo (opcional)</Label>
+                <Select
+                  value={formData.trabajo_id || "__none__"}
+                  onValueChange={(value) => handleChange("trabajo_id", value === "__none__" ? "" : value)}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder="Selecciona un trabajo" />
+                    <SelectValue placeholder="Sin trabajo asociado" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="__none__">Sin trabajo asociado</SelectItem>
                     {trabajos?.map((trabajo) => (
                       <SelectItem key={trabajo.id} value={trabajo.id}>
                         {trabajo.nombre_trabajo}

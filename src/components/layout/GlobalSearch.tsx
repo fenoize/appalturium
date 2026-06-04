@@ -51,66 +51,70 @@ export function GlobalSearch() {
     const q = query.trim();
     if (q.length < 2) {
       setResults(EMPTY);
+      setLoading(false);
       return;
     }
     let cancelled = false;
     setLoading(true);
     const like = `%${q}%`;
 
-    Promise.all([
-      supabase
-        .from("clientes")
-        .select("id, razon_social, nombres, apellidos, rut")
-        .or(`razon_social.ilike.${like},nombres.ilike.${like},rut.ilike.${like}`)
-        .limit(5),
-      supabase
-        .from("ordenes_servicio")
-        .select("id, numero, descripcion")
-        .or(`numero.ilike.${like},descripcion.ilike.${like}`)
-        .limit(5),
-      supabase
-        .from("cotizaciones")
-        .select("id, numero")
-        .ilike("numero", like)
-        .limit(5),
-      supabase
-        .from("equipos")
-        .select("id, codigo_qr, marca, modelo")
-        .or(`codigo_qr.ilike.${like},marca.ilike.${like},modelo.ilike.${like}`)
-        .limit(5),
-    ])
-      .then(([c, o, q2, e]) => {
-        if (cancelled) return;
-        setResults({
-          clientes: (c.data ?? []).map((r: any) => ({
-            id: r.id,
-            label: r.razon_social || [r.nombres, r.apellidos].filter(Boolean).join(" ") || r.rut,
-            sublabel: r.rut,
-            path: `/clientes/${r.id}`,
-          })),
-          ordenes: (o.data ?? []).map((r: any) => ({
-            id: r.id,
-            label: r.numero,
-            sublabel: r.descripcion,
-            path: `/ordenes-servicio/${r.id}`,
-          })),
-          cotizaciones: (q2.data ?? []).map((r: any) => ({
-            id: r.id,
-            label: r.numero,
-            path: `/cotizaciones/${r.id}`,
-          })),
-          equipos: (e.data ?? []).map((r: any) => ({
-            id: r.id,
-            label: r.codigo_qr,
-            sublabel: [r.marca, r.modelo].filter(Boolean).join(" "),
-            path: `/inventario/equipos/${r.id}`,
-          })),
-        });
-      })
-      .finally(() => !cancelled && setLoading(false));
+    const timeoutId = window.setTimeout(() => {
+      Promise.all([
+        supabase
+          .from("clientes")
+          .select("id, razon_social, nombres, apellidos, rut")
+          .or(`razon_social.ilike.${like},nombres.ilike.${like},rut.ilike.${like}`)
+          .limit(5),
+        supabase
+          .from("ordenes_servicio")
+          .select("id, numero, descripcion")
+          .or(`numero.ilike.${like},descripcion.ilike.${like}`)
+          .limit(5),
+        supabase
+          .from("cotizaciones")
+          .select("id, numero")
+          .ilike("numero", like)
+          .limit(5),
+        supabase
+          .from("equipos")
+          .select("id, codigo_qr, marca, modelo")
+          .or(`codigo_qr.ilike.${like},marca.ilike.${like},modelo.ilike.${like}`)
+          .limit(5),
+      ])
+        .then(([c, o, q2, e]) => {
+          if (cancelled) return;
+          setResults({
+            clientes: (c.data ?? []).map((r: any) => ({
+              id: r.id,
+              label: r.razon_social || [r.nombres, r.apellidos].filter(Boolean).join(" ") || r.rut,
+              sublabel: r.rut,
+              path: `/clientes/${r.id}`,
+            })),
+            ordenes: (o.data ?? []).map((r: any) => ({
+              id: r.id,
+              label: r.numero,
+              sublabel: r.descripcion,
+              path: `/ordenes-servicio/${r.id}`,
+            })),
+            cotizaciones: (q2.data ?? []).map((r: any) => ({
+              id: r.id,
+              label: r.numero,
+              path: `/cotizaciones/${r.id}`,
+            })),
+            equipos: (e.data ?? []).map((r: any) => ({
+              id: r.id,
+              label: r.codigo_qr,
+              sublabel: [r.marca, r.modelo].filter(Boolean).join(" "),
+              path: `/inventario/equipos/${r.id}`,
+            })),
+          });
+        })
+        .finally(() => !cancelled && setLoading(false));
+    }, 300);
 
     return () => {
       cancelled = true;
+      clearTimeout(timeoutId);
     };
   }, [query]);
 
