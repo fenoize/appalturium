@@ -16,6 +16,8 @@ import { CheckCircle, XCircle, Clock, FileText, AlertCircle } from "lucide-react
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+const FUNCTIONS_BASE = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1`;
+
 type TipoMoneda = "CLP" | "UF" | "USD";
 
 interface CotizacionPublica {
@@ -71,34 +73,25 @@ export default function CotizacionPublica() {
     }
 
     try {
-      // Buscar cotización por token
-      const { data: cot, error: cotError } = await supabase
-        .from("cotizaciones")
-        .select(`
-          id, numero, fecha_emision, fecha_vencimiento, estado, moneda,
-          subtotal, impuestos, total, notas, condiciones,
-          cliente:clientes(razon_social, nombres, apellidos, tipo)
-        `)
-        .eq("token_acceso", token)
-        .maybeSingle();
-
-      if (cotError) throw cotError;
-      if (!cot) {
-        setError("Cotización no encontrada o enlace inválido");
+      // Acceso público controlado: la edge function valida el token con service_role
+      // y devuelve cotización + items. El cliente nunca accede a la tabla directamente.
+      const resp = await fetch(
+        `${FUNCTIONS_BASE}/respond-cotizacion?token=${encodeURIComponent(token)}`,
+        {
+          method: "GET",
+          headers: {
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+        },
+      );
+      const body = await resp.json();
+      if (!resp.ok) {
+        setError(body?.error || "Cotización no encontrada o enlace inválido");
         setLoading(false);
         return;
       }
-
-      // Cargar items
-      const { data: items, error: itemsError } = await supabase
-        .from("cotizacion_items")
-        .select("descripcion, cantidad, precio_unitario, descuento_pct, subtotal, tipo")
-        .eq("cotizacion_id", cot.id)
-        .order("orden");
-
-      if (itemsError) throw itemsError;
-
-      setCotizacion({ ...cot, items: items || [] } as CotizacionPublica);
+      setCotizacion(body as CotizacionPublica);
     } catch (err: any) {
       setError(err.message || "Error al cargar la cotización");
     } finally {
