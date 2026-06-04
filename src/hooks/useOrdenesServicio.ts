@@ -120,7 +120,7 @@ export function useCrearOrdenServicio() {
 
       const { data, error } = await supabase
         .from("ordenes_servicio")
-        .insert([{ 
+        .insert([{
           cliente_id: nuevaOT.cliente_id,
           ubicacion_id: nuevaOT.ubicacion_id,
           trabajo_id: nuevaOT.trabajo_id || null,
@@ -134,11 +134,12 @@ export function useCrearOrdenServicio() {
           fecha_programada_inicio: nuevaOT.fecha_programada_inicio,
           fecha_programada_fin: nuevaOT.fecha_programada_fin,
           costos_estimado: nuevaOT.costos_estimado,
-          created_by_user_id: user.id, 
-          numero: '' 
-        }])
+          created_by_user_id: user.id,
+          // numero lo asigna el trigger auto_generar_numero_ot
+        } as any])
         .select()
         .single();
+
 
       if (error) throw error;
       return data;
