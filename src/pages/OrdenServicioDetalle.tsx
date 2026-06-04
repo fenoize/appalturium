@@ -42,6 +42,7 @@ import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -289,13 +290,7 @@ export default function OrdenServicioDetalle() {
 
         {/* Tab: Asignaciones */}
         <TabsContent value="asignaciones">
-          <Card>
-            <CardContent className="pt-6">
-              <p className="text-muted-foreground text-center py-8">
-                Funcionalidad de asignaciones disponible próximamente
-              </p>
-            </CardContent>
-          </Card>
+          <AsignacionesPanel otId={id!} />
         </TabsContent>
 
         {/* Tab: Presupuesto */}
