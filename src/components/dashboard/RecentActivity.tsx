@@ -48,7 +48,7 @@ export function RecentActivity() {
       supabase.from("ot_estado_logs").select("id, ot_id, estado_nuevo, created_at, ordenes_servicio(numero)").order("created_at", { ascending: false }).limit(5),
       supabase.from("cotizaciones").select("id, numero, estado, created_at").order("created_at", { ascending: false }).limit(5),
       supabase.from("documentos_venta").select("id, numero, tipo, total, created_at").order("created_at", { ascending: false }).limit(5),
-      supabase.from("clientes").select("id, razon_social, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("clientes").select("id, tipo, razon_social, nombres, apellidos, created_at").order("created_at", { ascending: false }).limit(5),
     ]);
 
     const merged: ActivityItem[] = [];
