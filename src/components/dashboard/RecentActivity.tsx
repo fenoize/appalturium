@@ -89,14 +89,19 @@ export function RecentActivity() {
       status: "info",
     }));
 
-    clis.data?.forEach((c: any) => merged.push({
-      id: `cli-${c.id}`,
-      type: "cliente",
-      title: `Nuevo cliente: ${c.razon_social}`,
-      description: "Cliente registrado",
-      createdAt: c.created_at,
-      status: "info",
-    }));
+    clis.data?.forEach((c: any) => {
+      const nombre = c.tipo === "empresa"
+        ? (c.razon_social || "Sin nombre")
+        : [c.nombres, c.apellidos].filter(Boolean).join(" ") || "Sin nombre";
+      merged.push({
+        id: `cli-${c.id}`,
+        type: "cliente",
+        title: `Nuevo cliente: ${nombre}`,
+        description: "Cliente registrado",
+        createdAt: c.created_at,
+        status: "info",
+      });
+    });
 
     merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     setItems(merged.slice(0, 8));
