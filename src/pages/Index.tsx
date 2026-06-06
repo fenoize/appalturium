@@ -31,12 +31,6 @@ const Index = () => {
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <div className="bg-gradient-primary rounded-xl p-6 text-primary-foreground">
-          <h1 className="text-3xl font-bold mb-2">¡Bienvenido al Sistema ALTURIUM!</h1>
-          <p className="text-primary-foreground/80">
-            Gestiona eficientemente tu negocio de climatización y energía fotovoltaica
-          </p>
-        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[...Array(8)].map((_, i) => (
             <Skeleton key={i} className="h-32 rounded-xl" />
