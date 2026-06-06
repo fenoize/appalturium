@@ -1,54 +1,123 @@
-import { Clock, CheckCircle, AlertCircle, Calendar } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Clock, CheckCircle, AlertCircle, Calendar, FileText, Receipt, UserPlus } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
-const recentActivities = [
-  {
-    id: 1,
-    type: "contract",
-    title: "Contrato firmado - Hotel Plaza",
-    description: "Sistema de climatización para 50 habitaciones",
-    time: "Hace 2 horas",
-    status: "completed",
-    icon: CheckCircle
-  },
-  {
-    id: 2,
-    type: "project",
-    title: "Instalación programada",
-    description: "Paneles solares - Edificio Comercial Norte",
-    time: "Hace 4 horas",
-    status: "scheduled",
-    icon: Calendar
-  },
-  {
-    id: 3,
-    type: "maintenance",
-    title: "Mantención pendiente",
-    description: "Revisión trimestral - Centro Comercial Sur",
-    time: "Hace 6 horas",
-    status: "pending",
-    icon: AlertCircle
-  },
-  {
-    id: 4,
-    type: "inventory",
-    title: "Stock bajo - Bombas de calor",
-    description: "Quedan 3 unidades en inventario",
-    time: "Hace 8 horas",
-    status: "warning",
-    icon: AlertCircle
-  }
-];
+type ActivityItem = {
+  id: string;
+  type: "ot" | "ot_estado" | "cotizacion" | "documento" | "cliente";
+  title: string;
+  description: string;
+  createdAt: string;
+  status: "completed" | "scheduled" | "pending" | "warning" | "info";
+};
 
 const statusConfig = {
   completed: { color: "success", label: "Completado" },
   scheduled: { color: "primary", label: "Programado" },
   pending: { color: "warning", label: "Pendiente" },
-  warning: { color: "destructive", label: "Atención" }
+  warning: { color: "destructive", label: "Atención" },
+  info: { color: "secondary", label: "Info" },
 };
 
+const iconByType = {
+  ot: Calendar,
+  ot_estado: CheckCircle,
+  cotizacion: FileText,
+  documento: Receipt,
+  cliente: UserPlus,
+} as const;
+
+function mapOtEstado(estado: string): ActivityItem["status"] {
+  if (["completed", "closed"].includes(estado)) return "completed";
+  if (["in_progress", "assigned"].includes(estado)) return "scheduled";
+  if (estado === "cancelled") return "warning";
+  return "pending";
+}
+
 export function RecentActivity() {
+  const [items, setItems] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    const [ots, logs, cots, docs, clis] = await Promise.all([
+      supabase.from("ordenes_servicio").select("id, numero, tipo_trabajo, estado, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("ot_estado_logs").select("id, ot_id, estado_nuevo, created_at, ordenes_servicio(numero)").order("created_at", { ascending: false }).limit(5),
+      supabase.from("cotizaciones").select("id, numero, estado, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("documentos_venta").select("id, numero, tipo, total, created_at").order("created_at", { ascending: false }).limit(5),
+      supabase.from("clientes").select("id, razon_social, created_at").order("created_at", { ascending: false }).limit(5),
+    ]);
+
+    const merged: ActivityItem[] = [];
+
+    ots.data?.forEach((o: any) => merged.push({
+      id: `ot-${o.id}`,
+      type: "ot",
+      title: `OT ${o.numero} creada`,
+      description: o.tipo_trabajo || "Nueva orden de servicio",
+      createdAt: o.created_at,
+      status: mapOtEstado(o.estado),
+    }));
+
+    logs.data?.forEach((l: any) => merged.push({
+      id: `log-${l.id}`,
+      type: "ot_estado",
+      title: `OT ${l.ordenes_servicio?.numero ?? ""} → ${l.estado_nuevo}`,
+      description: "Cambio de estado",
+      createdAt: l.created_at,
+      status: mapOtEstado(l.estado_nuevo),
+    }));
+
+    cots.data?.forEach((c: any) => merged.push({
+      id: `cot-${c.id}`,
+      type: "cotizacion",
+      title: `Cotización ${c.numero}`,
+      description: `Estado: ${c.estado}`,
+      createdAt: c.created_at,
+      status: c.estado === "aceptada" ? "completed" : c.estado === "rechazada" ? "warning" : "info",
+    }));
+
+    docs.data?.forEach((d: any) => merged.push({
+      id: `doc-${d.id}`,
+      type: "documento",
+      title: `${d.tipo?.toUpperCase()} ${d.numero}`,
+      description: `Total: $${Number(d.total).toLocaleString("es-CL")}`,
+      createdAt: d.created_at,
+      status: "info",
+    }));
+
+    clis.data?.forEach((c: any) => merged.push({
+      id: `cli-${c.id}`,
+      type: "cliente",
+      title: `Nuevo cliente: ${c.razon_social}`,
+      description: "Cliente registrado",
+      createdAt: c.created_at,
+      status: "info",
+    }));
+
+    merged.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    setItems(merged.slice(0, 8));
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    load();
+    const channel = supabase
+      .channel("dashboard-activity")
+      .on("postgres_changes", { event: "*", schema: "public", table: "ordenes_servicio" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "ot_estado_logs" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "cotizaciones" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "documentos_venta" }, () => load())
+      .on("postgres_changes", { event: "*", schema: "public", table: "clientes" }, () => load())
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [load]);
+
   return (
     <Card>
       <CardHeader>
@@ -58,10 +127,15 @@ export function RecentActivity() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {recentActivities.map((activity) => {
-          const Icon = activity.icon;
-          const status = statusConfig[activity.status as keyof typeof statusConfig];
-          
+        {loading && (
+          <p className="text-sm text-muted-foreground">Cargando actividad…</p>
+        )}
+        {!loading && items.length === 0 && (
+          <p className="text-sm text-muted-foreground">Sin actividad reciente.</p>
+        )}
+        {items.map((activity) => {
+          const Icon = iconByType[activity.type] ?? AlertCircle;
+          const status = statusConfig[activity.status];
           return (
             <div key={activity.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
               <div className="w-8 h-8 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0">
@@ -75,7 +149,9 @@ export function RecentActivity() {
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground mt-1">{activity.description}</p>
-                <p className="text-xs text-muted-foreground mt-2">{activity.time}</p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true, locale: es })}
+                </p>
               </div>
             </div>
           );
