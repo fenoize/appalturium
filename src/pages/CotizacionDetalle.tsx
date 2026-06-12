@@ -32,6 +32,7 @@ import {
   Download
 } from "lucide-react";
 import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
+import { PresupuestoInternoCard } from "@/components/cotizaciones/PresupuestoInternoCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -438,6 +439,14 @@ export default function CotizacionDetalle() {
               </Table>
             </CardContent>
           </Card>
+
+          {/* Presupuesto interno de costos */}
+          <PresupuestoInternoCard
+            cotizacionId={cotizacion.id}
+            cotizacionMoneda={cotizacion.moneda}
+            cotizacionSubtotal={cotizacion.subtotal}
+            readOnly={cotizacion.estado === 'rechazada'}
+          />
 
           {/* Notas */}
           {(cotizacion.notas || cotizacion.condiciones) && (

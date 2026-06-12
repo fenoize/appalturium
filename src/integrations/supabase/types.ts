@@ -1815,6 +1815,8 @@ export type Database = {
         Row: {
           aprobado_por_contacto_id: string | null
           aprobado_ts: string | null
+          costo_total: number | null
+          cotizacion_id: string | null
           created_at: string | null
           estado: Database["public"]["Enums"]["estado_presupuesto"]
           id: string
@@ -1822,9 +1824,12 @@ export type Database = {
           insumos: number
           items: Json
           mano_obra: number
+          margen_pct: number
           moneda: Database["public"]["Enums"]["tipo_moneda"]
-          ot_id: string
+          ot_id: string | null
+          otros_costos: number
           pdf_url: string | null
+          precio_venta_sugerido: number | null
           subtotal: number
           total: number
           updated_at: string | null
@@ -1833,6 +1838,8 @@ export type Database = {
         Insert: {
           aprobado_por_contacto_id?: string | null
           aprobado_ts?: string | null
+          costo_total?: number | null
+          cotizacion_id?: string | null
           created_at?: string | null
           estado?: Database["public"]["Enums"]["estado_presupuesto"]
           id?: string
@@ -1840,9 +1847,12 @@ export type Database = {
           insumos?: number
           items?: Json
           mano_obra?: number
+          margen_pct?: number
           moneda?: Database["public"]["Enums"]["tipo_moneda"]
-          ot_id: string
+          ot_id?: string | null
+          otros_costos?: number
           pdf_url?: string | null
+          precio_venta_sugerido?: number | null
           subtotal?: number
           total?: number
           updated_at?: string | null
@@ -1851,6 +1861,8 @@ export type Database = {
         Update: {
           aprobado_por_contacto_id?: string | null
           aprobado_ts?: string | null
+          costo_total?: number | null
+          cotizacion_id?: string | null
           created_at?: string | null
           estado?: Database["public"]["Enums"]["estado_presupuesto"]
           id?: string
@@ -1858,9 +1870,12 @@ export type Database = {
           insumos?: number
           items?: Json
           mano_obra?: number
+          margen_pct?: number
           moneda?: Database["public"]["Enums"]["tipo_moneda"]
-          ot_id?: string
+          ot_id?: string | null
+          otros_costos?: number
           pdf_url?: string | null
+          precio_venta_sugerido?: number | null
           subtotal?: number
           total?: number
           updated_at?: string | null
@@ -1872,6 +1887,13 @@ export type Database = {
             columns: ["aprobado_por_contacto_id"]
             isOneToOne: false
             referencedRelation: "contactos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuestos_cotizacion_id_fkey"
+            columns: ["cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "cotizaciones"
             referencedColumns: ["id"]
           },
           {
