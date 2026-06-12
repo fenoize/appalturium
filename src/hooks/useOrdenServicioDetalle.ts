@@ -27,10 +27,10 @@ export function useOrdenServicioDetalle(id: string) {
             id, estado, total, validez_dias, created_at
           ),
           comunicaciones (
-            id, tipo, asunto, mensaje, created_at
+            id, canal, resumen, fecha, created_at
           ),
           informes_finales (
-            id, created_at, firma_cliente, observaciones
+            id, created_at, firma_cliente, observaciones_cliente
           ),
           ot_estado_logs (
             id, estado_anterior, estado_nuevo, cambio_realizado_por, created_at
