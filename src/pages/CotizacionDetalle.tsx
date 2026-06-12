@@ -32,6 +32,7 @@ import {
   Download
 } from "lucide-react";
 import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
+import { PresupuestoInternoCard } from "@/components/cotizaciones/PresupuestoInternoCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
