@@ -440,6 +440,14 @@ export default function CotizacionDetalle() {
             </CardContent>
           </Card>
 
+          {/* Presupuesto interno de costos */}
+          <PresupuestoInternoCard
+            cotizacionId={cotizacion.id}
+            cotizacionMoneda={cotizacion.moneda}
+            cotizacionSubtotal={cotizacion.subtotal}
+            readOnly={cotizacion.estado === 'rechazada'}
+          />
+
           {/* Notas */}
           {(cotizacion.notas || cotizacion.condiciones) && (
             <Card>
