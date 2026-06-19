@@ -189,10 +189,6 @@ Deno.serve(async (req) => {
     };
   });
 
-  // Aplicar margen de la opción vigente sobre subtotales (proporcional)
-  const sumCosto = baseItems.reduce((s, x) => s + x.subtotal, 0) || 1;
-  const factor = Number(opcion.total) / (sumCosto * (1 + 0.19)); // aprox visual
-  // Mejor: no recalcular, mostrar el subtotal original; el total final viene de la opción.
 
   let grupos: Array<{ titulo: string; total: number; items?: any[] }> = [];
   if (formato === "categorias") {
