@@ -49,6 +49,7 @@ import EquipoNuevo from "./pages/EquipoNuevo";
 import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
 import EquipoPublico from "./pages/EquipoPublico";
+import CierreAdministrativo from "./pages/CierreAdministrativo";
 import NotFound from "./pages/NotFound";
 import AccesoDenegado from "./pages/AccesoDenegado";
 import { RoleProtectedRoute } from "@/components/RoleProtectedRoute";
