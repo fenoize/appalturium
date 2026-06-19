@@ -143,84 +143,17 @@ export default function SolicitudesCompra() {
       if (!proveedorSeleccion || proveedorSeleccion === SIN_PROVEEDOR) {
         throw new Error("Todas las SC deben tener el mismo proveedor sugerido");
       }
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No autenticado");
-
-      // Aggregate items by inventario id summing cantidad and averaging cost
-      const agregados = new Map<
-        string,
-        { cantidad: number; precio_unitario: number; precios: number[] }
-      >();
-      selectedSCs.forEach((sc) => {
-        sc.items.forEach((it) => {
-          const cur = agregados.get(it.item_inventario_id) ?? {
-            cantidad: 0,
-            precio_unitario: 0,
-            precios: [],
-          };
-          cur.cantidad += Number(it.cantidad);
-          if (it.costo_unitario_estimado != null) {
-            cur.precios.push(Number(it.costo_unitario_estimado));
-          }
-          agregados.set(it.item_inventario_id, cur);
-        });
+      const { data, error } = await (supabase as any).rpc("fn_convertir_sc_a_oc", {
+        p_sc_ids: selectedSCs.map((sc) => sc.id),
+        p_proveedor_id: proveedorSeleccion,
       });
-
-      const items = Array.from(agregados.entries()).map(([item_id, v]) => {
-        const precio =
-          v.precios.length > 0 ? v.precios.reduce((a, b) => a + b, 0) / v.precios.length : 0;
-        return {
-          item_id,
-          cantidad_solicitada: v.cantidad,
-          precio_unitario: precio,
-          subtotal: v.cantidad * precio,
-        };
-      });
-
-      const subtotal = items.reduce((a, i) => a + i.subtotal, 0);
-      const impuestos = Math.round(subtotal * 0.19);
-      const total = subtotal + impuestos;
-
-      // Generate OC number via existing DB function
-      const { data: numData, error: numErr } = await (supabase as any).rpc("generar_numero_oc");
-      if (numErr) throw numErr;
-
-      const { data: oc, error: ocErr } = await supabase
-        .from("ordenes_compra")
-        .insert({
-          numero: numData as string,
-          proveedor_id: proveedorSeleccion,
-          subtotal,
-          impuestos,
-          total,
-          created_by: user.id,
-        })
-        .select()
-        .single();
-      if (ocErr) throw ocErr;
-
-      const { error: itemsErr } = await supabase
-        .from("items_orden_compra")
-        .insert(items.map((i) => ({ ...i, orden_id: oc.id })));
-      if (itemsErr) throw itemsErr;
-
-      const { error: bridgeErr } = await (supabase as any)
-        .from("oc_solicitudes_compra")
-        .insert(selectedSCs.map((sc) => ({ orden_compra_id: oc.id, solicitud_compra_id: sc.id })));
-      if (bridgeErr) throw bridgeErr;
-
-      const { error: updErr } = await (supabase as any)
-        .from("solicitudes_compra")
-        .update({ estado: "convertida_oc" })
-        .in("id", selectedSCs.map((sc) => sc.id));
-      if (updErr) throw updErr;
-
-      return oc;
+      if (error) throw error;
+      return data as string;
     },
-    onSuccess: (oc: any) => {
+    onSuccess: (ocId: string) => {
       toast({
         title: "Orden de compra generada",
-        description: `Se creó ${oc.numero} agrupando ${selectedSCs.length} SC`,
+        description: `Se creó la OC agrupando ${selectedSCs.length} SC`,
       });
       setSeleccion(new Set());
       qc.invalidateQueries({ queryKey: ["solicitudes_compra"] });
