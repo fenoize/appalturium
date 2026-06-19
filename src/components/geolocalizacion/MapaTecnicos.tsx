@@ -52,7 +52,7 @@ interface MapaTecnicosProps {
   estadoFiltro?: string;
 }
 
-export function MapaTecnicos({ estadoFiltro = "scheduled" }: MapaTecnicosProps) {
+export function MapaTecnicos({ estadoFiltro = "pendiente" }: MapaTecnicosProps) {
   const { data: ubicaciones, isLoading: loadingUbicaciones } = usePersonalUbicaciones();
   const { data: ordenesResp, isLoading: loadingOrdenes } = useOrdenesServicio({
     estado: estadoFiltro,
