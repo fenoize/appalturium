@@ -1810,6 +1810,54 @@ export type Database = {
         }
         Relationships: []
       }
+      plan_pagos: {
+        Row: {
+          created_at: string
+          documento_venta_id: string
+          estado: string
+          fecha_esperada: string | null
+          id: string
+          monto_esperado: number
+          numero_cuota: number
+          pago_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          documento_venta_id: string
+          estado?: string
+          fecha_esperada?: string | null
+          id?: string
+          monto_esperado: number
+          numero_cuota: number
+          pago_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          documento_venta_id?: string
+          estado?: string
+          fecha_esperada?: string | null
+          id?: string
+          monto_esperado?: number
+          numero_cuota?: number
+          pago_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "plan_pagos_documento_venta_id_fkey"
+            columns: ["documento_venta_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_venta"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "plan_pagos_pago_id_fkey"
+            columns: ["pago_id"]
+            isOneToOne: false
+            referencedRelation: "pagos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       planes_mantenimiento: {
         Row: {
           activo: boolean
