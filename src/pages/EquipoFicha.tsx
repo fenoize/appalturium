@@ -23,6 +23,7 @@ import { EquipoMovimientos } from "@/components/equipos/EquipoMovimientos";
 import { EquipoIntervenciones } from "@/components/equipos/EquipoIntervenciones";
 import { EquipoMateriales } from "@/components/equipos/EquipoMateriales";
 import { PlanMantenimientoCard } from "@/components/equipos/PlanMantenimientoCard";
+import { HistorialInformes } from "@/components/historial/HistorialInformes";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 const estadoColors: Record<string, string> = {
@@ -214,6 +215,7 @@ export default function EquipoFicha() {
               <TabsTrigger value="movimientos">Movimientos</TabsTrigger>
               <TabsTrigger value="intervenciones">Intervenciones</TabsTrigger>
               <TabsTrigger value="materiales">Materiales</TabsTrigger>
+              <TabsTrigger value="historial">Historial</TabsTrigger>
             </TabsList>
             <TabsContent value="movimientos" className="mt-4">
               <EquipoMovimientos
@@ -227,6 +229,9 @@ export default function EquipoFicha() {
             </TabsContent>
             <TabsContent value="materiales" className="mt-4">
               <EquipoMateriales equipoId={equipo.id} />
+            </TabsContent>
+            <TabsContent value="historial" className="mt-4">
+              <HistorialInformes equipoId={equipo.id} />
             </TabsContent>
           </Tabs>
         </div>

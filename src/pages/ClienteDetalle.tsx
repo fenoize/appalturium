@@ -11,6 +11,7 @@ import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDi
 import { CrearAccesoPortalDialog } from "@/components/clientes/CrearAccesoPortalDialog";
 import { TrabajosList } from "@/components/trabajos/TrabajosList";
 import { OrdenesServicioList } from "@/components/ordenes/OrdenesServicioList";
+import { HistorialInformes } from "@/components/historial/HistorialInformes";
 import { Trabajo } from "@/hooks/useTrabajos";
 import {
   AlertDialog,
@@ -311,7 +312,7 @@ export default function ClienteDetalle() {
       </div>
 
         <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="ubicaciones">Ubicaciones</TabsTrigger>
           <TabsTrigger value="contactos">Contactos</TabsTrigger>
@@ -319,6 +320,7 @@ export default function ClienteDetalle() {
           <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
           <TabsTrigger value="ordenes">Órdenes</TabsTrigger>
           <TabsTrigger value="trabajos">Trabajos</TabsTrigger>
+          <TabsTrigger value="historial">Historial</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
@@ -608,6 +610,10 @@ export default function ClienteDetalle() {
               navigate(`/proyectos?trabajo_id=${trabajo.id}&cliente_id=${trabajo.cliente_id}&nombre=${encodeURIComponent(trabajo.nombre_trabajo)}`);
             }} 
           />
+        </TabsContent>
+
+        <TabsContent value="historial" className="space-y-4">
+          <HistorialInformes clienteId={id!} />
         </TabsContent>
       </Tabs>
     </div>

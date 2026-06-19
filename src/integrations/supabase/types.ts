@@ -103,6 +103,67 @@ export type Database = {
           },
         ]
       }
+      cierres_ot: {
+        Row: {
+          cobro_final: number | null
+          conforme: boolean | null
+          created_at: string
+          documento_venta_id: string | null
+          fecha_revision: string
+          id: string
+          observaciones: string | null
+          ot_id: string
+          revisado_por: string
+          updated_at: string
+        }
+        Insert: {
+          cobro_final?: number | null
+          conforme?: boolean | null
+          created_at?: string
+          documento_venta_id?: string | null
+          fecha_revision?: string
+          id?: string
+          observaciones?: string | null
+          ot_id: string
+          revisado_por: string
+          updated_at?: string
+        }
+        Update: {
+          cobro_final?: number | null
+          conforme?: boolean | null
+          created_at?: string
+          documento_venta_id?: string | null
+          fecha_revision?: string
+          id?: string
+          observaciones?: string | null
+          ot_id?: string
+          revisado_por?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cierres_ot_documento_venta_id_fkey"
+            columns: ["documento_venta_id"]
+            isOneToOne: false
+            referencedRelation: "documentos_venta"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cierres_ot_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: true
+            referencedRelation: "kpis_reportes"
+            referencedColumns: ["ot_id"]
+          },
+          {
+            foreignKeyName: "cierres_ot_ot_id_fkey"
+            columns: ["ot_id"]
+            isOneToOne: true
+            referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       clientes: {
         Row: {
           actualizado_por_user_id: string | null
@@ -1091,7 +1152,10 @@ export type Database = {
       }
       informes_finales: {
         Row: {
+          cliente_id: string | null
           created_at: string | null
+          equipo_id: string | null
+          especificaciones_equipo: Json
           evidencias_urls: Json | null
           firma_cliente: string | null
           geocierre_lat: number | null
@@ -1110,7 +1174,10 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          cliente_id?: string | null
           created_at?: string | null
+          equipo_id?: string | null
+          especificaciones_equipo?: Json
           evidencias_urls?: Json | null
           firma_cliente?: string | null
           geocierre_lat?: number | null
@@ -1129,7 +1196,10 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          cliente_id?: string | null
           created_at?: string | null
+          equipo_id?: string | null
+          especificaciones_equipo?: Json
           evidencias_urls?: Json | null
           firma_cliente?: string | null
           geocierre_lat?: number | null
@@ -1148,6 +1218,20 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "informes_finales_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "informes_finales_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: false
+            referencedRelation: "equipos"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "informes_finales_ot_id_fkey"
             columns: ["ot_id"]

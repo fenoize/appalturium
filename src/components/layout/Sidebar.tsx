@@ -45,6 +45,11 @@ const navigationItems = [
     href: "/ordenes-servicio" 
   },
   { 
+    title: "Cierre administrativo", 
+    icon: CheckSquare, 
+    href: "/cierre-administrativo" 
+  },
+  { 
     title: "Solicitudes de Cotización", 
     icon: FileQuestion, 
     href: "/solicitudes-cotizacion" 
