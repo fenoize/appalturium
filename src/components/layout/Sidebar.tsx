@@ -19,7 +19,8 @@ import {
   GanttChart,
   Wrench,
   Building2,
-  Receipt
+  Receipt,
+  FileQuestion
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,11 @@ const navigationItems = [
     title: "Órdenes de Servicio", 
     icon: ClipboardList, 
     href: "/ordenes-servicio" 
+  },
+  { 
+    title: "Solicitudes de Cotización", 
+    icon: FileQuestion, 
+    href: "/solicitudes-cotizacion" 
   },
   { 
     title: "Cotizaciones", 

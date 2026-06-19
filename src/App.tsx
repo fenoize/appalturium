@@ -42,6 +42,7 @@ import CotizacionNueva from "./pages/CotizacionNueva";
 import CotizacionDetalle from "./pages/CotizacionDetalle";
 import CotizacionEditar from "./pages/CotizacionEditar";
 import CotizacionPublica from "./pages/CotizacionPublica";
+import SolicitudesCotizacion from "./pages/SolicitudesCotizacion";
 import EquipoNuevo from "./pages/EquipoNuevo";
 import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
@@ -135,6 +136,7 @@ const App = () => {
                           <Route path="/gantt" element={<AdminRoute><Gantt /></AdminRoute>} />
                           <Route path="/servicios" element={<AdminRoute><Servicios /></AdminRoute>} />
                           <Route path="/cotizaciones" element={<AdminRoute><Cotizaciones /></AdminRoute>} />
+                          <Route path="/solicitudes-cotizacion" element={<AdminRoute><SolicitudesCotizacion /></AdminRoute>} />
                           <Route path="/cotizaciones/nueva" element={<AdminRoute><CotizacionNueva /></AdminRoute>} />
                           <Route path="/cotizaciones/:id" element={<AdminRoute><CotizacionDetalle /></AdminRoute>} />
                           <Route path="/cotizaciones/:id/editar" element={<AdminRoute><CotizacionEditar /></AdminRoute>} />

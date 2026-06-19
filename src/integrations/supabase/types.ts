@@ -1830,6 +1830,7 @@ export type Database = {
           otros_costos: number
           pdf_url: string | null
           precio_venta_sugerido: number | null
+          solicitud_cotizacion_id: string | null
           subtotal: number
           total: number
           updated_at: string | null
@@ -1853,6 +1854,7 @@ export type Database = {
           otros_costos?: number
           pdf_url?: string | null
           precio_venta_sugerido?: number | null
+          solicitud_cotizacion_id?: string | null
           subtotal?: number
           total?: number
           updated_at?: string | null
@@ -1876,6 +1878,7 @@ export type Database = {
           otros_costos?: number
           pdf_url?: string | null
           precio_venta_sugerido?: number | null
+          solicitud_cotizacion_id?: string | null
           subtotal?: number
           total?: number
           updated_at?: string | null
@@ -1908,6 +1911,13 @@ export type Database = {
             columns: ["ot_id"]
             isOneToOne: true
             referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "presupuestos_solicitud_cotizacion_id_fkey"
+            columns: ["solicitud_cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "solicitudes_cotizacion"
             referencedColumns: ["id"]
           },
         ]
@@ -2311,6 +2321,69 @@ export type Database = {
             columns: ["proyecto_id"]
             isOneToOne: false
             referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      solicitudes_cotizacion: {
+        Row: {
+          archivos_adjuntos: Json
+          cliente_id: string
+          created_at: string
+          descripcion_necesidad: string
+          detalle_requerimiento: Json
+          ejecutivo_id: string
+          estado: string
+          fecha_visita_tecnica: string | null
+          id: string
+          numero: string
+          tipo_servicio: string | null
+          ubicacion_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          archivos_adjuntos?: Json
+          cliente_id: string
+          created_at?: string
+          descripcion_necesidad: string
+          detalle_requerimiento?: Json
+          ejecutivo_id: string
+          estado?: string
+          fecha_visita_tecnica?: string | null
+          id?: string
+          numero: string
+          tipo_servicio?: string | null
+          ubicacion_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          archivos_adjuntos?: Json
+          cliente_id?: string
+          created_at?: string
+          descripcion_necesidad?: string
+          detalle_requerimiento?: Json
+          ejecutivo_id?: string
+          estado?: string
+          fecha_visita_tecnica?: string | null
+          id?: string
+          numero?: string
+          tipo_servicio?: string | null
+          ubicacion_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitudes_cotizacion_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_cotizacion_ubicacion_id_fkey"
+            columns: ["ubicacion_id"]
+            isOneToOne: false
+            referencedRelation: "ubicaciones"
             referencedColumns: ["id"]
           },
         ]
@@ -2843,6 +2916,7 @@ export type Database = {
       }
       generar_numero_oc: { Args: never; Returns: string }
       generar_numero_ot: { Args: never; Returns: string }
+      generar_numero_solicitud_cotizacion: { Args: never; Returns: string }
       get_dashboard_metrics: { Args: never; Returns: Json }
       has_role: {
         Args: {
