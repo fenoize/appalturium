@@ -43,6 +43,11 @@ const navigationItems = [
     href: "/ordenes-servicio" 
   },
   { 
+    title: "Solicitudes de Cotización", 
+    icon: FileQuestion, 
+    href: "/solicitudes-cotizacion" 
+  },
+  { 
     title: "Cotizaciones", 
     icon: Receipt, 
     href: "/cotizaciones" 
