@@ -374,7 +374,19 @@ export default function OrdenServicioDetalle() {
                 <div key={documento.id} className="space-y-4">
                   <DocumentoVentaCard
                     documento={documento}
-                    onRegistrarPago={() => setDialogPago(documento.id)}
+                    onRegistrarPago={() => setDialogPago({ documentoId: documento.id })}
+                  />
+                  <PlanPagoCard
+                    documentoId={documento.id}
+                    moneda={documento.moneda}
+                    onRegistrarPagoCuota={(cuota) =>
+                      setDialogPago({
+                        documentoId: documento.id,
+                        cuotaId: cuota.id,
+                        numeroCuota: cuota.numero_cuota,
+                        monto: cuota.monto_esperado,
+                      })
+                    }
                   />
                   <ListaPagosDocumento documentoId={documento.id} />
                 </div>
@@ -429,11 +441,16 @@ export default function OrdenServicioDetalle() {
         <Dialog open={!!dialogPago} onOpenChange={() => setDialogPago(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Registrar Pago</DialogTitle>
+              <DialogTitle>
+                Registrar Pago
+                {dialogPago.numeroCuota ? ` — Cuota ${dialogPago.numeroCuota}` : ""}
+              </DialogTitle>
             </DialogHeader>
             <PagoForm
-              documento={documentos.find((d) => d.id === dialogPago)!}
-              onSubmit={(data) => handleRegistrarPago(dialogPago, data)}
+              documento={documentos.find((d) => d.id === dialogPago.documentoId)!}
+              defaultMonto={dialogPago.monto}
+              contexto={dialogPago.numeroCuota ? `Cuota ${dialogPago.numeroCuota}` : undefined}
+              onSubmit={(data) => handleRegistrarPago(dialogPago.documentoId, data, dialogPago.cuotaId)}
               onCancel={() => setDialogPago(null)}
             />
           </DialogContent>
