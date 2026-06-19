@@ -31,6 +31,7 @@ interface Props {
 export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionActualId }: Props) {
   const { data: opciones, isLoading } = useCotizacionOpciones(cotizacionId);
   const presentar = usePresentarOpcion();
+  const [aceptando, setAceptando] = useState<{ id: string; etiqueta: string; total: number } | null>(null);
 
   return (
     <Card>
