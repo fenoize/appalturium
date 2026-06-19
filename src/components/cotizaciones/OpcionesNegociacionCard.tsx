@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Send, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Send, CheckCircle, XCircle, Clock, CheckCircle2 } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import {
   useCotizacionOpciones,
@@ -9,6 +10,7 @@ import {
   type EstadoOpcion,
   type EtiquetaOpcion,
 } from "@/hooks/useCotizacionOpciones";
+import { AceptarOpcionDialog } from "./AceptarOpcionDialog";
 
 const ETIQUETAS: EtiquetaOpcion[] = ["A", "B", "C"];
 
@@ -29,6 +31,7 @@ interface Props {
 export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionActualId }: Props) {
   const { data: opciones, isLoading } = useCotizacionOpciones(cotizacionId);
   const presentar = usePresentarOpcion();
+  const [aceptando, setAceptando] = useState<{ id: string; etiqueta: string; total: number } | null>(null);
 
   return (
     <Card>
@@ -98,22 +101,44 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
                     </div>
                   </div>
 
-                  <Button
-                    className="w-full"
-                    size="sm"
-                    variant={op.estado === "presentada" ? "secondary" : "default"}
-                    disabled={presentar.isPending || op.estado === "aceptada" || op.estado === "rechazada"}
-                    onClick={() => presentar.mutate(op)}
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    {op.estado === "presentada" ? "Re-presentar" : "Presentar al cliente"}
-                  </Button>
+                  <div className="flex flex-col gap-2">
+                    <Button
+                      className="w-full"
+                      size="sm"
+                      variant={op.estado === "presentada" ? "secondary" : "default"}
+                      disabled={presentar.isPending || op.estado === "aceptada" || op.estado === "rechazada"}
+                      onClick={() => presentar.mutate(op)}
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      {op.estado === "presentada" ? "Re-presentar" : "Presentar al cliente"}
+                    </Button>
+                    <Button
+                      className="w-full"
+                      size="sm"
+                      variant="outline"
+                      disabled={op.estado === "aceptada" || op.estado === "rechazada" || op.estado === "descartada"}
+                      onClick={() => setAceptando({ id: op.id, etiqueta: op.etiqueta, total: Number(op.total) })}
+                    >
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      Aceptar manualmente
+                    </Button>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
       </CardContent>
+      {aceptando && (
+        <AceptarOpcionDialog
+          open={!!aceptando}
+          onOpenChange={(v) => !v && setAceptando(null)}
+          opcionId={aceptando.id}
+          etiqueta={aceptando.etiqueta}
+          total={aceptando.total}
+          moneda={moneda}
+        />
+      )}
     </Card>
   );
 }

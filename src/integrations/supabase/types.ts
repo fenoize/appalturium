@@ -3299,6 +3299,23 @@ export type Database = {
         Args: { tiempo_servicio_min: number; tipo_trabajo: string }
         Returns: string
       }
+      fn_aceptar_opcion: {
+        Args: {
+          p_montos?: number[]
+          p_num_cuotas?: number
+          p_opcion_id: string
+        }
+        Returns: Json
+      }
+      fn_convertir_sc_a_oc: {
+        Args: { p_proveedor_id: string; p_sc_ids: string[] }
+        Returns: string
+      }
+      fn_generar_opciones_cotizacion: {
+        Args: { p_cotizacion_id: string }
+        Returns: undefined
+      }
+      fn_obtener_iva_pct: { Args: never; Returns: number }
       generar_codigo_equipo: { Args: never; Returns: string }
       generar_numero_cotizacion: { Args: never; Returns: string }
       generar_numero_documento: {
