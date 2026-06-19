@@ -44,6 +44,7 @@ import CotizacionEditar from "./pages/CotizacionEditar";
 import CotizacionPublica from "./pages/CotizacionPublica";
 import SolicitudesCotizacion from "./pages/SolicitudesCotizacion";
 import CategoriasInventario from "./pages/CategoriasInventario";
+import SolicitudesCompra from "./pages/SolicitudesCompra";
 import EquipoNuevo from "./pages/EquipoNuevo";
 import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
@@ -133,6 +134,7 @@ const App = () => {
                           <Route path="/inventario/equipos/:id" element={<AdminRoute><EquipoFicha /></AdminRoute>} />
                           <Route path="/inventario/equipos/:id/editar" element={<AdminRoute><EquipoEditar /></AdminRoute>} />
                           <Route path="/proveedores" element={<AdminRoute><Proveedores /></AdminRoute>} />
+                          <Route path="/solicitudes-compra" element={<AdminRoute><SolicitudesCompra /></AdminRoute>} />
                           <Route path="/proyectos" element={<AdminRoute><Proyectos /></AdminRoute>} />
                           <Route path="/tareas" element={<AdminRoute><Tareas /></AdminRoute>} />
                           <Route path="/gantt" element={<AdminRoute><Gantt /></AdminRoute>} />
