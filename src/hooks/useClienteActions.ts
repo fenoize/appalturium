@@ -86,7 +86,7 @@ export function useSolicitarMantencion() {
           descripcion: datos.descripcion,
           prioridad: datos.prioridad as any,
           fecha_programada_inicio: datos.fecha_programada_inicio,
-          estado: "draft",
+          estado: "pendiente",
           created_by_user_id: user.id,
           numero: numeroOT as string,
         }])
