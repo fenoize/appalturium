@@ -100,6 +100,11 @@ const navigationItems = [
     href: "/proveedores" 
   },
   { 
+    title: "Solicitudes de Compra", 
+    icon: ShoppingCart, 
+    href: "/solicitudes-compra" 
+  },
+  { 
     title: "Servicios", 
     icon: Wrench, 
     href: "/servicios" 
