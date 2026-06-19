@@ -1,0 +1,335 @@
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
+import { CheckCircle2, FileText, ExternalLink, Receipt } from "lucide-react";
+import { formatCurrency } from "@/lib/formatCurrency";
+import { format } from "date-fns";
+import { es } from "date-fns/locale";
+
+interface OTPendiente {
+  id: string;
+  numero: string;
+  cliente_id: string | null;
+  descripcion: string | null;
+  updated_at: string;
+  clientes?: { razon_social: string | null } | null;
+  informe?: {
+    resumen_tecnico: string | null;
+    recomendaciones: string | null;
+    evidencias_urls: any;
+  } | null;
+}
+
+export default function CierreAdministrativo() {
+  const [ots, setOts] = useState<OTPendiente[] | null>(null);
+  const [forms, setForms] = useState<Record<string, { conforme: boolean; cobro: string; obs: string; generarDoc: boolean; tipoDoc: string }>>({});
+  const [guardando, setGuardando] = useState<string | null>(null);
+
+  const cargar = async () => {
+    setOts(null);
+    // OTs finalizadas
+    const { data: finalizadas } = await supabase
+      .from("ordenes_servicio")
+      .select("id, numero, cliente_id, descripcion, updated_at, clientes(razon_social)")
+      .eq("estado", "finalizado")
+      .order("updated_at", { ascending: false });
+
+    const ids = (finalizadas ?? []).map((o: any) => o.id);
+
+    // Filter out those with cierre already
+    const { data: cerradas } = await supabase
+      .from("cierres_ot")
+      .select("ot_id")
+      .in("ot_id", ids.length > 0 ? ids : ["00000000-0000-0000-0000-000000000000"]);
+    const cerradasSet = new Set((cerradas ?? []).map((c: any) => c.ot_id));
+
+    const pendientes = (finalizadas ?? []).filter((o: any) => !cerradasSet.has(o.id));
+
+    // Load informes for each
+    const { data: informes } = await supabase
+      .from("informes_finales")
+      .select("ot_id, resumen_tecnico, recomendaciones, evidencias_urls")
+      .in("ot_id", pendientes.map((o: any) => o.id).length > 0 ? pendientes.map((o: any) => o.id) : ["00000000-0000-0000-0000-000000000000"]);
+    const infMap = new Map<string, any>((informes ?? []).map((i: any) => [i.ot_id, i]));
+
+    const result: OTPendiente[] = pendientes.map((o: any) => ({
+      ...o,
+      informe: infMap.get(o.id) ?? null,
+    }));
+
+    setOts(result);
+
+    const defaults: typeof forms = {};
+    result.forEach((o) => {
+      defaults[o.id] = { conforme: true, cobro: "", obs: "", generarDoc: false, tipoDoc: "factura" };
+    });
+    setForms(defaults);
+  };
+
+  useEffect(() => { cargar(); }, []);
+
+  const updateForm = (otId: string, patch: Partial<typeof forms[string]>) => {
+    setForms((prev) => ({ ...prev, [otId]: { ...prev[otId], ...patch } }));
+  };
+
+  const handleCerrar = async (ot: OTPendiente) => {
+    const f = forms[ot.id];
+    if (!f) return;
+    const cobro = f.cobro ? Number(f.cobro) : null;
+    if (f.cobro && (isNaN(cobro!) || cobro! < 0)) {
+      toast.error("Cobro final inválido");
+      return;
+    }
+    if (f.generarDoc && !cobro) {
+      toast.error("Para generar documento debe ingresar un cobro final");
+      return;
+    }
+
+    setGuardando(ot.id);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error("No autenticado");
+
+      let documentoId: string | null = null;
+
+      if (f.generarDoc && cobro) {
+        // generar número
+        const { data: numero, error: errNum } = await supabase.rpc("generar_numero_documento", { _tipo: f.tipoDoc as any });
+        if (errNum) throw errNum;
+
+        const { data: doc, error: errDoc } = await supabase
+          .from("documentos_venta")
+          .insert({
+            ot_id: ot.id,
+            tipo: f.tipoDoc as any,
+            numero,
+            fecha: new Date().toISOString().split("T")[0],
+            total: cobro,
+            saldo: cobro,
+          } as any)
+          .select("id")
+          .single();
+        if (errDoc) throw errDoc;
+        documentoId = (doc as any).id;
+      }
+
+      const { error } = await supabase.from("cierres_ot").insert({
+        ot_id: ot.id,
+        revisado_por: user.id,
+        conforme: f.conforme,
+        cobro_final: cobro,
+        observaciones: f.obs || null,
+        documento_venta_id: documentoId,
+      } as any);
+      if (error) throw error;
+
+      toast.success("Cierre administrativo registrado");
+      await cargar();
+    } catch (err: any) {
+      toast.error("Error al cerrar", { description: err.message });
+    } finally {
+      setGuardando(null);
+    }
+  };
+
+  if (ots === null) {
+    return (
+      <div className="container mx-auto p-6 space-y-4">
+        <h1 className="text-3xl font-bold">Cierre administrativo</h1>
+        <Skeleton className="h-40 w-full" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto p-6 space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold mb-2">Cierre administrativo</h1>
+        <p className="text-muted-foreground">
+          Revisa las Órdenes de Trabajo finalizadas, valida conformidad y genera el cobro final.
+        </p>
+      </div>
+
+      {ots.length === 0 ? (
+        <Card>
+          <CardContent className="py-12 text-center text-muted-foreground">
+            <CheckCircle2 className="h-10 w-10 mx-auto mb-3 text-success" />
+            No hay OT pendientes de cierre administrativo.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="space-y-4">
+          {ots.map((ot) => {
+            const f = forms[ot.id] ?? { conforme: true, cobro: "", obs: "", generarDoc: false, tipoDoc: "factura" };
+            const ev = ot.informe?.evidencias_urls ?? {};
+            const antes: string[] = Array.isArray(ev.antes) ? ev.antes : [];
+            const despues: string[] = Array.isArray(ev.despues) ? ev.despues : [];
+            return (
+              <Card key={ot.id}>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between text-lg">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-5 w-5" />
+                      OT {ot.numero}
+                      <Badge variant="outline">{ot.clientes?.razon_social ?? "—"}</Badge>
+                    </div>
+                    <Button asChild variant="ghost" size="sm">
+                      <Link to={`/ordenes-servicio/${ot.id}`}>
+                        Ver OT <ExternalLink className="h-3 w-3 ml-1" />
+                      </Link>
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {ot.descripcion && (
+                    <p className="text-sm text-muted-foreground">{ot.descripcion}</p>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Finalizada: {format(new Date(ot.updated_at), "dd MMM yyyy HH:mm", { locale: es })}
+                  </p>
+
+                  <Separator />
+
+                  <div>
+                    <h4 className="text-sm font-semibold mb-2">Informe del técnico</h4>
+                    {ot.informe ? (
+                      <div className="space-y-3 text-sm">
+                        {ot.informe.resumen_tecnico && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Resumen</p>
+                            <p className="whitespace-pre-line">{ot.informe.resumen_tecnico}</p>
+                          </div>
+                        )}
+                        {ot.informe.recomendaciones && (
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Recomendaciones</p>
+                            <p className="whitespace-pre-line">{ot.informe.recomendaciones}</p>
+                          </div>
+                        )}
+                        {(antes.length > 0 || despues.length > 0) && (
+                          <div className="grid grid-cols-2 gap-3">
+                            {antes.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Antes</p>
+                                <div className="grid grid-cols-3 gap-1">
+                                  {antes.map((u) => (
+                                    <a key={u} href={u} target="_blank" rel="noreferrer">
+                                      <img src={u} alt="antes" className="w-full h-16 object-cover rounded border" />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {despues.length > 0 && (
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground mb-1">Después</p>
+                                <div className="grid grid-cols-3 gap-1">
+                                  {despues.map((u) => (
+                                    <a key={u} href={u} target="_blank" rel="noreferrer">
+                                      <img src={u} alt="después" className="w-full h-16 object-cover rounded border" />
+                                    </a>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">Sin informe del técnico.</p>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`conf-${ot.id}`}
+                        checked={f.conforme}
+                        onCheckedChange={(v) => updateForm(ot.id, { conforme: v === true })}
+                      />
+                      <Label htmlFor={`conf-${ot.id}`} className="cursor-pointer">
+                        Marcar como conforme
+                      </Label>
+                    </div>
+                    <div className="space-y-1">
+                      <Label htmlFor={`cobro-${ot.id}`}>Cobro final (CLP)</Label>
+                      <Input
+                        id={`cobro-${ot.id}`}
+                        type="number"
+                        min="0"
+                        step="1"
+                        value={f.cobro}
+                        onChange={(e) => updateForm(ot.id, { cobro: e.target.value })}
+                        placeholder="Opcional"
+                      />
+                      {f.cobro && !isNaN(Number(f.cobro)) && (
+                        <p className="text-xs text-muted-foreground">{formatCurrency(Number(f.cobro), "CLP")}</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1">
+                    <Label htmlFor={`obs-${ot.id}`}>Observaciones</Label>
+                    <Textarea
+                      id={`obs-${ot.id}`}
+                      rows={2}
+                      value={f.obs}
+                      onChange={(e) => updateForm(ot.id, { obs: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2 border rounded-md p-3 bg-muted/30">
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`gen-${ot.id}`}
+                        checked={f.generarDoc}
+                        onCheckedChange={(v) => updateForm(ot.id, { generarDoc: v === true })}
+                      />
+                      <Label htmlFor={`gen-${ot.id}`} className="cursor-pointer flex items-center gap-2">
+                        <Receipt className="h-4 w-4" />
+                        Generar documento de venta por el cobro final
+                      </Label>
+                    </div>
+                    {f.generarDoc && (
+                      <div className="space-y-1 ml-6">
+                        <Label htmlFor={`tipo-${ot.id}`}>Tipo</Label>
+                        <select
+                          id={`tipo-${ot.id}`}
+                          value={f.tipoDoc}
+                          onChange={(e) => updateForm(ot.id, { tipoDoc: e.target.value })}
+                          className="h-10 rounded-md border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="boleta">Boleta</option>
+                          <option value="factura">Factura</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end">
+                    <Button onClick={() => handleCerrar(ot)} disabled={guardando === ot.id}>
+                      <CheckCircle2 className="h-4 w-4 mr-2" />
+                      {guardando === ot.id ? "Cerrando..." : "Cerrar OT"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
