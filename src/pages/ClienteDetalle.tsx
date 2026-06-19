@@ -11,6 +11,7 @@ import { AgregarUbicacionDialog } from "@/components/clientes/AgregarUbicacionDi
 import { CrearAccesoPortalDialog } from "@/components/clientes/CrearAccesoPortalDialog";
 import { TrabajosList } from "@/components/trabajos/TrabajosList";
 import { OrdenesServicioList } from "@/components/ordenes/OrdenesServicioList";
+import { HistorialInformes } from "@/components/historial/HistorialInformes";
 import { Trabajo } from "@/hooks/useTrabajos";
 import {
   AlertDialog,
