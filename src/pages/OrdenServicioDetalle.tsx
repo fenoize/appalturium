@@ -25,6 +25,8 @@ import { PresupuestoCard } from "@/components/facturacion/PresupuestoCard";
 import { DocumentoVentaForm } from "@/components/facturacion/DocumentoVentaForm";
 import { DocumentoVentaCard } from "@/components/facturacion/DocumentoVentaCard";
 import { PagoForm } from "@/components/facturacion/PagoForm";
+import { PlanPagoCard } from "@/components/facturacion/PlanPagoCard";
+import { useCrearPlanPagos, useVincularPagoCuota } from "@/hooks/usePlanPagos";
 import { ListaPagos } from "@/components/facturacion/ListaPagos";
 import { ResumenFinanciero } from "@/components/facturacion/ResumenFinanciero";
 import { ComunicacionesTimeline } from "@/components/comunicaciones/ComunicacionesTimeline";
@@ -51,7 +53,10 @@ export default function OrdenServicioDetalle() {
   const navigate = useNavigate();
   const [dialogPresupuesto, setDialogPresupuesto] = useState(false);
   const [dialogDocumento, setDialogDocumento] = useState(false);
-  const [dialogPago, setDialogPago] = useState<string | null>(null);
+  const [dialogPago, setDialogPago] = useState<
+    | { documentoId: string; cuotaId?: string; numeroCuota?: number; monto?: number }
+    | null
+  >(null);
 
   const { data: ordenServicio, isLoading: loadingOT } = useOrdenServicioDetalle(id);
   const { data: presupuesto, isLoading: loadingPresupuesto } = usePresupuestoOT(id);
@@ -63,6 +68,8 @@ export default function OrdenServicioDetalle() {
   const crearDocumento = useCrearDocumento();
   const registrarPago = useRegistrarPago();
   const eliminarPago = useEliminarPago();
+  const crearPlanPagos = useCrearPlanPagos();
+  const vincularPagoCuota = useVincularPagoCuota();
   const queryClient = useQueryClient();
   const { data: estadosOT } = useParametrosSistema("service_statuses");
   const [cambiandoEstado, setCambiandoEstado] = useState(false);
@@ -148,21 +155,34 @@ export default function OrdenServicioDetalle() {
   };
 
   const handleCrearDocumento = (data: any) => {
+    const { plan_cuotas, cuota1_monto, cuota1_fecha, cuota2_monto, cuota2_fecha, ...docData } = data;
     crearDocumento.mutate(
-      { ...data, ot_id: id },
+      { ...docData, ot_id: id },
       {
-        onSuccess: () => {
+        onSuccess: async (doc: any) => {
+          if (plan_cuotas === "2" && doc?.id) {
+            await crearPlanPagos.mutateAsync({
+              documentoId: doc.id,
+              cuotas: [
+                { numero_cuota: 1, monto_esperado: Number(cuota1_monto), fecha_esperada: cuota1_fecha || null },
+                { numero_cuota: 2, monto_esperado: Number(cuota2_monto), fecha_esperada: cuota2_fecha || null },
+              ],
+            });
+          }
           setDialogDocumento(false);
         },
       }
     );
   };
 
-  const handleRegistrarPago = (documentoId: string, data: any) => {
+  const handleRegistrarPago = (documentoId: string, data: any, cuotaId?: string) => {
     registrarPago.mutate(
       { ...data, documento_id: documentoId },
       {
-        onSuccess: () => {
+        onSuccess: async (pago: any) => {
+          if (cuotaId && pago?.id) {
+            await vincularPagoCuota.mutateAsync({ cuotaId, pagoId: pago.id });
+          }
           setDialogPago(null);
         },
       }
