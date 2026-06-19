@@ -132,7 +132,7 @@ export function useCrearOrdenServicio() {
           tipo_trabajo: nuevaOT.tipo_trabajo,
           descripcion: nuevaOT.descripcion,
           prioridad: nuevaOT.prioridad,
-          estado: nuevaOT.estado || 'draft',
+          estado: nuevaOT.estado || 'pendiente',
           fecha_programada_inicio: nuevaOT.fecha_programada_inicio,
           fecha_programada_fin: nuevaOT.fecha_programada_fin,
           costos_estimado: nuevaOT.costos_estimado,

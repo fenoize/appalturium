@@ -17,7 +17,7 @@ import {
 
 export default function Geolocalizacion() {
   const [otSeleccionada, setOtSeleccionada] = useState<string>("");
-  const [estadoFiltro, setEstadoFiltro] = useState<string>("scheduled");
+  const [estadoFiltro, setEstadoFiltro] = useState<string>("pendiente");
   const { data: estadosOT } = useParametrosSistema("service_statuses");
   const { data: ordenesResp } = useOrdenesServicio({ estado: estadoFiltro });
   const ordenes = ordenesResp?.data;

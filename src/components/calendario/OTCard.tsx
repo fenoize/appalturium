@@ -65,7 +65,7 @@ export function OTCard({ orden, isDragging }: OTCardProps) {
       className={cn(
         "p-2 cursor-move hover:shadow-lg transition-all duration-200",
         isDragging && "opacity-50 shadow-2xl scale-105",
-        orden.estado === "in_progress" && "animate-pulse ring-2 ring-primary/50"
+        orden.estado === "en_curso" && "animate-pulse ring-2 ring-primary/50"
       )}
     >
       <div className="flex items-start gap-2">

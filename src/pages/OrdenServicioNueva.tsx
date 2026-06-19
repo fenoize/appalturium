@@ -189,7 +189,7 @@ export default function OrdenServicioNueva() {
       costos_estimado: formData.costos_estimado ? parseFloat(formData.costos_estimado) : undefined,
       fecha_programada_inicio: formData.fecha_programada_inicio || null,
       fecha_programada_fin: formData.fecha_programada_fin || null,
-      estado: "draft",
+      estado: "pendiente",
     });
     navigate("/ordenes-servicio");
   };

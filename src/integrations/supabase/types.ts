@@ -1559,6 +1559,7 @@ export type Database = {
           created_at: string | null
           created_by_user_id: string
           descripcion: string
+          equipo_id: string | null
           estado: string
           fase_id: string | null
           fecha_programada_fin: string | null
@@ -1567,6 +1568,7 @@ export type Database = {
           numero: string
           prioridad: Database["public"]["Enums"]["prioridad_ot"] | null
           proyecto_id: string | null
+          solicitud_cotizacion_id: string | null
           tarea_id: string | null
           tipo_trabajo: string
           trabajo_id: string | null
@@ -1581,6 +1583,7 @@ export type Database = {
           created_at?: string | null
           created_by_user_id: string
           descripcion: string
+          equipo_id?: string | null
           estado?: string
           fase_id?: string | null
           fecha_programada_fin?: string | null
@@ -1589,6 +1592,7 @@ export type Database = {
           numero: string
           prioridad?: Database["public"]["Enums"]["prioridad_ot"] | null
           proyecto_id?: string | null
+          solicitud_cotizacion_id?: string | null
           tarea_id?: string | null
           tipo_trabajo: string
           trabajo_id?: string | null
@@ -1603,6 +1607,7 @@ export type Database = {
           created_at?: string | null
           created_by_user_id?: string
           descripcion?: string
+          equipo_id?: string | null
           estado?: string
           fase_id?: string | null
           fecha_programada_fin?: string | null
@@ -1611,6 +1616,7 @@ export type Database = {
           numero?: string
           prioridad?: Database["public"]["Enums"]["prioridad_ot"] | null
           proyecto_id?: string | null
+          solicitud_cotizacion_id?: string | null
           tarea_id?: string | null
           tipo_trabajo?: string
           trabajo_id?: string | null
@@ -1626,6 +1632,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "ordenes_servicio_equipo_id_fkey"
+            columns: ["equipo_id"]
+            isOneToOne: false
+            referencedRelation: "equipos"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "ordenes_servicio_fase_id_fkey"
             columns: ["fase_id"]
             isOneToOne: false
@@ -1637,6 +1650,13 @@ export type Database = {
             columns: ["proyecto_id"]
             isOneToOne: false
             referencedRelation: "proyectos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ordenes_servicio_solicitud_cotizacion_id_fkey"
+            columns: ["solicitud_cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "solicitudes_cotizacion"
             referencedColumns: ["id"]
           },
           {

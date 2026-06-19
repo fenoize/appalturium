@@ -63,12 +63,11 @@ export default function PortalClienteOrdenes() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="todos">Todos los estados</SelectItem>
-            <SelectItem value="draft">Borrador</SelectItem>
-            <SelectItem value="pending">Pendiente</SelectItem>
-            <SelectItem value="assigned">Asignada</SelectItem>
-            <SelectItem value="in_progress">En Proceso</SelectItem>
-            <SelectItem value="completed">Completada</SelectItem>
-            <SelectItem value="closed">Cerrada</SelectItem>
+            <SelectItem value="pendiente">Pendiente</SelectItem>
+            <SelectItem value="en_curso">En curso</SelectItem>
+            <SelectItem value="en_pausa">En pausa</SelectItem>
+            <SelectItem value="finalizado">Finalizado</SelectItem>
+            <SelectItem value="cancelado">Cancelado</SelectItem>
           </SelectContent>
         </Select>
       </div>
