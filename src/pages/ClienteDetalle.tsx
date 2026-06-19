@@ -610,6 +610,10 @@ export default function ClienteDetalle() {
             }} 
           />
         </TabsContent>
+
+        <TabsContent value="historial" className="space-y-4">
+          <HistorialInformes clienteId={id!} />
+        </TabsContent>
       </Tabs>
     </div>
   );
