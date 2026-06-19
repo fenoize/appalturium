@@ -42,6 +42,7 @@ import CotizacionNueva from "./pages/CotizacionNueva";
 import CotizacionDetalle from "./pages/CotizacionDetalle";
 import CotizacionEditar from "./pages/CotizacionEditar";
 import CotizacionPublica from "./pages/CotizacionPublica";
+import SolicitudesCotizacion from "./pages/SolicitudesCotizacion";
 import EquipoNuevo from "./pages/EquipoNuevo";
 import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
