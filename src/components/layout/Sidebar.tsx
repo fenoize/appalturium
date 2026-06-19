@@ -21,7 +21,8 @@ import {
   Building2,
   Receipt,
   FileQuestion,
-  FolderTree
+  FolderTree,
+  ShoppingCart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
