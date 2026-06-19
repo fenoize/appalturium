@@ -120,6 +120,7 @@ const App = () => {
                           <Route path="/ordenes-servicio" element={<AdminRoute><OrdenesServicio /></AdminRoute>} />
                           <Route path="/ordenes-servicio/nueva" element={<AdminRoute><OrdenServicioNueva /></AdminRoute>} />
                           <Route path="/ordenes-servicio/:id" element={<AdminRoute><OrdenServicioDetalle /></AdminRoute>} />
+                          <Route path="/cierre-administrativo" element={<AdminRoute><CierreAdministrativo /></AdminRoute>} />
                           <Route path="/calendario" element={<AdminRoute><Calendario /></AdminRoute>} />
                           <Route path="/geolocalizacion" element={<AdminRoute><Geolocalizacion /></AdminRoute>} />
                           <Route path="/reportes" element={<AdminRoute><Reportes /></AdminRoute>} />
