@@ -36,14 +36,18 @@ interface PagoFormProps {
   documento: DocumentoVenta;
   onSubmit: (data: PagoFormData) => void;
   onCancel: () => void;
+  /** Optional prefilled amount (e.g. installment amount). */
+  defaultMonto?: number;
+  /** Optional label to show context (e.g. "Cuota 1"). */
+  contexto?: string;
 }
 
-export function PagoForm({ documento, onSubmit, onCancel }: PagoFormProps) {
+export function PagoForm({ documento, onSubmit, onCancel, defaultMonto, contexto }: PagoFormProps) {
   const form = useForm<PagoFormData>({
     resolver: zodResolver(pagoSchema),
     defaultValues: {
       fecha: new Date().toISOString().split("T")[0],
-      monto: documento.saldo,
+      monto: defaultMonto ?? documento.saldo,
       metodo: "transferencia",
       referencia: "",
       notas: "",
@@ -65,6 +69,7 @@ export function PagoForm({ documento, onSubmit, onCancel }: PagoFormProps) {
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
         <div className="bg-muted p-3 rounded-lg text-sm">
           <p className="font-medium">Documento: {documento.numero}</p>
+          {contexto && <p className="text-primary font-medium">{contexto}</p>}
           <p className="text-muted-foreground">Saldo pendiente: ${documento.saldo.toFixed(2)}</p>
         </div>
 
