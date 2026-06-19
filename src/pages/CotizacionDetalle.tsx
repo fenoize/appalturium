@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
 import { PresupuestoInternoCard } from "@/components/cotizaciones/PresupuestoInternoCard";
+import { OpcionesNegociacionCard } from "@/components/cotizaciones/OpcionesNegociacionCard";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -446,6 +447,13 @@ export default function CotizacionDetalle() {
             cotizacionMoneda={cotizacion.moneda}
             cotizacionSubtotal={cotizacion.subtotal}
             readOnly={cotizacion.estado === 'rechazada'}
+          />
+
+          {/* Opciones de negociación A/B/C */}
+          <OpcionesNegociacionCard
+            cotizacionId={cotizacion.id}
+            moneda={cotizacion.moneda}
+            opcionActualId={(cotizacion as any).opcion_actual_id ?? null}
           />
 
           {/* Notas */}

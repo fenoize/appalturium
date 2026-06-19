@@ -43,6 +43,7 @@ import CotizacionDetalle from "./pages/CotizacionDetalle";
 import CotizacionEditar from "./pages/CotizacionEditar";
 import CotizacionPublica from "./pages/CotizacionPublica";
 import SolicitudesCotizacion from "./pages/SolicitudesCotizacion";
+import CategoriasInventario from "./pages/CategoriasInventario";
 import EquipoNuevo from "./pages/EquipoNuevo";
 import EquipoFicha from "./pages/EquipoFicha";
 import EquipoEditar from "./pages/EquipoEditar";
@@ -127,6 +128,7 @@ const App = () => {
                           <Route path="/usuarios" element={<AdminRoute><Usuarios /></AdminRoute>} />
                           <Route path="/configuracion" element={<AdminRoute><Configuracion /></AdminRoute>} />
                           <Route path="/inventario" element={<AdminRoute><Inventario /></AdminRoute>} />
+                          <Route path="/inventario/categorias" element={<AdminRoute><CategoriasInventario /></AdminRoute>} />
                           <Route path="/inventario/equipos/nuevo" element={<AdminRoute><EquipoNuevo /></AdminRoute>} />
                           <Route path="/inventario/equipos/:id" element={<AdminRoute><EquipoFicha /></AdminRoute>} />
                           <Route path="/inventario/equipos/:id/editar" element={<AdminRoute><EquipoEditar /></AdminRoute>} />

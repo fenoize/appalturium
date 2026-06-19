@@ -65,6 +65,7 @@ export type Database = {
       categorias_inventario: {
         Row: {
           activa: boolean | null
+          categoria_padre_id: string | null
           color: string | null
           created_at: string | null
           descripcion: string | null
@@ -74,6 +75,7 @@ export type Database = {
         }
         Insert: {
           activa?: boolean | null
+          categoria_padre_id?: string | null
           color?: string | null
           created_at?: string | null
           descripcion?: string | null
@@ -83,6 +85,7 @@ export type Database = {
         }
         Update: {
           activa?: boolean | null
+          categoria_padre_id?: string | null
           color?: string | null
           created_at?: string | null
           descripcion?: string | null
@@ -90,7 +93,15 @@ export type Database = {
           nombre?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "categorias_inventario_categoria_padre_id_fkey"
+            columns: ["categoria_padre_id"]
+            isOneToOne: false
+            referencedRelation: "categorias_inventario"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       clientes: {
         Row: {
@@ -472,6 +483,68 @@ export type Database = {
           },
         ]
       }
+      cotizacion_opciones: {
+        Row: {
+          aceptada_ts: string | null
+          costo_base: number
+          cotizacion_id: string
+          created_at: string
+          estado: string
+          etiqueta: string
+          formato: string
+          id: string
+          impuestos: number
+          margen_pct: number
+          orden: number
+          presentada_ts: string | null
+          rechazada_ts: string | null
+          subtotal: number | null
+          total: number
+        }
+        Insert: {
+          aceptada_ts?: string | null
+          costo_base?: number
+          cotizacion_id: string
+          created_at?: string
+          estado?: string
+          etiqueta: string
+          formato?: string
+          id?: string
+          impuestos?: number
+          margen_pct: number
+          orden: number
+          presentada_ts?: string | null
+          rechazada_ts?: string | null
+          subtotal?: number | null
+          total?: number
+        }
+        Update: {
+          aceptada_ts?: string | null
+          costo_base?: number
+          cotizacion_id?: string
+          created_at?: string
+          estado?: string
+          etiqueta?: string
+          formato?: string
+          id?: string
+          impuestos?: number
+          margen_pct?: number
+          orden?: number
+          presentada_ts?: string | null
+          rechazada_ts?: string | null
+          subtotal?: number | null
+          total?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cotizacion_opciones_cotizacion_id_fkey"
+            columns: ["cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "cotizaciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cotizaciones: {
         Row: {
           aceptada_por_email: string | null
@@ -489,9 +562,11 @@ export type Database = {
           moneda: Database["public"]["Enums"]["tipo_moneda"]
           notas: string | null
           numero: string
+          opcion_actual_id: string | null
           ot_id: string | null
           rechazada_ts: string | null
           rechazo_motivo: string | null
+          solicitud_cotizacion_id: string | null
           subtotal: number
           token_acceso: string | null
           total: number
@@ -514,9 +589,11 @@ export type Database = {
           moneda?: Database["public"]["Enums"]["tipo_moneda"]
           notas?: string | null
           numero: string
+          opcion_actual_id?: string | null
           ot_id?: string | null
           rechazada_ts?: string | null
           rechazo_motivo?: string | null
+          solicitud_cotizacion_id?: string | null
           subtotal?: number
           token_acceso?: string | null
           total?: number
@@ -539,9 +616,11 @@ export type Database = {
           moneda?: Database["public"]["Enums"]["tipo_moneda"]
           notas?: string | null
           numero?: string
+          opcion_actual_id?: string | null
           ot_id?: string | null
           rechazada_ts?: string | null
           rechazo_motivo?: string | null
+          solicitud_cotizacion_id?: string | null
           subtotal?: number
           token_acceso?: string | null
           total?: number
@@ -557,6 +636,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "cotizaciones_opcion_actual_fk"
+            columns: ["opcion_actual_id"]
+            isOneToOne: false
+            referencedRelation: "cotizacion_opciones"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "cotizaciones_ot_id_fkey"
             columns: ["ot_id"]
             isOneToOne: false
@@ -568,6 +654,13 @@ export type Database = {
             columns: ["ot_id"]
             isOneToOne: false
             referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotizaciones_solicitud_cotizacion_id_fkey"
+            columns: ["solicitud_cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "solicitudes_cotizacion"
             referencedColumns: ["id"]
           },
         ]
