@@ -1287,6 +1287,58 @@ export type Database = {
           },
         ]
       }
+      items_solicitud_compra: {
+        Row: {
+          cantidad: number
+          cantidad_en_oc: number
+          costo_unitario_estimado: number | null
+          id: string
+          item_inventario_id: string
+          proveedor_sugerido_id: string | null
+          solicitud_compra_id: string
+        }
+        Insert: {
+          cantidad: number
+          cantidad_en_oc?: number
+          costo_unitario_estimado?: number | null
+          id?: string
+          item_inventario_id: string
+          proveedor_sugerido_id?: string | null
+          solicitud_compra_id: string
+        }
+        Update: {
+          cantidad?: number
+          cantidad_en_oc?: number
+          costo_unitario_estimado?: number | null
+          id?: string
+          item_inventario_id?: string
+          proveedor_sugerido_id?: string | null
+          solicitud_compra_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "items_solicitud_compra_item_inventario_id_fkey"
+            columns: ["item_inventario_id"]
+            isOneToOne: false
+            referencedRelation: "inventario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_solicitud_compra_proveedor_sugerido_id_fkey"
+            columns: ["proveedor_sugerido_id"]
+            isOneToOne: false
+            referencedRelation: "proveedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "items_solicitud_compra_solicitud_compra_id_fkey"
+            columns: ["solicitud_compra_id"]
+            isOneToOne: false
+            referencedRelation: "solicitudes_compra"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movimientos_inventario: {
         Row: {
           cantidad: number
@@ -1399,6 +1451,39 @@ export type Database = {
             columns: ["ot_id"]
             isOneToOne: false
             referencedRelation: "ordenes_servicio"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      oc_solicitudes_compra: {
+        Row: {
+          id: string
+          orden_compra_id: string
+          solicitud_compra_id: string
+        }
+        Insert: {
+          id?: string
+          orden_compra_id: string
+          solicitud_compra_id: string
+        }
+        Update: {
+          id?: string
+          orden_compra_id?: string
+          solicitud_compra_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "oc_solicitudes_compra_orden_compra_id_fkey"
+            columns: ["orden_compra_id"]
+            isOneToOne: false
+            referencedRelation: "ordenes_compra"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "oc_solicitudes_compra_solicitud_compra_id_fkey"
+            columns: ["solicitud_compra_id"]
+            isOneToOne: false
+            referencedRelation: "solicitudes_compra"
             referencedColumns: ["id"]
           },
         ]
@@ -2466,6 +2551,67 @@ export type Database = {
           },
         ]
       }
+      solicitudes_compra: {
+        Row: {
+          cliente_id: string
+          cotizacion_id: string
+          cotizacion_opcion_id: string
+          created_at: string
+          estado: string
+          id: string
+          notas: string | null
+          numero: string
+          revisado_por: string | null
+          updated_at: string
+        }
+        Insert: {
+          cliente_id: string
+          cotizacion_id: string
+          cotizacion_opcion_id: string
+          created_at?: string
+          estado?: string
+          id?: string
+          notas?: string | null
+          numero: string
+          revisado_por?: string | null
+          updated_at?: string
+        }
+        Update: {
+          cliente_id?: string
+          cotizacion_id?: string
+          cotizacion_opcion_id?: string
+          created_at?: string
+          estado?: string
+          id?: string
+          notas?: string | null
+          numero?: string
+          revisado_por?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solicitudes_compra_cliente_id_fkey"
+            columns: ["cliente_id"]
+            isOneToOne: false
+            referencedRelation: "clientes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_compra_cotizacion_id_fkey"
+            columns: ["cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "cotizaciones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "solicitudes_compra_cotizacion_opcion_id_fkey"
+            columns: ["cotizacion_opcion_id"]
+            isOneToOne: false
+            referencedRelation: "cotizacion_opciones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       solicitudes_cotizacion: {
         Row: {
           archivos_adjuntos: Json
@@ -3057,6 +3203,7 @@ export type Database = {
       }
       generar_numero_oc: { Args: never; Returns: string }
       generar_numero_ot: { Args: never; Returns: string }
+      generar_numero_solicitud_compra: { Args: never; Returns: string }
       generar_numero_solicitud_cotizacion: { Args: never; Returns: string }
       get_dashboard_metrics: { Args: never; Returns: Json }
       has_role: {
