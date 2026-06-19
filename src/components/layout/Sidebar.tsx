@@ -20,7 +20,8 @@ import {
   Wrench,
   Building2,
   Receipt,
-  FileQuestion
+  FileQuestion,
+  FolderTree
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -86,6 +87,11 @@ const navigationItems = [
     title: "Inventario", 
     icon: Package, 
     href: "/inventario" 
+  },
+  { 
+    title: "Categorías Inventario", 
+    icon: FolderTree, 
+    href: "/inventario/categorias" 
   },
   { 
     title: "Proveedores", 
