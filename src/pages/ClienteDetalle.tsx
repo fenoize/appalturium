@@ -311,7 +311,7 @@ export default function ClienteDetalle() {
       </div>
 
         <Tabs defaultValue="general" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-7">
+        <TabsList className="grid w-full grid-cols-8">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="ubicaciones">Ubicaciones</TabsTrigger>
           <TabsTrigger value="contactos">Contactos</TabsTrigger>
@@ -319,6 +319,7 @@ export default function ClienteDetalle() {
           <TabsTrigger value="notificaciones">Notificaciones</TabsTrigger>
           <TabsTrigger value="ordenes">Órdenes</TabsTrigger>
           <TabsTrigger value="trabajos">Trabajos</TabsTrigger>
+          <TabsTrigger value="historial">Historial</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4">
