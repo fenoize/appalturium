@@ -23,6 +23,7 @@ import { EquipoMovimientos } from "@/components/equipos/EquipoMovimientos";
 import { EquipoIntervenciones } from "@/components/equipos/EquipoIntervenciones";
 import { EquipoMateriales } from "@/components/equipos/EquipoMateriales";
 import { PlanMantenimientoCard } from "@/components/equipos/PlanMantenimientoCard";
+import { HistorialInformes } from "@/components/historial/HistorialInformes";
 import { formatCurrency } from "@/lib/formatCurrency";
 
 const estadoColors: Record<string, string> = {
