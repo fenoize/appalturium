@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Send, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Send, CheckCircle, XCircle, Clock, CheckCircle2 } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import {
   useCotizacionOpciones,
@@ -9,6 +10,7 @@ import {
   type EstadoOpcion,
   type EtiquetaOpcion,
 } from "@/hooks/useCotizacionOpciones";
+import { AceptarOpcionDialog } from "./AceptarOpcionDialog";
 
 const ETIQUETAS: EtiquetaOpcion[] = ["A", "B", "C"];
 
