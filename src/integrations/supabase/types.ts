@@ -3317,6 +3317,20 @@ export type Database = {
         }
         Returns: Json
       }
+      fn_cerrar_ot_con_documento: {
+        Args: {
+          p_cobro_final: number
+          p_conforme: boolean
+          p_metodo_pago?: Database["public"]["Enums"]["metodo_pago"]
+          p_moneda?: Database["public"]["Enums"]["tipo_moneda"]
+          p_observaciones: string
+          p_ot_id: string
+          p_ot_numero?: string
+          p_revisado_por: string
+          p_tipo_documento: Database["public"]["Enums"]["tipo_documento_venta"]
+        }
+        Returns: Json
+      }
       fn_convertir_sc_a_oc: {
         Args: { p_proveedor_id: string; p_sc_ids: string[] }
         Returns: string
