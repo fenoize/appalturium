@@ -416,8 +416,18 @@ export default function CierreAdministrativo() {
                     )}
                   </div>
 
-                  <div className="flex justify-end">
-                    <Button onClick={() => handleCerrar(ot)} disabled={guardando === ot.id}>
+                  <div className="flex flex-col items-end gap-2">
+                    {(ot.pago_pendiente || ot.compra_pendiente) && (
+                      <p className="text-xs text-destructive text-right">
+                        No se puede cerrar mientras existan dependencias pendientes.
+                      </p>
+                    )}
+                    <Button
+                      onClick={() => handleCerrar(ot)}
+                      disabled={
+                        guardando === ot.id || ot.pago_pendiente || ot.compra_pendiente
+                      }
+                    >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                       {guardando === ot.id ? "Cerrando..." : "Cerrar OT"}
                     </Button>
