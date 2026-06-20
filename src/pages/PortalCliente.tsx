@@ -26,7 +26,7 @@ export default function PortalCliente() {
     );
   }
 
-  const ordenesActivas = ordenes?.filter(o => !["completed", "closed", "cancelled"].includes(o.estado)) || [];
+  const ordenesActivas = ordenes?.filter(o => !["finalizado", "cancelado"].includes(o.estado)) || [];
   const presupuestosPendientes = ordenes?.filter(o => 
     Array.isArray(o.presupuestos) && o.presupuestos.some((p: any) => p.estado === "enviado")
   ) || [];

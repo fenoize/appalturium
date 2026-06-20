@@ -33,8 +33,9 @@ const iconByType = {
 
 function mapOtEstado(estado: string): ActivityItem["status"] {
   if (estado === "finalizado") return "completed";
+  if (estado === "pendiente") return "pending";
   if (estado === "en_curso") return "scheduled";
-  if (estado === "cancelado") return "warning";
+  if (estado === "en_pausa" || estado === "cancelado") return "warning";
   return "pending";
 }
 
