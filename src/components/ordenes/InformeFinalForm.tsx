@@ -23,6 +23,10 @@ interface EvidenciasObj {
 }
 
 export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
+  const { hasAnyRole } = useCurrentUserRole();
+  const isAdminOrSupervisor = hasAnyRole(["admin", "supervisor"]);
+  const [otEstado, setOtEstado] = useState<string | null>(null);
+  const readOnly = otEstado === "finalizado" && !isAdminOrSupervisor;
   const sigRef = useRef<SignatureCanvas | null>(null);
   const [resumen, setResumen] = useState("");
   const [recomendaciones, setRecomendaciones] = useState("");
