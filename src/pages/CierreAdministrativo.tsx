@@ -264,10 +264,22 @@ export default function CierreAdministrativo() {
               <Card key={ot.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between text-lg">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <FileText className="h-5 w-5" />
                       OT {ot.numero}
                       <Badge variant="outline">{ot.clientes?.razon_social ?? "—"}</Badge>
+                      {ot.pago_pendiente && (
+                        <Badge variant="destructive" className="gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Pago pendiente ({formatCurrency(ot.saldo_pendiente, "CLP")})
+                        </Badge>
+                      )}
+                      {ot.compra_pendiente && (
+                        <Badge variant="destructive" className="gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Compra a proveedor pendiente{ot.compra_motivo ? `: ${ot.compra_motivo}` : ""}
+                        </Badge>
+                      )}
                     </div>
                     <Button asChild variant="ghost" size="sm">
                       <Link to={`/ordenes-servicio/${ot.id}`}>
