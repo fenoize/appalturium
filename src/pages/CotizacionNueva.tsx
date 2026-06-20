@@ -131,6 +131,13 @@ export default function CotizacionNueva() {
       setUbicacionId(null);
     }
   }, [ubicacionesCliente, ubicacionId]);
+
+  // Autoasigna la única ubicación del cliente cuando no hay una preseleccionada
+  useEffect(() => {
+    if (ubicacionesCliente?.length === 1 && !ubicacionId) {
+      setUbicacionId(ubicacionesCliente[0].id);
+    }
+  }, [ubicacionesCliente, ubicacionId]);
   const { data: paramsFacturacion } = useParametrosSistema("facturacion");
   const ivaPct = (() => {
     const p = paramsFacturacion?.find((x) => x.key === "iva_porcentaje");
