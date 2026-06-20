@@ -181,12 +181,15 @@ export function PersonalForm({
       setIsSubmitting(true);
       
       // Determine roles based on rol_operativo
-      const roles: ("admin" | "supervisor" | "cliente")[] = [];
+      const roles: ("admin" | "supervisor" | "cliente" | "tecnico")[] = [];
       if (rest.rol_operativo === "supervisor") {
         roles.push("supervisor");
       } else if (rest.rol_operativo === "administrador") {
         roles.push("admin");
+      } else if (rest.rol_operativo === "tecnico") {
+        roles.push("tecnico");
       }
+
       
       crearUsuarioConPersonal.mutate(
         { 

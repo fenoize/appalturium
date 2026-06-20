@@ -64,7 +64,24 @@ serve(async (req) => {
 
     const { action, ...payload } = await req.json();
 
+    // Helper: remove the default admin role auto-assigned by the trigger
+    // when the real intended role is "tecnico" (or any other non-admin role).
+    async function cleanupDefaultAdminIfNeeded(
+      supabaseAdmin: ReturnType<typeof createClient>,
+      newUserId: string,
+      userRoles: string[],
+    ) {
+      if (userRoles.includes("tecnico") && !userRoles.includes("admin")) {
+        await supabaseAdmin
+          .from("user_roles")
+          .delete()
+          .eq("user_id", newUserId)
+          .eq("role", "admin");
+      }
+    }
+
     let result;
+
 
     switch (action) {
       case "create": {
@@ -90,6 +107,8 @@ serve(async (req) => {
 
         // Assign roles if provided (use upsert to avoid duplicates)
         if (userRoles && userRoles.length > 0) {
+          await cleanupDefaultAdminIfNeeded(supabaseAdmin, authData.user.id, userRoles);
+
           const { error: rolesInsertError } = await supabaseAdmin
             .from("user_roles")
             .upsert(
@@ -99,6 +118,7 @@ serve(async (req) => {
 
           if (rolesInsertError) throw rolesInsertError;
         }
+
 
         result = { user: authData.user };
         break;
@@ -131,13 +151,8 @@ serve(async (req) => {
         if (userRoles && userRoles.length > 0) {
           // If creating a 'tecnico', remove any default 'admin' role
           // auto-assigned by the handle_new_user_role trigger before inserting.
-          if (userRoles.includes("tecnico")) {
-            await supabaseAdmin
-              .from("user_roles")
-              .delete()
-              .eq("user_id", newUserId)
-              .eq("role", "admin");
-          }
+          await cleanupDefaultAdminIfNeeded(supabaseAdmin, newUserId, userRoles);
+
 
           const { error: rolesInsertError } = await supabaseAdmin
             .from("user_roles")
