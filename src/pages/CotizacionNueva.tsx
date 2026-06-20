@@ -131,6 +131,13 @@ export default function CotizacionNueva() {
       setUbicacionId(null);
     }
   }, [ubicacionesCliente, ubicacionId]);
+
+  // Autoasigna la única ubicación del cliente cuando no hay una preseleccionada
+  useEffect(() => {
+    if (ubicacionesCliente?.length === 1 && !ubicacionId) {
+      setUbicacionId(ubicacionesCliente[0].id);
+    }
+  }, [ubicacionesCliente, ubicacionId]);
   const { data: paramsFacturacion } = useParametrosSistema("facturacion");
   const ivaPct = (() => {
     const p = paramsFacturacion?.find((x) => x.key === "iva_porcentaje");
@@ -496,6 +503,16 @@ export default function CotizacionNueva() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              )}
+
+              {clienteSeleccionado && ubicacionesCliente && ubicacionesCliente.length === 1 && (
+                <div>
+                  <Label>Ubicación</Label>
+                  <div className="p-3 bg-muted rounded-lg text-sm">
+                    {ubicacionesCliente[0].alias} - {ubicacionesCliente[0].direccion}
+                    {ubicacionesCliente[0].comuna ? `, ${ubicacionesCliente[0].comuna}` : ""}
+                  </div>
                 </div>
               )}
             </CardContent>
