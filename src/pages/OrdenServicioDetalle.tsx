@@ -48,6 +48,14 @@ import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+const TRANSICIONES_OT: Record<string, string[]> = {
+  pendiente: ["en_curso", "cancelado"],
+  en_curso: ["en_pausa", "finalizado", "cancelado"],
+  en_pausa: ["en_curso", "cancelado"],
+  finalizado: [],
+  cancelado: [],
+};
+
 export default function OrdenServicioDetalle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -221,17 +229,22 @@ export default function OrdenServicioDetalle() {
             <Select
               value={ordenServicio.estado}
               onValueChange={handleCambiarEstado}
-              disabled={cambiandoEstado}
+              disabled={cambiandoEstado || TRANSICIONES_OT[ordenServicio.estado]?.length === 0}
             >
               <SelectTrigger className="w-[200px] h-8">
                 <SelectValue placeholder="Cambiar estado" />
               </SelectTrigger>
               <SelectContent>
-                {estadosOT?.map((estado) => (
-                  <SelectItem key={estado.key} value={estado.key}>
-                    {estado.label}
-                  </SelectItem>
-                ))}
+                {estadosOT
+                  ?.filter((estado) =>
+                    estado.key === ordenServicio.estado ||
+                    (TRANSICIONES_OT[ordenServicio.estado] ?? []).includes(estado.key)
+                  )
+                  .map((estado) => (
+                    <SelectItem key={estado.key} value={estado.key}>
+                      {estado.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
