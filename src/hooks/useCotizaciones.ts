@@ -42,6 +42,7 @@ export interface Cotizacion {
   rechazo_motivo: string | null;
   ot_id: string | null;
   solicitud_cotizacion_id?: string | null;
+  ubicacion_id?: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -74,6 +75,7 @@ export interface CotizacionInput {
   notas?: string | null;
   condiciones?: string | null;
   solicitud_cotizacion_id?: string | null;
+  ubicacion_id?: string | null;
 }
 
 
