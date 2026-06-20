@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { detectarConflictosAsignacion } from "@/lib/asignaciones-conflictos";
 
 const locales = { es };
 const localizer = dateFnsLocalizer({
