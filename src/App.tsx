@@ -2,12 +2,16 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useState } from "react";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Header } from "@/components/layout/Header";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PortalClienteLayout } from "@/components/layout/PortalClienteLayout";
+import { PortalTecnicoLayout } from "@/components/layout/PortalTecnicoLayout";
+import PortalTecnicoTrabajos from "./pages/PortalTecnicoTrabajos";
+import PortalTecnicoTrabajoDetalle from "./pages/PortalTecnicoTrabajoDetalle";
+import PortalTecnicoPerfil from "./pages/PortalTecnicoPerfil";
 import Index from "./pages/Index";
 import Configuracion from "./pages/Configuracion";
 import Auth from "./pages/Auth";
@@ -61,6 +65,9 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => (
 const ClienteRoute = ({ children }: { children: React.ReactNode }) => (
   <RoleProtectedRoute allowedRoles={["cliente"]}>{children}</RoleProtectedRoute>
 );
+const TecnicoRoute = ({ children }: { children: React.ReactNode }) => (
+  <RoleProtectedRoute allowedRoles={["tecnico"]}>{children}</RoleProtectedRoute>
+);
 
 const queryClient = new QueryClient();
 
@@ -97,6 +104,24 @@ const App = () => {
               <Route path="documentos" element={<PortalClienteDocumentos />} />
               <Route path="perfil" element={<PortalClientePerfil />} />
             </Route>
+
+            {/* Portal del Técnico */}
+            <Route
+              path="/portal-tecnico/*"
+              element={
+                <ProtectedRoute>
+                  <TecnicoRoute>
+                    <PortalTecnicoLayout />
+                  </TecnicoRoute>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="trabajos" replace />} />
+              <Route path="trabajos" element={<PortalTecnicoTrabajos />} />
+              <Route path="trabajos/:id" element={<PortalTecnicoTrabajoDetalle />} />
+              <Route path="perfil" element={<PortalTecnicoPerfil />} />
+            </Route>
+
 
             {/* Layout de Administración */}
             <Route
