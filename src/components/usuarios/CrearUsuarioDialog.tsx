@@ -24,10 +24,11 @@ interface CrearUsuarioDialogProps {
 const roleLabels: Record<string, string> = {
   admin: "Administrador",
   supervisor: "Supervisor",
+  tecnico: "Técnico",
   cliente: "Cliente",
 };
 
-const rolesDisponibles: AppRole[] = ["admin", "supervisor", "cliente"];
+const rolesDisponibles: AppRole[] = ["admin", "supervisor", "tecnico", "cliente"];
 
 export function CrearUsuarioDialog({ onCrear }: CrearUsuarioDialogProps) {
   const [open, setOpen] = useState(false);
