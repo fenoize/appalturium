@@ -186,51 +186,29 @@ export default function CierreAdministrativo() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
-      let documentoId: string | null = null;
-
       if (f.generarDoc && cobro) {
-        // generar número
-        const { data: numero, error: errNum } = await supabase.rpc("generar_numero_documento", { _tipo: f.tipoDoc as any });
-        if (errNum) throw errNum;
-
-        const { data: doc, error: errDoc } = await supabase
-          .from("documentos_venta")
-          .insert({
-            ot_id: ot.id,
-            tipo: f.tipoDoc as any,
-            numero,
-            fecha: new Date().toISOString().split("T")[0],
-            total: cobro,
-            saldo: cobro,
-          } as any)
-          .select("id")
-          .single();
-        if (errDoc) throw errDoc;
-        documentoId = (doc as any).id;
-
-        // Registrar pago por el monto total para que saldo quede en 0
-        // (el cobro final del cierre representa dinero efectivamente cobrado)
-        const { error: errPago } = await supabase.from("pagos").insert({
-          documento_id: documentoId,
-          fecha: new Date().toISOString().split("T")[0],
-          monto: cobro,
-          metodo: "transferencia",
-          referencia: `Cobro al cierre OT ${ot.numero}`,
-          notas: "Pago registrado automáticamente al cerrar la OT",
-          registrado_por_user_id: user.id,
+        // Cierre atómico: documento de venta + pago + cierre en una sola transacción
+        const { error: errRpc } = await supabase.rpc("fn_cerrar_ot_con_documento", {
+          p_ot_id: ot.id,
+          p_revisado_por: user.id,
+          p_conforme: f.conforme,
+          p_cobro_final: cobro,
+          p_observaciones: f.obs || null,
+          p_tipo_documento: f.tipoDoc as any,
+          p_ot_numero: ot.numero,
         } as any);
-        if (errPago) throw errPago;
+        if (errRpc) throw errRpc;
+      } else {
+        const { error } = await supabase.from("cierres_ot").insert({
+          ot_id: ot.id,
+          revisado_por: user.id,
+          conforme: f.conforme,
+          cobro_final: cobro,
+          observaciones: f.obs || null,
+          documento_venta_id: null,
+        } as any);
+        if (error) throw error;
       }
-
-      const { error } = await supabase.from("cierres_ot").insert({
-        ot_id: ot.id,
-        revisado_por: user.id,
-        conforme: f.conforme,
-        cobro_final: cobro,
-        observaciones: f.obs || null,
-        documento_venta_id: documentoId,
-      } as any);
-      if (error) throw error;
 
       toast.success("Cierre administrativo registrado");
       await cargar();
