@@ -14,7 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Send, CheckCircle, XCircle, Clock, CheckCircle2, ChevronDown } from "lucide-react";
+import { Send, CheckCircle, XCircle, Clock, CheckCircle2, ChevronDown, Eye } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { formatCurrency } from "@/lib/formatCurrency";
 import {
   useCotizacionOpciones,
@@ -23,9 +24,13 @@ import {
   type EstadoOpcion,
   type EtiquetaOpcion,
   type FormatoOpcion,
+  type CotizacionOpcion,
 } from "@/hooks/useCotizacionOpciones";
+import type { Cotizacion } from "@/hooks/useCotizaciones";
 import { AceptarOpcionDialog } from "./AceptarOpcionDialog";
 import { DetalleOpcionAgrupado } from "./DetalleOpcionAgrupado";
+import { VistaPreviaCotizacion } from "./VistaPreviaCotizacion";
+
 
 const ETIQUETAS: EtiquetaOpcion[] = ["A", "B", "C"];
 
@@ -47,14 +52,17 @@ interface Props {
   cotizacionId: string;
   moneda?: string;
   opcionActualId?: string | null;
+  cotizacion?: Cotizacion;
 }
 
-export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionActualId }: Props) {
+export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionActualId, cotizacion }: Props) {
   const { data: opciones, isLoading } = useCotizacionOpciones(cotizacionId);
   const presentar = usePresentarOpcion();
   const actualizarFormato = useActualizarFormatoOpcion();
   const [aceptando, setAceptando] = useState<{ id: string; etiqueta: string; total: number } | null>(null);
   const [abiertas, setAbiertas] = useState<Record<string, boolean>>({});
+  const [previewOp, setPreviewOp] = useState<CotizacionOpcion | null>(null);
+
 
   return (
     <Card>
@@ -175,6 +183,17 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
                   </Collapsible>
 
                   <div className="flex flex-col gap-2">
+                    {cotizacion && (
+                      <Button
+                        className="w-full"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setPreviewOp(op)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Vista previa
+                      </Button>
+                    )}
                     <Button
                       className="w-full"
                       size="sm"
@@ -196,6 +215,7 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
                       Aceptar manualmente
                     </Button>
                   </div>
+
                 </div>
               );
             })}
@@ -212,6 +232,17 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
           moneda={moneda}
         />
       )}
+      {cotizacion && (
+        <Dialog open={!!previewOp} onOpenChange={(v) => !v && setPreviewOp(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Vista previa — Opción {previewOp?.etiqueta}</DialogTitle>
+            </DialogHeader>
+            {previewOp && <VistaPreviaCotizacion cotizacion={cotizacion} opcion={previewOp} />}
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 }
+
