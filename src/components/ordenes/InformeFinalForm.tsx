@@ -318,6 +318,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             onChange={(e) => setResumen(e.target.value)}
             rows={4}
             placeholder="Describa el trabajo ejecutado..."
+            disabled={readOnly}
           />
         </div>
 
@@ -328,6 +329,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             value={recomendaciones}
             onChange={(e) => setRecomendaciones(e.target.value)}
             rows={3}
+            disabled={readOnly}
           />
         </div>
 
@@ -338,6 +340,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
             rows={3}
+            disabled={readOnly}
           />
         </div>
 
