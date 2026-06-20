@@ -105,6 +105,24 @@ const App = () => {
               <Route path="perfil" element={<PortalClientePerfil />} />
             </Route>
 
+            {/* Portal del Técnico */}
+            <Route
+              path="/portal-tecnico/*"
+              element={
+                <ProtectedRoute>
+                  <TecnicoRoute>
+                    <PortalTecnicoLayout />
+                  </TecnicoRoute>
+                </ProtectedRoute>
+              }
+            >
+              <Route index element={<Navigate to="trabajos" replace />} />
+              <Route path="trabajos" element={<PortalTecnicoTrabajos />} />
+              <Route path="trabajos/:id" element={<PortalTecnicoTrabajoDetalle />} />
+              <Route path="perfil" element={<PortalTecnicoPerfil />} />
+            </Route>
+
+
             {/* Layout de Administración */}
             <Route
               path="/*"
