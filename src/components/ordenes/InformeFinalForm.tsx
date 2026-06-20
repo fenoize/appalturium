@@ -52,13 +52,14 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
 
   useEffect(() => {
     (async () => {
-      // Load OT to know its equipo_id (default)
+      // Load OT to know its equipo_id (default) and estado
       const { data: ot } = await supabase
         .from("ordenes_servicio")
-        .select("equipo_id")
+        .select("equipo_id, estado")
         .eq("id", otId)
         .maybeSingle();
       setEquipoOTId((ot as any)?.equipo_id ?? null);
+      setOtEstado((ot as any)?.estado ?? null);
 
       // Load list of equipos to allow change
       const { data: eqs } = await supabase
