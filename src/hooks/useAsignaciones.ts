@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { detectarConflictosAsignacion } from "@/lib/asignaciones-conflictos";
 
 export interface AsignacionOT {
   id: string;
@@ -57,6 +58,27 @@ export function useCrearAsignacion() {
       horario_fin?: string | null;
       notas?: string | null;
     }) => {
+      // Validar conflicto de horario con otras OT del mismo técnico
+      const { data: ot, error: otErr } = await supabase
+        .from("ordenes_servicio")
+        .select("fecha_programada_inicio, fecha_programada_fin")
+        .eq("id", payload.ot_id)
+        .maybeSingle();
+      if (otErr) throw otErr;
+      if (ot?.fecha_programada_inicio && ot?.fecha_programada_fin) {
+        const conflictos = await detectarConflictosAsignacion({
+          personalIds: [payload.personal_id],
+          inicio: new Date(ot.fecha_programada_inicio),
+          fin: new Date(ot.fecha_programada_fin),
+          otIdExcluida: payload.ot_id,
+        });
+        if (conflictos.length > 0) {
+          throw new Error(
+            `El técnico ya está asignado a la OT ${conflictos.map((c) => c.numero).join(", ")} en ese horario`
+          );
+        }
+      }
+
       const { data, error } = await supabase
         .from("asignaciones_ot")
         .insert(payload as any)

@@ -15,6 +15,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { toast } from "sonner";
+import { detectarConflictosAsignacion } from "@/lib/asignaciones-conflictos";
 
 const locales = { es };
 const localizer = dateFnsLocalizer({
@@ -43,6 +44,7 @@ export default function Calendario() {
   const [tecnicoId, setTecnicoId] = useState<string>("todos");
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState<Date>(new Date());
+  const [calendarKey, setCalendarKey] = useState(0);
 
   const { data: ordenesResp, isLoading } = useOrdenesServicio(filtros);
   const ordenes = ordenesResp?.data;
@@ -95,6 +97,22 @@ export default function Calendario() {
       inicio: Date;
       fin: Date;
     }) => {
+      // Validar conflictos con técnicos asignados a esta OT
+      const personalIds = asignacionesPorOT.get(otId) ?? [];
+      if (personalIds.length > 0) {
+        const conflictos = await detectarConflictosAsignacion({
+          personalIds,
+          inicio,
+          fin,
+          otIdExcluida: otId,
+        });
+        if (conflictos.length > 0) {
+          throw new Error(
+            `Choca con la OT ${conflictos.map((c) => c.numero).join(", ")} del mismo técnico`
+          );
+        }
+      }
+
       const { error } = await supabase
         .from("ordenes_servicio")
         .update({
@@ -110,6 +128,8 @@ export default function Calendario() {
     },
     onError: (err: any) => {
       toast.error("Error al reprogramar", { description: err.message });
+      // Revertir visualmente el evento a su posición original
+      setCalendarKey((k) => k + 1);
     },
   });
 
@@ -239,6 +259,7 @@ export default function Calendario() {
           ) : (
             <div style={{ height: "70vh" }}>
               <DnDCalendar
+                key={calendarKey}
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
