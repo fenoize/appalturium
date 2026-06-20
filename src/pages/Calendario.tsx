@@ -44,6 +44,7 @@ export default function Calendario() {
   const [tecnicoId, setTecnicoId] = useState<string>("todos");
   const [view, setView] = useState<View>(Views.WEEK);
   const [date, setDate] = useState<Date>(new Date());
+  const [calendarKey, setCalendarKey] = useState(0);
 
   const { data: ordenesResp, isLoading } = useOrdenesServicio(filtros);
   const ordenes = ordenesResp?.data;
