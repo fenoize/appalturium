@@ -9,7 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eraser, MapPin, Save, Info, Upload, Trash2 } from "lucide-react";
+import { Eraser, MapPin, Save, Info, Upload, Trash2, Lock } from "lucide-react";
+import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
 
 interface InformeFinalFormProps {
   otId: string;
@@ -22,6 +23,10 @@ interface EvidenciasObj {
 }
 
 export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
+  const { hasAnyRole } = useCurrentUserRole();
+  const isAdminOrSupervisor = hasAnyRole(["admin", "supervisor"]);
+  const [otEstado, setOtEstado] = useState<string | null>(null);
+  const readOnly = otEstado === "finalizado" && !isAdminOrSupervisor;
   const sigRef = useRef<SignatureCanvas | null>(null);
   const [resumen, setResumen] = useState("");
   const [recomendaciones, setRecomendaciones] = useState("");
@@ -47,13 +52,14 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
 
   useEffect(() => {
     (async () => {
-      // Load OT to know its equipo_id (default)
+      // Load OT to know its equipo_id (default) and estado
       const { data: ot } = await supabase
         .from("ordenes_servicio")
-        .select("equipo_id")
+        .select("equipo_id, estado")
         .eq("id", otId)
         .maybeSingle();
       setEquipoOTId((ot as any)?.equipo_id ?? null);
+      setOtEstado((ot as any)?.estado ?? null);
 
       // Load list of equipos to allow change
       const { data: eqs } = await supabase
@@ -239,25 +245,27 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <Label>Fotos {titulo}</Label>
-        <label className="cursor-pointer">
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            disabled={subiendo === seccion}
-            onChange={(e) => {
-              handleSubirEvidencia(seccion, e.target.files);
-              e.target.value = "";
-            }}
-          />
-          <Button asChild type="button" variant="outline" size="sm" disabled={subiendo === seccion}>
-            <span>
-              <Upload className="h-4 w-4 mr-2" />
-              {subiendo === seccion ? "Subiendo..." : "Subir fotos"}
-            </span>
-          </Button>
-        </label>
+        {!readOnly && (
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={subiendo === seccion}
+              onChange={(e) => {
+                handleSubirEvidencia(seccion, e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <Button asChild type="button" variant="outline" size="sm" disabled={subiendo === seccion}>
+              <span>
+                <Upload className="h-4 w-4 mr-2" />
+                {subiendo === seccion ? "Subiendo..." : "Subir fotos"}
+              </span>
+            </Button>
+          </label>
+        )}
       </div>
       {evidencias[seccion].length === 0 ? (
         <p className="text-xs text-muted-foreground">Sin fotos cargadas.</p>
@@ -266,14 +274,16 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
           {evidencias[seccion].map((url) => (
             <div key={url} className="relative group">
               <img src={url} alt={`Evidencia ${titulo}`} className="w-full h-24 object-cover rounded-md border" />
-              <button
-                type="button"
-                onClick={() => eliminarEvidencia(seccion, url)}
-                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                aria-label="Eliminar"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => eliminarEvidencia(seccion, url)}
+                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -287,7 +297,15 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         <CardTitle>{yaExiste ? "Editar Informe Final" : "Informe Final"}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {yaExiste && (
+        {readOnly && (
+          <Alert>
+            <Lock className="h-4 w-4" />
+            <AlertDescription>
+              La OT está finalizada. El informe está en modo solo lectura. Solo un administrador o supervisor puede modificarlo.
+            </AlertDescription>
+          </Alert>
+        )}
+        {yaExiste && !readOnly && (
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
@@ -304,6 +322,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             onChange={(e) => setResumen(e.target.value)}
             rows={4}
             placeholder="Describa el trabajo ejecutado..."
+            disabled={readOnly}
           />
         </div>
 
@@ -314,6 +333,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             value={recomendaciones}
             onChange={(e) => setRecomendaciones(e.target.value)}
             rows={3}
+            disabled={readOnly}
           />
         </div>
 
@@ -324,6 +344,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             value={observaciones}
             onChange={(e) => setObservaciones(e.target.value)}
             rows={3}
+            disabled={readOnly}
           />
         </div>
 
@@ -341,7 +362,8 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
               id="equipo"
               value={equipoId}
               onChange={(e) => setEquipoId(e.target.value)}
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
+              disabled={readOnly}
             >
               <option value="">— Sin equipo asociado —</option>
               {equiposDisponibles.map((eq) => (
@@ -355,19 +377,19 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="marca">Marca</Label>
-              <Input id="marca" value={marca} onChange={(e) => setMarca(e.target.value)} />
+              <Input id="marca" value={marca} onChange={(e) => setMarca(e.target.value)} disabled={readOnly} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="modelo">Modelo</Label>
-              <Input id="modelo" value={modelo} onChange={(e) => setModelo(e.target.value)} />
+              <Input id="modelo" value={modelo} onChange={(e) => setModelo(e.target.value)} disabled={readOnly} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ns">N° de serie</Label>
-              <Input id="ns" value={numeroSerie} onChange={(e) => setNumeroSerie(e.target.value)} />
+              <Input id="ns" value={numeroSerie} onChange={(e) => setNumeroSerie(e.target.value)} disabled={readOnly} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="pot">Potencia / capacidad</Label>
-              <Input id="pot" value={potencia} onChange={(e) => setPotencia(e.target.value)} />
+              <Input id="pot" value={potencia} onChange={(e) => setPotencia(e.target.value)} disabled={readOnly} />
             </div>
           </div>
           <div className="space-y-2">
@@ -377,6 +399,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
               value={observacionesEquipo}
               onChange={(e) => setObservacionesEquipo(e.target.value)}
               rows={2}
+              disabled={readOnly}
             />
           </div>
         </div>
@@ -392,7 +415,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         <div className="space-y-2 border-t pt-4">
           <div className="flex items-center justify-between">
             <Label>Firma del cliente *</Label>
-            {!usandoFirmaPrevia && (
+            {!usandoFirmaPrevia && !readOnly && (
               <Button type="button" variant="ghost" size="sm" onClick={limpiarFirma}>
                 <Eraser className="h-4 w-4 mr-2" />
                 Limpiar
@@ -400,7 +423,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             )}
           </div>
 
-          {yaExiste && firmaPreviaUrl && (
+          {yaExiste && firmaPreviaUrl && !readOnly && (
             <div className="flex items-center justify-between rounded-md border p-3">
               <div className="space-y-0.5">
                 <p className="text-sm font-medium">Mantener firma existente</p>
@@ -412,7 +435,19 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             </div>
           )}
 
-          {usandoFirmaPrevia ? (
+          {readOnly ? (
+            firmaPreviaUrl ? (
+              <div className="border rounded-md bg-background p-3 flex items-center justify-center">
+                <img
+                  src={firmaPreviaUrl}
+                  alt="Firma del cliente registrada"
+                  className="max-h-48 object-contain"
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">Sin firma registrada.</p>
+            )
+          ) : usandoFirmaPrevia ? (
             <div className="border rounded-md bg-background p-3 flex items-center justify-center">
               <img
                 src={firmaPreviaUrl!}
@@ -441,12 +476,14 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
           </div>
         )}
 
-        <div className="flex justify-end">
-          <Button onClick={handleGuardar} disabled={guardando}>
-            <Save className="h-4 w-4 mr-2" />
-            {guardando ? "Guardando..." : yaExiste ? "Actualizar informe" : "Guardar informe"}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex justify-end">
+            <Button onClick={handleGuardar} disabled={guardando}>
+              <Save className="h-4 w-4 mr-2" />
+              {guardando ? "Guardando..." : yaExiste ? "Actualizar informe" : "Guardar informe"}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
