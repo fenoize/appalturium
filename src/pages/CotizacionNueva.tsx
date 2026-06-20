@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { format, addDays } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
@@ -45,16 +46,25 @@ interface NuevoCliente {
 
 export default function CotizacionNueva() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const routeState = (location.state ?? {}) as {
+    cliente_id?: string;
+    ubicacion_id?: string | null;
+    solicitud_cotizacion_id?: string;
+  };
   const queryClient = useQueryClient();
   const crearCotizacion = useCrearCotizacion();
 
   // Estados del formulario
-  const [clienteId, setClienteId] = useState<string | null>(null);
+  const [clienteId, setClienteId] = useState<string | null>(routeState.cliente_id ?? null);
+  const [ubicacionId] = useState<string | null>(routeState.ubicacion_id ?? null);
+  const [solicitudCotizacionId] = useState<string | null>(routeState.solicitud_cotizacion_id ?? null);
   const [moneda, setMoneda] = useState<TipoMoneda>("CLP");
   const [validezDias, setValidezDias] = useState(30);
   const [notas, setNotas] = useState("");
   const [condiciones, setCondiciones] = useState("");
   const [items, setItems] = useState<CotizacionItem[]>([]);
+
   
   // Diálogo de nuevo cliente
   const [showNuevoCliente, setShowNuevoCliente] = useState(false);
@@ -277,14 +287,31 @@ export default function CotizacionNueva() {
           validez_dias: validezDias,
           notas: notas || null,
           condiciones: condiciones || null,
+          solicitud_cotizacion_id: solicitudCotizacionId || null,
         },
         items,
       });
+
+      // Si vino de una solicitud, actualiza su estado a 'en_presupuesto' (si estaba en 'nueva')
+      if (solicitudCotizacionId) {
+        try {
+          await (supabase as any)
+            .from("solicitudes_cotizacion")
+            .update({ estado: "en_presupuesto" })
+            .eq("id", solicitudCotizacionId)
+            .eq("estado", "nueva");
+          await queryClient.invalidateQueries({ queryKey: ["solicitudes_cotizacion"] });
+        } catch {
+          // no bloqueante
+        }
+      }
+
       navigate("/cotizaciones");
     } catch (error) {
       // Error ya manejado en el hook
     }
   };
+
 
   const getClienteLabel = (cliente: any) => {
     return cliente.tipo === "empresa" 

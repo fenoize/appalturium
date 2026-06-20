@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
+
 import {
   useSolicitudesCotizacion,
   useCrearSolicitud,
@@ -36,7 +38,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, FileQuestion } from "lucide-react";
+import { Plus, FileQuestion, FileText } from "lucide-react";
 
 type FormValues = {
   cliente_id: string;
@@ -61,6 +63,8 @@ function formatCliente(c: any | null | undefined) {
 }
 
 export default function SolicitudesCotizacion() {
+  const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
   const { data: solicitudes, isLoading } = useSolicitudesCotizacion();
   const { data: clientesData } = useClientes({ pageSize: 200 });
@@ -214,12 +218,14 @@ export default function SolicitudesCotizacion() {
                   <TableHead>Visita técnica</TableHead>
                   <TableHead>Estado</TableHead>
                   <TableHead>Creada</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {(solicitudes ?? []).map((s) => (
                   <TableRow key={s.id}>
                     <TableCell className="font-mono">{s.numero}</TableCell>
+
                     <TableCell>{formatCliente(s.cliente)}</TableCell>
                     <TableCell>{s.tipo_servicio || "—"}</TableCell>
                     <TableCell className="max-w-xs truncate" title={s.descripcion_necesidad}>
@@ -238,7 +244,27 @@ export default function SolicitudesCotizacion() {
                     <TableCell>
                       {new Date(s.created_at).toLocaleDateString("es-CL")}
                     </TableCell>
+                    <TableCell className="text-right">
+                      {(s.estado === "nueva" || s.estado === "en_presupuesto") && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            navigate("/cotizaciones/nueva", {
+                              state: {
+                                cliente_id: s.cliente_id,
+                                ubicacion_id: s.ubicacion_id,
+                                solicitud_cotizacion_id: s.id,
+                              },
+                            })
+                          }
+                        >
+                          <FileText className="w-4 h-4 mr-1" /> Crear cotización
+                        </Button>
+                      )}
+                    </TableCell>
                   </TableRow>
+
                 ))}
               </TableBody>
             </Table>
