@@ -129,6 +129,16 @@ serve(async (req) => {
 
         // Assign roles if provided
         if (userRoles && userRoles.length > 0) {
+          // If creating a 'tecnico', remove any default 'admin' role
+          // auto-assigned by the handle_new_user_role trigger before inserting.
+          if (userRoles.includes("tecnico")) {
+            await supabaseAdmin
+              .from("user_roles")
+              .delete()
+              .eq("user_id", newUserId)
+              .eq("role", "admin");
+          }
+
           const { error: rolesInsertError } = await supabaseAdmin
             .from("user_roles")
             .upsert(
