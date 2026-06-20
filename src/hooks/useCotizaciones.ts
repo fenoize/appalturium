@@ -41,6 +41,7 @@ export interface Cotizacion {
   rechazada_ts: string | null;
   rechazo_motivo: string | null;
   ot_id: string | null;
+  solicitud_cotizacion_id?: string | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -72,7 +73,9 @@ export interface CotizacionInput {
   total?: number;
   notas?: string | null;
   condiciones?: string | null;
+  solicitud_cotizacion_id?: string | null;
 }
+
 
 // Calcular subtotal de un item
 export function calcularSubtotalItem(cantidad: number, precio_unitario: number, descuento_pct: number): number {

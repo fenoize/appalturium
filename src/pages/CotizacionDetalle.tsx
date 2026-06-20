@@ -75,6 +75,22 @@ export default function CotizacionDetalle() {
     enabled: !!clienteId && showCrearOT,
   });
 
+  const solicitudId = (cotizacion as any)?.solicitud_cotizacion_id as string | null | undefined;
+  const { data: solicitudOrigen } = useQuery({
+    queryKey: ["solicitud_origen_cotizacion", solicitudId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("solicitudes_cotizacion")
+        .select("id, numero")
+        .eq("id", solicitudId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; numero: string } | null;
+    },
+    enabled: !!solicitudId,
+  });
+
+
   useEffect(() => {
     if (showCrearOT && cotizacion && !otDescripcion) {
       const itemsDesc = cotizacion.items?.map(i => i.descripcion).join(", ") || "";
@@ -177,7 +193,19 @@ export default function CotizacionDetalle() {
             <p className="text-muted-foreground">
               Creada el {format(new Date(cotizacion.created_at), "dd 'de' MMMM 'de' yyyy", { locale: es })}
             </p>
+            {solicitudOrigen && (
+              <button
+                type="button"
+                onClick={() => navigate("/solicitudes-cotizacion")}
+                className="mt-1 inline-flex items-center"
+              >
+                <Badge variant="outline" className="cursor-pointer hover:bg-muted">
+                  Originada de Solicitud {solicitudOrigen.numero}
+                </Badge>
+              </button>
+            )}
           </div>
+
         </div>
         
         <div className="flex gap-2 flex-wrap">
