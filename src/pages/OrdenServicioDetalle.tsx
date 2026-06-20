@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -51,6 +51,8 @@ import { es } from "date-fns/locale";
 export default function OrdenServicioDetalle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validTabs = ["resumen", "comunicaciones", "asignaciones", "presupuesto", "facturacion", "informe"];
   const [dialogPresupuesto, setDialogPresupuesto] = useState(false);
   const [dialogDocumento, setDialogDocumento] = useState(false);
   const [dialogPago, setDialogPago] = useState<
@@ -237,7 +239,11 @@ export default function OrdenServicioDetalle() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="resumen" className="space-y-6">
+      <Tabs
+        value={validTabs.includes(searchParams.get("tab") || "") ? (searchParams.get("tab") as string) : "resumen"}
+        onValueChange={(v) => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("tab", v); return p; }, { replace: true })}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="resumen">
             <ClipboardList className="h-4 w-4 mr-2" />
