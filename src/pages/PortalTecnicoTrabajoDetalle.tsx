@@ -9,6 +9,8 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import { StatusBadge } from "@/components/ordenes/StatusBadge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { InformeFinalForm } from "@/components/ordenes/InformeFinalForm";
 import { ArrowLeft, MapPin, User, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -134,74 +136,87 @@ export default function PortalTecnicoTrabajoDetalle() {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2">
-            <User className="w-4 h-4" /> Cliente
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-1 text-sm">
-          <p className="font-medium">{cliente}</p>
-          {ot.clientes?.telefono && <p className="text-muted-foreground">{ot.clientes.telefono}</p>}
-          {ot.clientes?.email && <p className="text-muted-foreground">{ot.clientes.email}</p>}
-        </CardContent>
-      </Card>
+      <Tabs defaultValue="detalle" className="w-full">
+        <TabsList>
+          <TabsTrigger value="detalle">Detalle</TabsTrigger>
+          <TabsTrigger value="informe">Informe</TabsTrigger>
+        </TabsList>
 
-      {ot.ubicaciones && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <MapPin className="w-4 h-4" /> Ubicación
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p className="font-medium">{ot.ubicaciones.alias}</p>
-            <p>{ot.ubicaciones.direccion}</p>
-            <p className="text-muted-foreground">
-              {[ot.ubicaciones.comuna, ot.ubicaciones.ciudad, ot.ubicaciones.region]
-                .filter(Boolean)
-                .join(", ")}
-            </p>
-          </CardContent>
-        </Card>
-      )}
+        <TabsContent value="detalle" className="space-y-6 mt-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg flex items-center gap-2">
+                <User className="w-4 h-4" /> Cliente
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-1 text-sm">
+              <p className="font-medium">{cliente}</p>
+              {ot.clientes?.telefono && <p className="text-muted-foreground">{ot.clientes.telefono}</p>}
+              {ot.clientes?.email && <p className="text-muted-foreground">{ot.clientes.email}</p>}
+            </CardContent>
+          </Card>
 
-      {ot.fecha_programada_inicio && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <Calendar className="w-4 h-4" /> Programación
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p>
-              Inicio:{" "}
-              {format(new Date(ot.fecha_programada_inicio), "EEEE d 'de' MMMM, HH:mm", {
-                locale: es,
-              })}
-            </p>
-            {ot.fecha_programada_fin && (
-              <p>
-                Fin:{" "}
-                {format(new Date(ot.fecha_programada_fin), "EEEE d 'de' MMMM, HH:mm", {
-                  locale: es,
-                })}
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
+          {ot.ubicaciones && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <MapPin className="w-4 h-4" /> Ubicación
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm">
+                <p className="font-medium">{ot.ubicaciones.alias}</p>
+                <p>{ot.ubicaciones.direccion}</p>
+                <p className="text-muted-foreground">
+                  {[ot.ubicaciones.comuna, ot.ubicaciones.ciudad, ot.ubicaciones.region]
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
-      {ot.descripcion && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">Descripción del trabajo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm whitespace-pre-wrap">{ot.descripcion}</p>
-          </CardContent>
-        </Card>
-      )}
+          {ot.fecha_programada_inicio && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <Calendar className="w-4 h-4" /> Programación
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1 text-sm">
+                <p>
+                  Inicio:{" "}
+                  {format(new Date(ot.fecha_programada_inicio), "EEEE d 'de' MMMM, HH:mm", {
+                    locale: es,
+                  })}
+                </p>
+                {ot.fecha_programada_fin && (
+                  <p>
+                    Fin:{" "}
+                    {format(new Date(ot.fecha_programada_fin), "EEEE d 'de' MMMM, HH:mm", {
+                      locale: es,
+                    })}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {ot.descripcion && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Descripción del trabajo</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm whitespace-pre-wrap">{ot.descripcion}</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        <TabsContent value="informe" className="mt-4">
+          <InformeFinalForm otId={ot.id} />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
