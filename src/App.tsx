@@ -65,6 +65,9 @@ const AdminRoute = ({ children }: { children: React.ReactNode }) => (
 const ClienteRoute = ({ children }: { children: React.ReactNode }) => (
   <RoleProtectedRoute allowedRoles={["cliente"]}>{children}</RoleProtectedRoute>
 );
+const TecnicoRoute = ({ children }: { children: React.ReactNode }) => (
+  <RoleProtectedRoute allowedRoles={["tecnico"]}>{children}</RoleProtectedRoute>
+);
 
 const queryClient = new QueryClient();
 
