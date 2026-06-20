@@ -424,6 +424,16 @@ export default function CotizacionDetalle() {
                       <p className="font-medium">{cotizacion.cliente.email}</p>
                     </div>
                   )}
+                  {(cotizacion as any).ubicacion && (
+                    <div className="col-span-2">
+                      <p className="text-sm text-muted-foreground">Ubicación</p>
+                      <p className="font-medium">
+                        {(cotizacion as any).ubicacion.alias}
+                        {(cotizacion as any).ubicacion.direccion ? ` — ${(cotizacion as any).ubicacion.direccion}` : ""}
+                        {(cotizacion as any).ubicacion.comuna ? `, ${(cotizacion as any).ubicacion.comuna}` : ""}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-muted-foreground">Sin cliente asignado</p>
