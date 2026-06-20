@@ -415,7 +415,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         <div className="space-y-2 border-t pt-4">
           <div className="flex items-center justify-between">
             <Label>Firma del cliente *</Label>
-            {!usandoFirmaPrevia && (
+            {!usandoFirmaPrevia && !readOnly && (
               <Button type="button" variant="ghost" size="sm" onClick={limpiarFirma}>
                 <Eraser className="h-4 w-4 mr-2" />
                 Limpiar
@@ -423,7 +423,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             )}
           </div>
 
-          {yaExiste && firmaPreviaUrl && (
+          {yaExiste && firmaPreviaUrl && !readOnly && (
             <div className="flex items-center justify-between rounded-md border p-3">
               <div className="space-y-0.5">
                 <p className="text-sm font-medium">Mantener firma existente</p>
@@ -435,7 +435,19 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             </div>
           )}
 
-          {usandoFirmaPrevia ? (
+          {readOnly ? (
+            firmaPreviaUrl ? (
+              <div className="border rounded-md bg-background p-3 flex items-center justify-center">
+                <img
+                  src={firmaPreviaUrl}
+                  alt="Firma del cliente registrada"
+                  className="max-h-48 object-contain"
+                />
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground italic">Sin firma registrada.</p>
+            )
+          ) : usandoFirmaPrevia ? (
             <div className="border rounded-md bg-background p-3 flex items-center justify-center">
               <img
                 src={firmaPreviaUrl!}
@@ -464,12 +476,14 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
           </div>
         )}
 
-        <div className="flex justify-end">
-          <Button onClick={handleGuardar} disabled={guardando}>
-            <Save className="h-4 w-4 mr-2" />
-            {guardando ? "Guardando..." : yaExiste ? "Actualizar informe" : "Guardar informe"}
-          </Button>
-        </div>
+        {!readOnly && (
+          <div className="flex justify-end">
+            <Button onClick={handleGuardar} disabled={guardando}>
+              <Save className="h-4 w-4 mr-2" />
+              {guardando ? "Guardando..." : yaExiste ? "Actualizar informe" : "Guardar informe"}
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
