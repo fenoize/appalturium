@@ -221,17 +221,22 @@ export default function OrdenServicioDetalle() {
             <Select
               value={ordenServicio.estado}
               onValueChange={handleCambiarEstado}
-              disabled={cambiandoEstado}
+              disabled={cambiandoEstado || TRANSICIONES_OT[ordenServicio.estado]?.length === 0}
             >
               <SelectTrigger className="w-[200px] h-8">
                 <SelectValue placeholder="Cambiar estado" />
               </SelectTrigger>
               <SelectContent>
-                {estadosOT?.map((estado) => (
-                  <SelectItem key={estado.key} value={estado.key}>
-                    {estado.label}
-                  </SelectItem>
-                ))}
+                {estadosOT
+                  ?.filter((estado) =>
+                    estado.key === ordenServicio.estado ||
+                    (TRANSICIONES_OT[ordenServicio.estado] ?? []).includes(estado.key)
+                  )
+                  .map((estado) => (
+                    <SelectItem key={estado.key} value={estado.key}>
+                      {estado.label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
