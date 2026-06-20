@@ -43,6 +43,7 @@ export interface Cotizacion {
   ot_id: string | null;
   solicitud_cotizacion_id?: string | null;
   ubicacion_id?: string | null;
+  ubicacion?: { id: string; alias: string | null; direccion: string | null; comuna: string | null } | null;
   created_by: string;
   created_at: string;
   updated_at: string;
