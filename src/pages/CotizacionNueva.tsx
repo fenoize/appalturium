@@ -505,6 +505,16 @@ export default function CotizacionNueva() {
                   </Select>
                 </div>
               )}
+
+              {clienteSeleccionado && ubicacionesCliente && ubicacionesCliente.length === 1 && (
+                <div>
+                  <Label>Ubicación</Label>
+                  <div className="p-3 bg-muted rounded-lg text-sm">
+                    {ubicacionesCliente[0].alias} - {ubicacionesCliente[0].direccion}
+                    {ubicacionesCliente[0].comuna ? `, ${ubicacionesCliente[0].comuna}` : ""}
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
