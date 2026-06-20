@@ -44,17 +44,10 @@ export function usePresentarOpcion() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (opcion: CotizacionOpcion) => {
-      const ts = new Date().toISOString();
-      const { error: e1 } = await (supabase as any)
-        .from("cotizacion_opciones")
-        .update({ estado: "presentada", presentada_ts: ts })
-        .eq("id", opcion.id);
-      if (e1) throw e1;
-      const { error: e2 } = await (supabase as any)
-        .from("cotizaciones")
-        .update({ opcion_actual_id: opcion.id })
-        .eq("id", opcion.cotizacion_id);
-      if (e2) throw e2;
+      const { error } = await (supabase as any).rpc("fn_presentar_opcion", {
+        p_opcion_id: opcion.id,
+      });
+      if (error) throw error;
       return opcion;
     },
     onSuccess: (opcion) => {
