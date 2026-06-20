@@ -245,25 +245,27 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <Label>Fotos {titulo}</Label>
-        <label className="cursor-pointer">
-          <input
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            disabled={subiendo === seccion}
-            onChange={(e) => {
-              handleSubirEvidencia(seccion, e.target.files);
-              e.target.value = "";
-            }}
-          />
-          <Button asChild type="button" variant="outline" size="sm" disabled={subiendo === seccion}>
-            <span>
-              <Upload className="h-4 w-4 mr-2" />
-              {subiendo === seccion ? "Subiendo..." : "Subir fotos"}
-            </span>
-          </Button>
-        </label>
+        {!readOnly && (
+          <label className="cursor-pointer">
+            <input
+              type="file"
+              accept="image/*"
+              multiple
+              className="hidden"
+              disabled={subiendo === seccion}
+              onChange={(e) => {
+                handleSubirEvidencia(seccion, e.target.files);
+                e.target.value = "";
+              }}
+            />
+            <Button asChild type="button" variant="outline" size="sm" disabled={subiendo === seccion}>
+              <span>
+                <Upload className="h-4 w-4 mr-2" />
+                {subiendo === seccion ? "Subiendo..." : "Subir fotos"}
+              </span>
+            </Button>
+          </label>
+        )}
       </div>
       {evidencias[seccion].length === 0 ? (
         <p className="text-xs text-muted-foreground">Sin fotos cargadas.</p>
@@ -272,14 +274,16 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
           {evidencias[seccion].map((url) => (
             <div key={url} className="relative group">
               <img src={url} alt={`Evidencia ${titulo}`} className="w-full h-24 object-cover rounded-md border" />
-              <button
-                type="button"
-                onClick={() => eliminarEvidencia(seccion, url)}
-                className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
-                aria-label="Eliminar"
-              >
-                <Trash2 className="h-3 w-3" />
-              </button>
+              {!readOnly && (
+                <button
+                  type="button"
+                  onClick={() => eliminarEvidencia(seccion, url)}
+                  className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition"
+                  aria-label="Eliminar"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              )}
             </div>
           ))}
         </div>
