@@ -48,6 +48,14 @@ import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
+const TRANSICIONES_OT: Record<string, string[]> = {
+  pendiente: ["en_curso", "cancelado"],
+  en_curso: ["en_pausa", "finalizado", "cancelado"],
+  en_pausa: ["en_curso", "cancelado"],
+  finalizado: [],
+  cancelado: [],
+};
+
 export default function OrdenServicioDetalle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
