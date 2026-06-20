@@ -358,7 +358,8 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
               id="equipo"
               value={equipoId}
               onChange={(e) => setEquipoId(e.target.value)}
-              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm"
+              className="w-full h-10 rounded-md border border-input bg-background px-3 text-sm disabled:opacity-50"
+              disabled={readOnly}
             >
               <option value="">— Sin equipo asociado —</option>
               {equiposDisponibles.map((eq) => (
@@ -372,19 +373,19 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-2">
               <Label htmlFor="marca">Marca</Label>
-              <Input id="marca" value={marca} onChange={(e) => setMarca(e.target.value)} />
+              <Input id="marca" value={marca} onChange={(e) => setMarca(e.target.value)} disabled={readOnly} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="modelo">Modelo</Label>
-              <Input id="modelo" value={modelo} onChange={(e) => setModelo(e.target.value)} />
+              <Input id="modelo" value={modelo} onChange={(e) => setModelo(e.target.value)} disabled={readOnly} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="ns">N° de serie</Label>
-              <Input id="ns" value={numeroSerie} onChange={(e) => setNumeroSerie(e.target.value)} />
+              <Input id="ns" value={numeroSerie} onChange={(e) => setNumeroSerie(e.target.value)} disabled={readOnly} />
             </div>
             <div className="space-y-2">
               <Label htmlFor="pot">Potencia / capacidad</Label>
-              <Input id="pot" value={potencia} onChange={(e) => setPotencia(e.target.value)} />
+              <Input id="pot" value={potencia} onChange={(e) => setPotencia(e.target.value)} disabled={readOnly} />
             </div>
           </div>
           <div className="space-y-2">
@@ -394,6 +395,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
               value={observacionesEquipo}
               onChange={(e) => setObservacionesEquipo(e.target.value)}
               rows={2}
+              disabled={readOnly}
             />
           </div>
         </div>
