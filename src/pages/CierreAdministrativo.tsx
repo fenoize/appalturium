@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, ExternalLink, Receipt } from "lucide-react";
+import { CheckCircle2, FileText, ExternalLink, Receipt, AlertTriangle } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -28,6 +28,10 @@ interface OTPendiente {
     recomendaciones: string | null;
     evidencias_urls: any;
   } | null;
+  pago_pendiente: boolean;
+  saldo_pendiente: number;
+  compra_pendiente: boolean;
+  compra_motivo: string | null;
 }
 
 export default function CierreAdministrativo() {
@@ -62,10 +66,92 @@ export default function CierreAdministrativo() {
       .in("ot_id", pendientes.map((o: any) => o.id).length > 0 ? pendientes.map((o: any) => o.id) : ["00000000-0000-0000-0000-000000000000"]);
     const infMap = new Map<string, any>((informes ?? []).map((i: any) => [i.ot_id, i]));
 
-    const result: OTPendiente[] = pendientes.map((o: any) => ({
-      ...o,
-      informe: infMap.get(o.id) ?? null,
-    }));
+    const otIds = pendientes.map((o: any) => o.id);
+    const safeIds = otIds.length > 0 ? otIds : ["00000000-0000-0000-0000-000000000000"];
+
+    // Pago: documentos_venta con saldo > 0
+    const { data: docs } = await supabase
+      .from("documentos_venta")
+      .select("ot_id, saldo")
+      .in("ot_id", safeIds);
+    const saldoMap = new Map<string, number>();
+    (docs ?? []).forEach((d: any) => {
+      saldoMap.set(d.ot_id, (saldoMap.get(d.ot_id) ?? 0) + Number(d.saldo ?? 0));
+    });
+
+    // Compra: cotizaciones -> solicitudes_compra -> oc
+    const { data: cots } = await supabase
+      .from("cotizaciones")
+      .select("id, ot_id")
+      .in("ot_id", safeIds);
+    const cotByOt = new Map<string, string[]>();
+    (cots ?? []).forEach((c: any) => {
+      if (!c.ot_id) return;
+      const arr = cotByOt.get(c.ot_id) ?? [];
+      arr.push(c.id);
+      cotByOt.set(c.ot_id, arr);
+    });
+    const allCotIds = (cots ?? []).map((c: any) => c.id);
+    const safeCotIds = allCotIds.length > 0 ? allCotIds : ["00000000-0000-0000-0000-000000000000"];
+
+    const { data: scs } = await supabase
+      .from("solicitudes_compra")
+      .select("id, cotizacion_id, estado")
+      .in("cotizacion_id", safeCotIds);
+
+    const allScIds = (scs ?? []).map((s: any) => s.id);
+    const safeScIds = allScIds.length > 0 ? allScIds : ["00000000-0000-0000-0000-000000000000"];
+
+    const { data: links } = await supabase
+      .from("oc_solicitudes_compra")
+      .select("solicitud_compra_id, orden_compra_id")
+      .in("solicitud_compra_id", safeScIds);
+
+    const allOcIds = Array.from(new Set((links ?? []).map((l: any) => l.orden_compra_id)));
+    const safeOcIds = allOcIds.length > 0 ? allOcIds : ["00000000-0000-0000-0000-000000000000"];
+
+    const { data: ocs } = await supabase
+      .from("ordenes_compra")
+      .select("id, estado")
+      .in("id", safeOcIds);
+    const ocEstadoMap = new Map<string, string>((ocs ?? []).map((o: any) => [o.id, o.estado]));
+
+    const computeCompra = (otId: string): { pendiente: boolean; motivo: string | null } => {
+      const cotIds = cotByOt.get(otId) ?? [];
+      const scsOt = (scs ?? []).filter((s: any) => cotIds.includes(s.cotizacion_id));
+      if (scsOt.length === 0) return { pendiente: false, motivo: null };
+      const noConvertidas = scsOt.filter((s: any) => s.estado !== "convertida_oc").length;
+      if (noConvertidas > 0) {
+        return { pendiente: true, motivo: `${noConvertidas} solicitud(es) sin convertir a OC` };
+      }
+      const scIdsOt = scsOt.map((s: any) => s.id);
+      const ocIdsOt = Array.from(
+        new Set(
+          (links ?? [])
+            .filter((l: any) => scIdsOt.includes(l.solicitud_compra_id))
+            .map((l: any) => l.orden_compra_id),
+        ),
+      );
+      if (ocIdsOt.length === 0) return { pendiente: true, motivo: "OC no encontrada" };
+      const noCompletadas = ocIdsOt.filter((id) => ocEstadoMap.get(id) !== "completada").length;
+      if (noCompletadas > 0) {
+        return { pendiente: true, motivo: `${noCompletadas} OC no completada(s)` };
+      }
+      return { pendiente: false, motivo: null };
+    };
+
+    const result: OTPendiente[] = pendientes.map((o: any) => {
+      const saldo = saldoMap.get(o.id) ?? 0;
+      const compra = computeCompra(o.id);
+      return {
+        ...o,
+        informe: infMap.get(o.id) ?? null,
+        pago_pendiente: saldo > 0,
+        saldo_pendiente: saldo,
+        compra_pendiente: compra.pendiente,
+        compra_motivo: compra.motivo,
+      };
+    });
 
     setOts(result);
 
@@ -178,10 +264,22 @@ export default function CierreAdministrativo() {
               <Card key={ot.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between text-lg">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <FileText className="h-5 w-5" />
                       OT {ot.numero}
                       <Badge variant="outline">{ot.clientes?.razon_social ?? "—"}</Badge>
+                      {ot.pago_pendiente && (
+                        <Badge variant="destructive" className="gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Pago pendiente ({formatCurrency(ot.saldo_pendiente, "CLP")})
+                        </Badge>
+                      )}
+                      {ot.compra_pendiente && (
+                        <Badge variant="destructive" className="gap-1">
+                          <AlertTriangle className="h-3 w-3" />
+                          Compra a proveedor pendiente{ot.compra_motivo ? `: ${ot.compra_motivo}` : ""}
+                        </Badge>
+                      )}
                     </div>
                     <Button asChild variant="ghost" size="sm">
                       <Link to={`/ordenes-servicio/${ot.id}`}>
@@ -318,8 +416,18 @@ export default function CierreAdministrativo() {
                     )}
                   </div>
 
-                  <div className="flex justify-end">
-                    <Button onClick={() => handleCerrar(ot)} disabled={guardando === ot.id}>
+                  <div className="flex flex-col items-end gap-2">
+                    {(ot.pago_pendiente || ot.compra_pendiente) && (
+                      <p className="text-xs text-destructive text-right">
+                        No se puede cerrar mientras existan dependencias pendientes.
+                      </p>
+                    )}
+                    <Button
+                      onClick={() => handleCerrar(ot)}
+                      disabled={
+                        guardando === ot.id || ot.pago_pendiente || ot.compra_pendiente
+                      }
+                    >
                       <CheckCircle2 className="h-4 w-4 mr-2" />
                       {guardando === ot.id ? "Cerrando..." : "Cerrar OT"}
                     </Button>
