@@ -51,6 +51,8 @@ import { es } from "date-fns/locale";
 export default function OrdenServicioDetalle() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const validTabs = ["resumen", "comunicaciones", "asignaciones", "presupuesto", "facturacion", "informe"];
   const [dialogPresupuesto, setDialogPresupuesto] = useState(false);
   const [dialogDocumento, setDialogDocumento] = useState(false);
   const [dialogPago, setDialogPago] = useState<
