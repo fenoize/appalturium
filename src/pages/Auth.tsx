@@ -20,16 +20,31 @@ export default function Auth() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [recoverySent, setRecoverySent] = useState(false);
 
+  const redirectByRole = async (userId: string) => {
+    const { data } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId);
+    const roles = (data ?? []).map((r) => r.role as string);
+    if (roles.includes("cliente")) {
+      navigate("/portal-cliente");
+    } else if (roles.includes("tecnico") && !roles.includes("admin") && !roles.includes("supervisor")) {
+      navigate("/portal-tecnico");
+    } else {
+      navigate("/");
+    }
+  };
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        navigate("/");
+      if (session?.user) {
+        redirectByRole(session.user.id);
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        navigate("/");
+      if (session?.user) {
+        redirectByRole(session.user.id);
       }
     });
 
