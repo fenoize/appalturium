@@ -70,7 +70,7 @@ export function useVincularPagoCuota() {
     mutationFn: async ({ cuotaId, pagoId }: { cuotaId: string; pagoId: string }) => {
       const { error } = await (supabase as any)
         .from("plan_pagos")
-        .update({ pago_id: pagoId, estado: "pagada" })
+        .update({ pago_id: pagoId })
         .eq("id", cuotaId);
       if (error) throw error;
     },
