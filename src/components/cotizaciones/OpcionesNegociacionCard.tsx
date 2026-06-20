@@ -183,6 +183,17 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
                   </Collapsible>
 
                   <div className="flex flex-col gap-2">
+                    {cotizacion && (
+                      <Button
+                        className="w-full"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setPreviewOp(op)}
+                      >
+                        <Eye className="h-4 w-4 mr-2" />
+                        Vista previa
+                      </Button>
+                    )}
                     <Button
                       className="w-full"
                       size="sm"
@@ -204,6 +215,7 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
                       Aceptar manualmente
                     </Button>
                   </div>
+
                 </div>
               );
             })}
@@ -220,6 +232,17 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
           moneda={moneda}
         />
       )}
+      {cotizacion && (
+        <Dialog open={!!previewOp} onOpenChange={(v) => !v && setPreviewOp(null)}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Vista previa — Opción {previewOp?.etiqueta}</DialogTitle>
+            </DialogHeader>
+            {previewOp && <VistaPreviaCotizacion cotizacion={cotizacion} opcion={previewOp} />}
+          </DialogContent>
+        </Dialog>
+      )}
     </Card>
   );
 }
+
