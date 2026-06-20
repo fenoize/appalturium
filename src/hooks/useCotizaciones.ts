@@ -42,6 +42,8 @@ export interface Cotizacion {
   rechazo_motivo: string | null;
   ot_id: string | null;
   solicitud_cotizacion_id?: string | null;
+  ubicacion_id?: string | null;
+  ubicacion?: { id: string; alias: string | null; direccion: string | null; comuna: string | null } | null;
   created_by: string;
   created_at: string;
   updated_at: string;
@@ -74,6 +76,7 @@ export interface CotizacionInput {
   notas?: string | null;
   condiciones?: string | null;
   solicitud_cotizacion_id?: string | null;
+  ubicacion_id?: string | null;
 }
 
 
@@ -159,7 +162,8 @@ export function useCotizacion(id: string | undefined) {
         .select(`
           *,
           cliente:clientes(id, razon_social, nombres, apellidos, rut, email, tipo),
-          orden_servicio:ordenes_servicio(id, numero)
+          orden_servicio:ordenes_servicio(id, numero),
+          ubicacion:ubicaciones(id, alias, direccion, comuna)
         `)
         .eq("id", id)
         .maybeSingle();

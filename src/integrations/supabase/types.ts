@@ -631,6 +631,7 @@ export type Database = {
           subtotal: number
           token_acceso: string | null
           total: number
+          ubicacion_id: string | null
           updated_at: string
           validez_dias: number
         }
@@ -658,6 +659,7 @@ export type Database = {
           subtotal?: number
           token_acceso?: string | null
           total?: number
+          ubicacion_id?: string | null
           updated_at?: string
           validez_dias?: number
         }
@@ -685,6 +687,7 @@ export type Database = {
           subtotal?: number
           token_acceso?: string | null
           total?: number
+          ubicacion_id?: string | null
           updated_at?: string
           validez_dias?: number
         }
@@ -722,6 +725,13 @@ export type Database = {
             columns: ["solicitud_cotizacion_id"]
             isOneToOne: false
             referencedRelation: "solicitudes_cotizacion"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cotizaciones_ubicacion_id_fkey"
+            columns: ["ubicacion_id"]
+            isOneToOne: false
+            referencedRelation: "ubicaciones"
             referencedColumns: ["id"]
           },
         ]

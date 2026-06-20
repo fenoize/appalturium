@@ -57,7 +57,7 @@ export default function CotizacionNueva() {
 
   // Estados del formulario
   const [clienteId, setClienteId] = useState<string | null>(routeState.cliente_id ?? null);
-  const [ubicacionId] = useState<string | null>(routeState.ubicacion_id ?? null);
+  const [ubicacionId, setUbicacionId] = useState<string | null>(routeState.ubicacion_id ?? null);
   const [solicitudCotizacionId] = useState<string | null>(routeState.solicitud_cotizacion_id ?? null);
   const [moneda, setMoneda] = useState<TipoMoneda>("CLP");
   const [validezDias, setValidezDias] = useState(30);
@@ -109,6 +109,28 @@ export default function CotizacionNueva() {
   const { data: servicios } = useServicios();
 
   const clienteSeleccionado = clientes?.find(c => c.id === clienteId);
+
+  const { data: ubicacionesCliente } = useQuery({
+    queryKey: ["ubicaciones_cliente_cotizacion", clienteId],
+    queryFn: async () => {
+      if (!clienteId) return [];
+      const { data, error } = await supabase
+        .from("ubicaciones")
+        .select("id, alias, direccion, comuna, es_principal")
+        .eq("cliente_id", clienteId);
+      if (error) throw error;
+      return data ?? [];
+    },
+    enabled: !!clienteId,
+  });
+
+  // Limpia ubicación si el cliente cambia y la ubicación ya no le pertenece
+  useEffect(() => {
+    if (!ubicacionesCliente) return;
+    if (ubicacionId && !ubicacionesCliente.some((u: any) => u.id === ubicacionId)) {
+      setUbicacionId(null);
+    }
+  }, [ubicacionesCliente, ubicacionId]);
   const { data: paramsFacturacion } = useParametrosSistema("facturacion");
   const ivaPct = (() => {
     const p = paramsFacturacion?.find((x) => x.key === "iva_porcentaje");
@@ -283,6 +305,7 @@ export default function CotizacionNueva() {
       await crearCotizacion.mutateAsync({
         cotizacion: {
           cliente_id: clienteId,
+          ubicacion_id: ubicacionId,
           moneda,
           validez_dias: validezDias,
           notas: notas || null,
@@ -451,6 +474,28 @@ export default function CotizacionNueva() {
                   {clienteSeleccionado.email && (
                     <p className="text-sm text-muted-foreground">Email: {clienteSeleccionado.email}</p>
                   )}
+                </div>
+              )}
+
+              {clienteSeleccionado && ubicacionesCliente && ubicacionesCliente.length > 1 && (
+                <div>
+                  <Label>Ubicación</Label>
+                  <Select
+                    value={ubicacionId ?? "__none__"}
+                    onValueChange={(v) => setUbicacionId(v === "__none__" ? null : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una ubicación" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Sin ubicación</SelectItem>
+                      {ubicacionesCliente.map((u: any) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.alias} - {u.direccion}{u.comuna ? `, ${u.comuna}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               )}
             </CardContent>
