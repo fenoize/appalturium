@@ -2,15 +2,30 @@ import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Send, CheckCircle, XCircle, Clock, CheckCircle2 } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Send, CheckCircle, XCircle, Clock, CheckCircle2, ChevronDown } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import {
   useCotizacionOpciones,
   usePresentarOpcion,
+  useActualizarFormatoOpcion,
   type EstadoOpcion,
   type EtiquetaOpcion,
+  type FormatoOpcion,
 } from "@/hooks/useCotizacionOpciones";
 import { AceptarOpcionDialog } from "./AceptarOpcionDialog";
+import { DetalleOpcionAgrupado } from "./DetalleOpcionAgrupado";
 
 const ETIQUETAS: EtiquetaOpcion[] = ["A", "B", "C"];
 
@@ -22,6 +37,12 @@ const estadoBadge: Record<EstadoOpcion, { label: string; variant: "default" | "s
   descartada: { label: "Descartada", variant: "secondary", icon: XCircle },
 };
 
+const FORMATO_LABELS: Record<FormatoOpcion, string> = {
+  categorias: "Por categoría",
+  items_por_categoria: "Items por categoría",
+  items_por_categoria_padre: "Items por categoría padre",
+};
+
 interface Props {
   cotizacionId: string;
   moneda?: string;
@@ -31,7 +52,9 @@ interface Props {
 export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionActualId }: Props) {
   const { data: opciones, isLoading } = useCotizacionOpciones(cotizacionId);
   const presentar = usePresentarOpcion();
+  const actualizarFormato = useActualizarFormatoOpcion();
   const [aceptando, setAceptando] = useState<{ id: string; etiqueta: string; total: number } | null>(null);
+  const [abiertas, setAbiertas] = useState<Record<string, boolean>>({});
 
   return (
     <Card>
@@ -66,6 +89,9 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
               const meta = estadoBadge[op.estado];
               const Icon = meta.icon;
               const esActual = opcionActualId === op.id;
+              const bloqueado =
+                op.estado === "aceptada" || op.estado === "rechazada" || op.estado === "descartada";
+              const open = !!abiertas[op.id];
               return (
                 <div
                   key={op.id}
@@ -100,6 +126,53 @@ export function OpcionesNegociacionCard({ cotizacionId, moneda = "CLP", opcionAc
                       <span>{formatCurrency(op.total, moneda as any)}</span>
                     </div>
                   </div>
+
+                  <div className="space-y-1">
+                    <label className="text-xs text-muted-foreground">Formato</label>
+                    <Select
+                      value={op.formato}
+                      disabled={bloqueado || actualizarFormato.isPending}
+                      onValueChange={(v: FormatoOpcion) =>
+                        actualizarFormato.mutate({
+                          id: op.id,
+                          formato: v,
+                          cotizacion_id: op.cotizacion_id,
+                        })
+                      }
+                    >
+                      <SelectTrigger className="h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(FORMATO_LABELS) as FormatoOpcion[]).map((f) => (
+                          <SelectItem key={f} value={f}>
+                            {FORMATO_LABELS[f]}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Collapsible
+                    open={open}
+                    onOpenChange={(v) => setAbiertas((s) => ({ ...s, [op.id]: v }))}
+                  >
+                    <CollapsibleTrigger asChild>
+                      <Button variant="ghost" size="sm" className="w-full justify-between">
+                        Ver detalle
+                        <ChevronDown
+                          className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
+                        />
+                      </Button>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="pt-2">
+                      <DetalleOpcionAgrupado
+                        cotizacionId={op.cotizacion_id}
+                        formato={op.formato}
+                        moneda={moneda}
+                      />
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   <div className="flex flex-col gap-2">
                     <Button

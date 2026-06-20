@@ -59,3 +59,23 @@ export function usePresentarOpcion() {
       toast({ title: "Error", description: e?.message ?? "No se pudo presentar", variant: "destructive" }),
   });
 }
+
+export function useActualizarFormatoOpcion() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, formato, cotizacion_id }: { id: string; formato: FormatoOpcion; cotizacion_id: string }) => {
+      const { error } = await (supabase as any)
+        .from("cotizacion_opciones")
+        .update({ formato })
+        .eq("id", id);
+      if (error) throw error;
+      return { id, formato, cotizacion_id };
+    },
+    onSuccess: ({ cotizacion_id }) => {
+      qc.invalidateQueries({ queryKey: ["cotizacion_opciones", cotizacion_id] });
+    },
+    onError: (e: any) =>
+      toast({ title: "Error", description: e?.message ?? "No se pudo actualizar formato", variant: "destructive" }),
+  });
+}
+
