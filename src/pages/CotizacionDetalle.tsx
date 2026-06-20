@@ -391,10 +391,18 @@ export default function CotizacionDetalle() {
           )}
 
           {cotizacion.ot_id && cotizacion.orden_servicio && (
-            <Button variant="outline" onClick={() => navigate(`/ordenes-servicio/${cotizacion.ot_id}`)}>
-              <ClipboardList className="h-4 w-4 mr-2" />
-              Ver OT {cotizacion.orden_servicio.numero}
-            </Button>
+            <>
+              <Button variant="outline" onClick={() => navigate(`/ordenes-servicio/${cotizacion.ot_id}`)}>
+                <ClipboardList className="h-4 w-4 mr-2" />
+                Ver OT {cotizacion.orden_servicio.numero}
+              </Button>
+              {cotizacion.estado === 'aceptada' && (
+                <Button onClick={() => navigate(`/ordenes-servicio/${cotizacion.ot_id}?tab=facturacion`)}>
+                  <Receipt className="h-4 w-4 mr-2" />
+                  Ver plan de pagos
+                </Button>
+              )}
+            </>
           )}
         </div>
       </div>
