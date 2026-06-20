@@ -259,6 +259,7 @@ export default function Calendario() {
           ) : (
             <div style={{ height: "70vh" }}>
               <DnDCalendar
+                key={calendarKey}
                 localizer={localizer}
                 events={events}
                 startAccessor="start"
