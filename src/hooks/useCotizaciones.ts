@@ -162,7 +162,8 @@ export function useCotizacion(id: string | undefined) {
         .select(`
           *,
           cliente:clientes(id, razon_social, nombres, apellidos, rut, email, tipo),
-          orden_servicio:ordenes_servicio(id, numero)
+          orden_servicio:ordenes_servicio(id, numero),
+          ubicacion:ubicaciones(id, alias, direccion, comuna)
         `)
         .eq("id", id)
         .maybeSingle();
