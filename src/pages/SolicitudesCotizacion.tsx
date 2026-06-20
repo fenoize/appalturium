@@ -224,7 +224,15 @@ export default function SolicitudesCotizacion() {
               <TableBody>
                 {(solicitudes ?? []).map((s) => (
                   <TableRow key={s.id}>
-                    <TableCell className="font-mono">{s.numero}</TableCell>
+                    <TableCell className="font-mono">
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/solicitudes-cotizacion/${s.id}`)}
+                        className="underline hover:text-primary"
+                      >
+                        {s.numero}
+                      </button>
+                    </TableCell>
 
                     <TableCell>{formatCliente(s.cliente)}</TableCell>
                     <TableCell>{s.tipo_servicio || "—"}</TableCell>

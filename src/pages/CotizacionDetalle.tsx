@@ -198,7 +198,7 @@ export default function CotizacionDetalle() {
             {solicitudOrigen && (
               <button
                 type="button"
-                onClick={() => navigate("/solicitudes-cotizacion")}
+                onClick={() => navigate(`/solicitudes-cotizacion/${solicitudOrigen.id}`)}
                 className="mt-1 inline-flex items-center"
               >
                 <Badge variant="outline" className="cursor-pointer hover:bg-muted">
