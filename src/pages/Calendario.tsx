@@ -97,6 +97,22 @@ export default function Calendario() {
       inicio: Date;
       fin: Date;
     }) => {
+      // Validar conflictos con técnicos asignados a esta OT
+      const personalIds = asignacionesPorOT.get(otId) ?? [];
+      if (personalIds.length > 0) {
+        const conflictos = await detectarConflictosAsignacion({
+          personalIds,
+          inicio,
+          fin,
+          otIdExcluida: otId,
+        });
+        if (conflictos.length > 0) {
+          throw new Error(
+            `Choca con la OT ${conflictos.map((c) => c.numero).join(", ")} del mismo técnico`
+          );
+        }
+      }
+
       const { error } = await supabase
         .from("ordenes_servicio")
         .update({
@@ -112,6 +128,8 @@ export default function Calendario() {
     },
     onError: (err: any) => {
       toast.error("Error al reprogramar", { description: err.message });
+      // Revertir visualmente el evento a su posición original
+      setCalendarKey((k) => k + 1);
     },
   });
 
