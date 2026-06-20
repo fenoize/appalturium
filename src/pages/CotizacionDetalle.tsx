@@ -29,7 +29,8 @@ import {
   Link,
   ClipboardList,
   Edit,
-  Download
+  Download,
+  Receipt
 } from "lucide-react";
 import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
 import { PresupuestoInternoCard } from "@/components/cotizaciones/PresupuestoInternoCard";
