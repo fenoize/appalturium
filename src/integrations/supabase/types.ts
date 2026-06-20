@@ -3321,6 +3321,7 @@ export type Database = {
         Args: { p_proveedor_id: string; p_sc_ids: string[] }
         Returns: string
       }
+      fn_firmas_ot_id_from_path: { Args: { _name: string }; Returns: string }
       fn_generar_opciones_cotizacion: {
         Args: { p_cotizacion_id: string }
         Returns: undefined
