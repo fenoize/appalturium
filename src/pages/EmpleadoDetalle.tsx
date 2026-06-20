@@ -225,7 +225,7 @@ export default function EmpleadoDetalle() {
                   <p className="text-sm text-muted-foreground">OTs Asignadas</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
-                  <p className="text-3xl font-bold">{asignaciones.filter((a: any) => a.ordenes_servicio?.estado === "completed").length}</p>
+                  <p className="text-3xl font-bold">{asignaciones.filter((a: any) => a.ordenes_servicio?.estado === "finalizado").length}</p>
                   <p className="text-sm text-muted-foreground">Completadas</p>
                 </div>
                 <div className="text-center p-4 border rounded-lg">
