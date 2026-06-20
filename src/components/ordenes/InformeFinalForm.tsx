@@ -293,7 +293,15 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         <CardTitle>{yaExiste ? "Editar Informe Final" : "Informe Final"}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        {yaExiste && (
+        {readOnly && (
+          <Alert>
+            <Lock className="h-4 w-4" />
+            <AlertDescription>
+              La OT está finalizada. El informe está en modo solo lectura. Solo un administrador o supervisor puede modificarlo.
+            </AlertDescription>
+          </Alert>
+        )}
+        {yaExiste && !readOnly && (
           <Alert>
             <Info className="h-4 w-4" />
             <AlertDescription>
