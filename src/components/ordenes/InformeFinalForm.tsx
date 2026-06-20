@@ -9,7 +9,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eraser, MapPin, Save, Info, Upload, Trash2 } from "lucide-react";
+import { Eraser, MapPin, Save, Info, Upload, Trash2, Lock } from "lucide-react";
+import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
 
 interface InformeFinalFormProps {
   otId: string;
