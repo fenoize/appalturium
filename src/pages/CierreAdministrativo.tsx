@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
-import { CheckCircle2, FileText, ExternalLink, Receipt } from "lucide-react";
+import { CheckCircle2, FileText, ExternalLink, Receipt, AlertTriangle } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -28,6 +28,10 @@ interface OTPendiente {
     recomendaciones: string | null;
     evidencias_urls: any;
   } | null;
+  pago_pendiente: boolean;
+  saldo_pendiente: number;
+  compra_pendiente: boolean;
+  compra_motivo: string | null;
 }
 
 export default function CierreAdministrativo() {
