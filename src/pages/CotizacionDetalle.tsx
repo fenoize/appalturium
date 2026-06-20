@@ -34,6 +34,8 @@ import {
 import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
 import { PresupuestoInternoCard } from "@/components/cotizaciones/PresupuestoInternoCard";
 import { OpcionesNegociacionCard } from "@/components/cotizaciones/OpcionesNegociacionCard";
+import { BitacoraNegociacion } from "@/components/cotizaciones/BitacoraNegociacion";
+
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -482,7 +484,12 @@ export default function CotizacionDetalle() {
             cotizacionId={cotizacion.id}
             moneda={cotizacion.moneda}
             opcionActualId={(cotizacion as any).opcion_actual_id ?? null}
+            cotizacion={cotizacion}
           />
+
+          {/* Bitácora de negociación */}
+          <BitacoraNegociacion cotizacionId={cotizacion.id} />
+
 
           {/* Notas */}
           {(cotizacion.notas || cotizacion.condiciones) && (
