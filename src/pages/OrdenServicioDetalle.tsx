@@ -237,7 +237,11 @@ export default function OrdenServicioDetalle() {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="resumen" className="space-y-6">
+      <Tabs
+        value={validTabs.includes(searchParams.get("tab") || "") ? (searchParams.get("tab") as string) : "resumen"}
+        onValueChange={(v) => setSearchParams((prev) => { const p = new URLSearchParams(prev); p.set("tab", v); return p; }, { replace: true })}
+        className="space-y-6"
+      >
         <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="resumen">
             <ClipboardList className="h-4 w-4 mr-2" />
