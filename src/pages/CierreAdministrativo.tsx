@@ -207,6 +207,19 @@ export default function CierreAdministrativo() {
           .single();
         if (errDoc) throw errDoc;
         documentoId = (doc as any).id;
+
+        // Registrar pago por el monto total para que saldo quede en 0
+        // (el cobro final del cierre representa dinero efectivamente cobrado)
+        const { error: errPago } = await supabase.from("pagos").insert({
+          documento_id: documentoId,
+          fecha: new Date().toISOString().split("T")[0],
+          monto: cobro,
+          metodo: "transferencia",
+          referencia: `Cobro al cierre OT ${ot.numero}`,
+          notas: "Pago registrado automáticamente al cerrar la OT",
+          registrado_por_user_id: user.id,
+        } as any);
+        if (errPago) throw errPago;
       }
 
       const { error } = await supabase.from("cierres_ot").insert({
