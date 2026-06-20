@@ -476,6 +476,28 @@ export default function CotizacionNueva() {
                   )}
                 </div>
               )}
+
+              {clienteSeleccionado && ubicacionesCliente && ubicacionesCliente.length > 1 && (
+                <div>
+                  <Label>Ubicación</Label>
+                  <Select
+                    value={ubicacionId ?? "__none__"}
+                    onValueChange={(v) => setUbicacionId(v === "__none__" ? null : v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecciona una ubicación" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">Sin ubicación</SelectItem>
+                      {ubicacionesCliente.map((u: any) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.alias} - {u.direccion}{u.comuna ? `, ${u.comuna}` : ""}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </CardContent>
           </Card>
 
