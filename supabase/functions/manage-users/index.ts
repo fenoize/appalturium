@@ -64,7 +64,24 @@ serve(async (req) => {
 
     const { action, ...payload } = await req.json();
 
+    // Helper: remove the default admin role auto-assigned by the trigger
+    // when the real intended role is "tecnico" (or any other non-admin role).
+    async function cleanupDefaultAdminIfNeeded(
+      supabaseAdmin: ReturnType<typeof createClient>,
+      newUserId: string,
+      userRoles: string[],
+    ) {
+      if (userRoles.includes("tecnico") && !userRoles.includes("admin")) {
+        await supabaseAdmin
+          .from("user_roles")
+          .delete()
+          .eq("user_id", newUserId)
+          .eq("role", "admin");
+      }
+    }
+
     let result;
+
 
     switch (action) {
       case "create": {
