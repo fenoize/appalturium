@@ -84,6 +84,9 @@ export function PresupuestoInternoCard({
   const crear = useCrearPresupuestoInterno();
   const actualizar = useActualizarPresupuestoInterno();
   const eliminar = useEliminarPresupuestoInterno();
+  const aprobar = useAprobarPresupuestoInterno();
+  const { hasAnyRole } = useCurrentUserRole();
+  const isAdminOrSupervisor = hasAnyRole(["admin", "supervisor"]);
 
   const [items, setItems] = useState<LineaCosto[]>([]);
   const [margenPct, setMargenPct] = useState<number>(30);
