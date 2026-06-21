@@ -53,10 +53,13 @@ import {
   useCrearPresupuestoInterno,
   useActualizarPresupuestoInterno,
   useEliminarPresupuestoInterno,
+  useAprobarPresupuestoInterno,
   LineaCosto,
   TipoLineaCosto,
 } from "@/hooks/usePresupuestoInterno";
 import { toast } from "@/hooks/use-toast";
+import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
+import { CheckCircle2 } from "lucide-react";
 
 interface Props {
   cotizacionId: string;
