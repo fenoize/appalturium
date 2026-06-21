@@ -254,10 +254,11 @@ export default function Proveedores() {
             <div className="space-y-3">
               {ordenes.map((orden) => {
                 const estadoInfo = estadoOrdenLabels[orden.estado] || { label: orden.estado, variant: "secondary" as const };
+                const canReceive = ["borrador", "enviada", "parcial"].includes(orden.estado);
                 return (
                   <Card key={orden.id}>
                     <CardContent className="py-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                           {getEstadoIcon(orden.estado)}
                           <div>
@@ -277,6 +278,15 @@ export default function Proveedores() {
                               {format(new Date(orden.fecha_emision), "dd/MM/yyyy", { locale: es })}
                             </p>
                           </div>
+                          {canReceive && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setRecibirOrdenId(orden.id)}
+                            >
+                              Recibir
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
