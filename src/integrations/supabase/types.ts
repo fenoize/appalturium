@@ -3457,7 +3457,12 @@ export type Database = {
         | "administrador_sucursal"
         | "encargado_proyecto"
         | "otro"
-      tipo_contacto_persona: "pareja" | "hijo" | "secundario" | "otro"
+      tipo_contacto_persona:
+        | "principal"
+        | "pareja"
+        | "hijo"
+        | "secundario"
+        | "otro"
       tipo_documento_venta:
         | "boleta"
         | "factura"
@@ -3694,7 +3699,13 @@ export const Constants = {
         "encargado_proyecto",
         "otro",
       ],
-      tipo_contacto_persona: ["pareja", "hijo", "secundario", "otro"],
+      tipo_contacto_persona: [
+        "principal",
+        "pareja",
+        "hijo",
+        "secundario",
+        "otro",
+      ],
       tipo_documento_venta: [
         "boleta",
         "factura",
