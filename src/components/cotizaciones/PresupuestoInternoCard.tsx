@@ -58,6 +58,7 @@ import {
   TipoLineaCosto,
 } from "@/hooks/usePresupuestoInterno";
 import { toast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
 import { CheckCircle2 } from "lucide-react";
 
@@ -249,7 +250,24 @@ export function PresupuestoInternoCard({
                     <AlertDialogCancel>Cancelar</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() =>
-                        aprobar.mutate({ id: presupuesto.id, cotizacion_id: cotizacionId })
+                        aprobar.mutate(
+                          { id: presupuesto.id, cotizacion_id: cotizacionId },
+                          {
+                            onSuccess: async () => {
+                              const { data, error } = await supabase
+                                .from("cotizacion_opciones")
+                                .select("id")
+                                .eq("cotizacion_id", cotizacionId);
+                              if (error || !data || data.length !== 3) {
+                                toast({
+                                  title: "Presupuesto aprobado, pero opciones no generadas",
+                                  description: `Se esperaban 3 opciones (A/B/C) y se encontraron ${data?.length ?? 0}. Revisa manualmente la tarjeta "Opciones de negociación".`,
+                                  variant: "destructive",
+                                });
+                              }
+                            },
+                          }
+                        )
                       }
                     >
                       Aprobar
