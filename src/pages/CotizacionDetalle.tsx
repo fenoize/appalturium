@@ -499,12 +499,14 @@ export default function CotizacionDetalle() {
           />
 
           {/* Opciones de negociación A/B/C */}
-          <OpcionesNegociacionCard
-            cotizacionId={cotizacion.id}
-            moneda={cotizacion.moneda}
-            opcionActualId={(cotizacion as any).opcion_actual_id ?? null}
-            cotizacion={cotizacion}
-          />
+          <div id="opciones-negociacion">
+            <OpcionesNegociacionCard
+              cotizacionId={cotizacion.id}
+              moneda={cotizacion.moneda}
+              opcionActualId={(cotizacion as any).opcion_actual_id ?? null}
+              cotizacion={cotizacion}
+            />
+          </div>
 
           {/* Bitácora de negociación */}
           <BitacoraNegociacion cotizacionId={cotizacion.id} />
