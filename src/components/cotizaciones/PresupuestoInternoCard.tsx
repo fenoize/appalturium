@@ -265,6 +265,23 @@ export function PresupuestoInternoCard({
                                   description: `Se esperaban 3 opciones (A/B/C) y se encontraron ${data?.length ?? 0}. Revisa manualmente la tarjeta "Opciones de negociación".`,
                                   variant: "destructive",
                                 });
+                              } else {
+                                toast({
+                                  title: "Presupuesto aprobado",
+                                  description: "Se generaron las opciones de negociación A/B/C.",
+                                  action: (
+                                    <ToastAction
+                                      altText="Ver opciones"
+                                      onClick={() =>
+                                        document
+                                          .getElementById("opciones-negociacion")
+                                          ?.scrollIntoView({ behavior: "smooth", block: "start" })
+                                      }
+                                    >
+                                      Ver opciones
+                                    </ToastAction>
+                                  ),
+                                });
                               }
                             },
                           }
