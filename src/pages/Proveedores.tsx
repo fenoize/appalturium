@@ -16,8 +16,10 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProveedorCard } from "@/components/proveedores/ProveedorCard";
+import { ProveedorCard } from "@/components/proveedores/ProveedorCard";
 import { ProveedorForm } from "@/components/proveedores/ProveedorForm";
 import { OrdenCompraForm } from "@/components/proveedores/OrdenCompraForm";
+import { RecibirOrdenCompraDialog } from "@/components/proveedores/RecibirOrdenCompraDialog";
 import { ReporteCompras } from "@/components/proveedores/ReporteCompras";
 import { useProveedores, useDeleteProveedor, type Proveedor } from "@/hooks/useProveedores";
 import { useOrdenesCompra } from "@/hooks/useOrdenesCompra";
