@@ -218,6 +218,46 @@ export function PresupuestoInternoCard({
                 <Save className="h-4 w-4 mr-1" /> Guardar
               </Button>
             )}
+            {!aprobado && !readOnly && isAdminOrSupervisor && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    disabled={dirty || items.length === 0 || aprobar.isPending}
+                    title={
+                      dirty
+                        ? "Guarda los cambios antes de aprobar"
+                        : items.length === 0
+                        ? "Agrega al menos 1 línea de costo"
+                        : "Aprobar presupuesto"
+                    }
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-1" /> Aprobar presupuesto
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Aprobar presupuesto interno?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Al aprobar se bloquearán los costos y se generarán automáticamente las
+                      3 opciones de negociación (A/B/C) para esta cotización. Esta acción no
+                      se puede deshacer desde la interfaz.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        aprobar.mutate({ id: presupuesto.id, cotizacion_id: cotizacionId })
+                      }
+                    >
+                      Aprobar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             {!bloqueado && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
