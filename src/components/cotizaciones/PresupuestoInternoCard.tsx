@@ -61,6 +61,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
 import { CheckCircle2 } from "lucide-react";
+import { ToastAction } from "@/components/ui/toast";
 
 interface Props {
   cotizacionId: string;
