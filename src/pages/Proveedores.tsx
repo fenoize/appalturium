@@ -313,6 +313,12 @@ export default function Proveedores() {
         onOpenChange={setOrdenFormOpen}
       />
 
+      <RecibirOrdenCompraDialog
+        ordenId={recibirOrdenId}
+        onOpenChange={(open) => !open && setRecibirOrdenId(null)}
+      />
+
+
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
