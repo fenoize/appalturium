@@ -1,0 +1,1 @@
+ALTER TYPE public.tipo_contacto_persona ADD VALUE IF NOT EXISTS 'principal' BEFORE 'pareja';
