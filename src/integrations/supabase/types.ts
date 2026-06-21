@@ -3342,6 +3342,10 @@ export type Database = {
       }
       fn_obtener_iva_pct: { Args: never; Returns: number }
       fn_presentar_opcion: { Args: { p_opcion_id: string }; Returns: string }
+      fn_tecnico_asignado_a_cliente: {
+        Args: { _cliente_id: string; _user_id: string }
+        Returns: boolean
+      }
       generar_codigo_equipo: { Args: never; Returns: string }
       generar_numero_cotizacion: { Args: never; Returns: string }
       generar_numero_documento: {
