@@ -51,6 +51,7 @@ export default function Proveedores() {
   const [editingProveedor, setEditingProveedor] = useState<Proveedor | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [recibirOrdenId, setRecibirOrdenId] = useState<string | null>(null);
 
   const { data: proveedores = [], isLoading: loadingProveedores } = useProveedores();
   const { data: ordenes = [], isLoading: loadingOrdenes } = useOrdenesCompra();
