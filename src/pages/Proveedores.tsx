@@ -16,7 +16,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { ProveedorCard } from "@/components/proveedores/ProveedorCard";
-import { ProveedorCard } from "@/components/proveedores/ProveedorCard";
 import { ProveedorForm } from "@/components/proveedores/ProveedorForm";
 import { OrdenCompraForm } from "@/components/proveedores/OrdenCompraForm";
 import { RecibirOrdenCompraDialog } from "@/components/proveedores/RecibirOrdenCompraDialog";
