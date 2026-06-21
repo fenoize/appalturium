@@ -250,8 +250,9 @@ export function useRecibirOrdenCompra() {
 
       if (ordenError) throw ordenError;
     },
-    onSuccess: () => {
+    onSuccess: (_data, vars) => {
       queryClient.invalidateQueries({ queryKey: ["ordenes_compra"] });
+      queryClient.invalidateQueries({ queryKey: ["orden_compra", vars.ordenId] });
       queryClient.invalidateQueries({ queryKey: ["inventario"] });
       queryClient.invalidateQueries({ queryKey: ["movimientos_inventario"] });
       toast({ title: "Recepción registrada exitosamente" });

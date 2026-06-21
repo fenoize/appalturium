@@ -18,6 +18,7 @@ import {
 import { ProveedorCard } from "@/components/proveedores/ProveedorCard";
 import { ProveedorForm } from "@/components/proveedores/ProveedorForm";
 import { OrdenCompraForm } from "@/components/proveedores/OrdenCompraForm";
+import { RecibirOrdenCompraDialog } from "@/components/proveedores/RecibirOrdenCompraDialog";
 import { ReporteCompras } from "@/components/proveedores/ReporteCompras";
 import { useProveedores, useDeleteProveedor, type Proveedor } from "@/hooks/useProveedores";
 import { useOrdenesCompra } from "@/hooks/useOrdenesCompra";
@@ -50,6 +51,7 @@ export default function Proveedores() {
   const [editingProveedor, setEditingProveedor] = useState<Proveedor | undefined>();
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [recibirOrdenId, setRecibirOrdenId] = useState<string | null>(null);
 
   const { data: proveedores = [], isLoading: loadingProveedores } = useProveedores();
   const { data: ordenes = [], isLoading: loadingOrdenes } = useOrdenesCompra();
@@ -252,10 +254,11 @@ export default function Proveedores() {
             <div className="space-y-3">
               {ordenes.map((orden) => {
                 const estadoInfo = estadoOrdenLabels[orden.estado] || { label: orden.estado, variant: "secondary" as const };
+                const canReceive = ["borrador", "enviada", "parcial"].includes(orden.estado);
                 return (
                   <Card key={orden.id}>
                     <CardContent className="py-4">
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4">
                           {getEstadoIcon(orden.estado)}
                           <div>
@@ -275,6 +278,15 @@ export default function Proveedores() {
                               {format(new Date(orden.fecha_emision), "dd/MM/yyyy", { locale: es })}
                             </p>
                           </div>
+                          {canReceive && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => setRecibirOrdenId(orden.id)}
+                            >
+                              Recibir
+                            </Button>
+                          )}
                         </div>
                       </div>
                     </CardContent>
@@ -300,6 +312,12 @@ export default function Proveedores() {
         open={ordenFormOpen}
         onOpenChange={setOrdenFormOpen}
       />
+
+      <RecibirOrdenCompraDialog
+        ordenId={recibirOrdenId}
+        onOpenChange={(open) => !open && setRecibirOrdenId(null)}
+      />
+
 
       <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
         <AlertDialogContent>
