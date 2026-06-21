@@ -74,10 +74,20 @@ export function useCrearPresupuestoInterno() {
     }) => {
       const items = input.items ?? [];
       const totales = calcularTotalesCosto(items);
+
+      // Fetch solicitud_cotizacion_id from cotización for the trigger
+      const { data: cot, error: cotErr } = await supabase
+        .from("cotizaciones")
+        .select("solicitud_cotizacion_id")
+        .eq("id", input.cotizacion_id)
+        .maybeSingle();
+      if (cotErr) throw cotErr;
+
       const { data, error } = await supabase
         .from("presupuestos")
         .insert({
           cotizacion_id: input.cotizacion_id,
+          solicitud_cotizacion_id: cot?.solicitud_cotizacion_id ?? null,
           ot_id: null,
           moneda: input.moneda ?? "CLP",
           items: items as any,
