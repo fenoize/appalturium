@@ -293,6 +293,22 @@ export function PresupuestoInternoCard({
           Información interna — el cliente no la ve. Sirve para calcular tu utilidad estimada.
         </p>
 
+        {aprobado && (
+          <div className="rounded-md border border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900 p-3 text-sm flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-green-800 dark:text-green-300">
+                Presupuesto aprobado
+              </p>
+              <p className="text-green-700 dark:text-green-400 text-xs">
+                Se generaron automáticamente las opciones de negociación (A/B/C). Revísalas en
+                la tarjeta "Opciones de negociación" más abajo en esta página.
+              </p>
+            </div>
+          </div>
+        )}
+
+
         {/* Tabla de líneas */}
         <div className="border rounded-lg overflow-x-auto">
           <Table>
