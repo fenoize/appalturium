@@ -74,10 +74,20 @@ export function useCrearPresupuestoInterno() {
     }) => {
       const items = input.items ?? [];
       const totales = calcularTotalesCosto(items);
+
+      // Fetch solicitud_cotizacion_id from cotización for the trigger
+      const { data: cot, error: cotErr } = await supabase
+        .from("cotizaciones")
+        .select("solicitud_cotizacion_id")
+        .eq("id", input.cotizacion_id)
+        .maybeSingle();
+      if (cotErr) throw cotErr;
+
       const { data, error } = await supabase
         .from("presupuestos")
         .insert({
           cotizacion_id: input.cotizacion_id,
+          solicitud_cotizacion_id: cot?.solicitud_cotizacion_id ?? null,
           ot_id: null,
           moneda: input.moneda ?? "CLP",
           items: items as any,
@@ -151,6 +161,34 @@ export function useEliminarPresupuestoInterno() {
     onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ["presupuesto_interno", data.cotizacion_id] });
       toast({ title: "Presupuesto interno eliminado" });
+    },
+    onError: (e: Error) => {
+      toast({ title: "Error", description: e.message, variant: "destructive" });
+    },
+  });
+}
+
+export function useAprobarPresupuestoInterno() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: { id: string; cotizacion_id: string }) => {
+      const { data, error } = await supabase
+        .from("presupuestos")
+        .update({ estado: "aprobado", aprobado_ts: new Date().toISOString() } as any)
+        .eq("id", input.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["presupuesto_interno", vars.cotizacion_id] });
+      qc.invalidateQueries({ queryKey: ["cotizacion_opciones", vars.cotizacion_id] });
+      qc.invalidateQueries({ queryKey: ["cotizacion", vars.cotizacion_id] });
+      toast({
+        title: "Presupuesto aprobado",
+        description: "Se generaron las opciones de negociación (A/B/C).",
+      });
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });

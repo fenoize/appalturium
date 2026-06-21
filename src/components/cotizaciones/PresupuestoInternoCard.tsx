@@ -53,10 +53,13 @@ import {
   useCrearPresupuestoInterno,
   useActualizarPresupuestoInterno,
   useEliminarPresupuestoInterno,
+  useAprobarPresupuestoInterno,
   LineaCosto,
   TipoLineaCosto,
 } from "@/hooks/usePresupuestoInterno";
 import { toast } from "@/hooks/use-toast";
+import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
+import { CheckCircle2 } from "lucide-react";
 
 interface Props {
   cotizacionId: string;
@@ -81,6 +84,9 @@ export function PresupuestoInternoCard({
   const crear = useCrearPresupuestoInterno();
   const actualizar = useActualizarPresupuestoInterno();
   const eliminar = useEliminarPresupuestoInterno();
+  const aprobar = useAprobarPresupuestoInterno();
+  const { hasAnyRole } = useCurrentUserRole();
+  const isAdminOrSupervisor = hasAnyRole(["admin", "supervisor"]);
 
   const [items, setItems] = useState<LineaCosto[]>([]);
   const [margenPct, setMargenPct] = useState<number>(30);
@@ -212,6 +218,46 @@ export function PresupuestoInternoCard({
                 <Save className="h-4 w-4 mr-1" /> Guardar
               </Button>
             )}
+            {!aprobado && !readOnly && isAdminOrSupervisor && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="default"
+                    disabled={dirty || items.length === 0 || aprobar.isPending}
+                    title={
+                      dirty
+                        ? "Guarda los cambios antes de aprobar"
+                        : items.length === 0
+                        ? "Agrega al menos 1 línea de costo"
+                        : "Aprobar presupuesto"
+                    }
+                  >
+                    <CheckCircle2 className="h-4 w-4 mr-1" /> Aprobar presupuesto
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>¿Aprobar presupuesto interno?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Al aprobar se bloquearán los costos y se generarán automáticamente las
+                      3 opciones de negociación (A/B/C) para esta cotización. Esta acción no
+                      se puede deshacer desde la interfaz.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() =>
+                        aprobar.mutate({ id: presupuesto.id, cotizacion_id: cotizacionId })
+                      }
+                    >
+                      Aprobar
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
             {!bloqueado && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -246,6 +292,22 @@ export function PresupuestoInternoCard({
         <p className="text-xs text-muted-foreground">
           Información interna — el cliente no la ve. Sirve para calcular tu utilidad estimada.
         </p>
+
+        {aprobado && (
+          <div className="rounded-md border border-green-200 bg-green-50 dark:bg-green-950/30 dark:border-green-900 p-3 text-sm flex items-start gap-2">
+            <CheckCircle2 className="h-4 w-4 text-green-600 mt-0.5 shrink-0" />
+            <div>
+              <p className="font-medium text-green-800 dark:text-green-300">
+                Presupuesto aprobado
+              </p>
+              <p className="text-green-700 dark:text-green-400 text-xs">
+                Se generaron automáticamente las opciones de negociación (A/B/C). Revísalas en
+                la tarjeta "Opciones de negociación" más abajo en esta página.
+              </p>
+            </div>
+          </div>
+        )}
+
 
         {/* Tabla de líneas */}
         <div className="border rounded-lg overflow-x-auto">
