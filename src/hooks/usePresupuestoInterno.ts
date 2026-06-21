@@ -185,10 +185,6 @@ export function useAprobarPresupuestoInterno() {
       qc.invalidateQueries({ queryKey: ["presupuesto_interno", vars.cotizacion_id] });
       qc.invalidateQueries({ queryKey: ["cotizacion_opciones", vars.cotizacion_id] });
       qc.invalidateQueries({ queryKey: ["cotizacion", vars.cotizacion_id] });
-      toast({
-        title: "Presupuesto aprobado",
-        description: "Se generaron las opciones de negociación (A/B/C).",
-      });
     },
     onError: (e: Error) => {
       toast({ title: "Error", description: e.message, variant: "destructive" });
