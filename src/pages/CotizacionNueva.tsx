@@ -130,7 +130,7 @@ export default function CotizacionNueva() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("solicitudes_cotizacion")
-        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado, archivos_adjuntos, created_at, cliente:clientes(id, razon_social, nombres, apellidos, rut), ubicacion:ubicaciones(id, alias, direccion, comuna)")
+        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado, archivos_adjuntos, detalle_requerimiento, created_at, cliente:clientes(id, razon_social, nombres, apellidos, rut), ubicacion:ubicaciones(id, alias, direccion, comuna)")
         .eq("id", solicitudCotizacionId!)
         .maybeSingle();
       if (error) throw error;
