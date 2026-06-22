@@ -118,6 +118,8 @@ export default function SolicitudCotizacionNueva() {
     numeracion: "",
     region: "",
     comuna: "",
+    lat: null as number | null,
+    lng: null as number | null,
   });
   const [creandoUbicacion, setCreandoUbicacion] = useState(false);
 
