@@ -42,7 +42,7 @@ import { InformeFinalForm } from "@/components/ordenes/InformeFinalForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
@@ -72,6 +72,47 @@ export default function OrdenServicioDetalle() {
   const { data: ordenServicio, isLoading: loadingOT } = useOrdenServicioDetalle(id);
   const { data: presupuesto, isLoading: loadingPresupuesto } = usePresupuestoOT(id);
   const { data: documentos = [], isLoading: loadingDocumentos } = useDocumentosOT(id);
+
+  // Cotización de origen (si la OT fue generada desde una cotización aceptada)
+  const { data: cotizacionOrigen } = useQuery({
+    queryKey: ["cotizacion_origen_ot", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cotizaciones")
+        .select("id, numero, solicitud_cotizacion_id")
+        .eq("ot_id", id!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; numero: string; solicitud_cotizacion_id: string | null } | null;
+    },
+    enabled: !!id,
+  });
+
+  // Presupuesto interno aprobado de la cotización de origen (concepto distinto al presupuesto de OT)
+  const { data: presupuestoCotizacion, isLoading: loadingPresupuestoCot } = useQuery({
+    queryKey: ["presupuesto_interno_cotizacion", cotizacionOrigen?.id, cotizacionOrigen?.solicitud_cotizacion_id],
+    queryFn: async () => {
+      const conds: string[] = [];
+      if (cotizacionOrigen?.id) conds.push(`cotizacion_id.eq.${cotizacionOrigen.id}`);
+      if (cotizacionOrigen?.solicitud_cotizacion_id)
+        conds.push(`solicitud_cotizacion_id.eq.${cotizacionOrigen.solicitud_cotizacion_id}`);
+      if (conds.length === 0) return null;
+      const { data, error } = await (supabase as any)
+        .from("presupuestos")
+        .select("*")
+        .or(conds.join(","))
+        .order("aprobado_ts", { ascending: false, nullsFirst: false })
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!cotizacionOrigen && (!!cotizacionOrigen.id || !!cotizacionOrigen.solicitud_cotizacion_id),
+  });
+
+  const presupuestoInternoAprobado =
+    presupuestoCotizacion && presupuestoCotizacion.estado === "aprobado" ? presupuestoCotizacion : null;
 
   const crearPresupuesto = useCrearPresupuesto();
   const actualizarPresupuesto = useActualizarPresupuesto();
@@ -332,7 +373,7 @@ export default function OrdenServicioDetalle() {
 
         {/* Tab: Presupuesto */}
         <TabsContent value="presupuesto" className="space-y-6">
-          {loadingPresupuesto ? (
+          {loadingPresupuesto || loadingPresupuestoCot ? (
             <Card>
               <CardContent className="pt-6">
                 <div className="animate-pulse space-y-4">
@@ -349,6 +390,67 @@ export default function OrdenServicioDetalle() {
               onRechazar={handleRechazarPresupuesto}
               canEdit={true}
             />
+          ) : presupuestoCotizacion ? (
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Presupuesto interno de la cotización de origen
+                    </p>
+                    {cotizacionOrigen && (
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline"
+                        onClick={() => navigate(`/cotizaciones/${cotizacionOrigen.id}`)}
+                      >
+                        Cotización {cotizacionOrigen.numero}
+                      </button>
+                    )}
+                  </div>
+                  <Badge variant={presupuestoCotizacion.estado === "aprobado" ? "default" : "secondary"}>
+                    {presupuestoCotizacion.estado}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Costo total</p>
+                    <p className="font-medium">{formatCurrency(presupuestoCotizacion.costo_total ?? 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Margen</p>
+                    <p className="font-medium">{Number(presupuestoCotizacion.margen_pct ?? 0)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Impuestos</p>
+                    <p className="font-medium">{formatCurrency(presupuestoCotizacion.impuestos ?? 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Total</p>
+                    <p className="font-semibold">{formatCurrency(presupuestoCotizacion.total ?? 0)}</p>
+                  </div>
+                </div>
+
+                {Array.isArray(presupuestoCotizacion.items) && presupuestoCotizacion.items.length > 0 && (
+                  <div className="border rounded-md divide-y">
+                    {presupuestoCotizacion.items.map((it: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
+                        <span className="truncate">{it.descripcion || it.nombre || `Ítem ${idx + 1}`}</span>
+                        <span className="text-muted-foreground">
+                          {it.cantidad ? `${it.cantidad} × ` : ""}
+                          {formatCurrency(Number(it.precio_unitario ?? it.costo_unitario ?? 0))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  Este presupuesto fue aprobado dentro de la cotización antes de generar la OT. Las OT creadas desde el flujo de cotización no requieren un presupuesto adicional a nivel de OT.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             <Card>
               <CardContent className="pt-6 text-center space-y-4">
@@ -374,7 +476,12 @@ export default function OrdenServicioDetalle() {
             <h3 className="text-lg font-semibold">Documentos de Venta</h3>
             <Button
               onClick={() => setDialogDocumento(true)}
-              disabled={!presupuesto || presupuesto.estado !== "aprobado"}
+              disabled={
+                !(
+                  (presupuesto && presupuesto.estado === "aprobado") ||
+                  !!presupuestoInternoAprobado
+                )
+              }
             >
               <Receipt className="h-4 w-4 mr-2" />
               Emitir Documento

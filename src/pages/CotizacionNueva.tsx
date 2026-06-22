@@ -124,6 +124,28 @@ export default function CotizacionNueva() {
     enabled: !!clienteId,
   });
 
+  // Solicitud de cotización de origen (si la cotización se está creando desde una)
+  const { data: solicitudOrigen } = useQuery({
+    queryKey: ["solicitud_origen_cotizacion_nueva", solicitudCotizacionId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("solicitudes_cotizacion")
+        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado")
+        .eq("id", solicitudCotizacionId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        id: string;
+        numero: string;
+        tipo_servicio: string | null;
+        descripcion_necesidad: string | null;
+        fecha_visita_tecnica: string | null;
+        estado: string | null;
+      } | null;
+    },
+    enabled: !!solicitudCotizacionId,
+  });
+
   // Limpia ubicación si el cliente cambia y la ubicación ya no le pertenece
   useEffect(() => {
     if (!ubicacionesCliente) return;
@@ -361,6 +383,46 @@ export default function CotizacionNueva() {
           <p className="text-muted-foreground">Crea una cotización para tu cliente</p>
         </div>
       </div>
+
+      {solicitudOrigen && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <CardTitle className="text-base">
+                Originada de Solicitud {solicitudOrigen.numero}
+              </CardTitle>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(`/solicitudes-cotizacion/${solicitudOrigen.id}`)}
+              >
+                Ver solicitud
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Tipo de servicio</p>
+              <p className="font-medium">{solicitudOrigen.tipo_servicio || "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Visita técnica</p>
+              <p className="font-medium">
+                {solicitudOrigen.fecha_visita_tecnica
+                  ? format(new Date(solicitudOrigen.fecha_visita_tecnica), "dd/MM/yyyy HH:mm")
+                  : "No programada"}
+              </p>
+            </div>
+            <div className="md:col-span-3">
+              <p className="text-xs uppercase text-muted-foreground">Descripción de la necesidad</p>
+              <p className="whitespace-pre-wrap">
+                {solicitudOrigen.descripcion_necesidad || "—"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Columna izquierda: Datos principales */}
