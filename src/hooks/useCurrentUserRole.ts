@@ -36,12 +36,15 @@ export function useCurrentUserRole() {
     };
 
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       const uid = session?.user?.id ?? null;
       setUserId(uid);
       loadRoles(uid);
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "INITIAL_SESSION") return;
+      if (!mounted) return;
       const uid = session?.user?.id ?? null;
       setUserId(uid);
       setLoading(true);
