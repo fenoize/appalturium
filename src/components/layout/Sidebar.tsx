@@ -1,4 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
+import { APP_VERSION } from "@/lib/version";
 import { 
   Package, 
   Truck, 
