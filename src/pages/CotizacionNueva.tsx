@@ -390,7 +390,7 @@ export default function CotizacionNueva() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => navigate(`/solicitudes-cotizacion/${solicitudOrigen.id}`)}
+                onClick={() => setVerSolicitudOpen(true)}
               >
                 Ver solicitud
               </Button>
@@ -418,6 +418,80 @@ export default function CotizacionNueva() {
           </CardContent>
         </Card>
       )}
+
+      {solicitudOrigen && (
+        <Dialog open={verSolicitudOpen} onOpenChange={setVerSolicitudOpen}>
+          <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Solicitud {solicitudOrigen.numero}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 text-sm">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">Cliente</p>
+                  <p className="font-medium">
+                    {solicitudOrigen.cliente?.razon_social
+                      || [solicitudOrigen.cliente?.nombres, solicitudOrigen.cliente?.apellidos].filter(Boolean).join(" ")
+                      || solicitudOrigen.cliente?.rut
+                      || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">Estado</p>
+                  <p className="font-medium">{solicitudOrigen.estado || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">Tipo de servicio</p>
+                  <p className="font-medium">{solicitudOrigen.tipo_servicio || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs uppercase text-muted-foreground">Visita técnica</p>
+                  <p className="font-medium">
+                    {solicitudOrigen.fecha_visita_tecnica
+                      ? format(new Date(solicitudOrigen.fecha_visita_tecnica), "dd/MM/yyyy HH:mm")
+                      : "No programada"}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-xs uppercase text-muted-foreground">Ubicación</p>
+                  <p className="font-medium">
+                    {solicitudOrigen.ubicacion
+                      ? `${solicitudOrigen.ubicacion.alias ?? ""}${solicitudOrigen.ubicacion.direccion ? ` — ${solicitudOrigen.ubicacion.direccion}` : ""}${solicitudOrigen.ubicacion.comuna ? `, ${solicitudOrigen.ubicacion.comuna}` : ""}`
+                      : "—"}
+                  </p>
+                </div>
+                <div className="md:col-span-2">
+                  <p className="text-xs uppercase text-muted-foreground">Descripción de la necesidad</p>
+                  <p className="font-medium whitespace-pre-wrap">{solicitudOrigen.descripcion_necesidad || "—"}</p>
+                </div>
+                {Array.isArray(solicitudOrigen.archivos_adjuntos) && solicitudOrigen.archivos_adjuntos.length > 0 && (
+                  <div className="md:col-span-2">
+                    <p className="text-xs uppercase text-muted-foreground mb-1">Archivos adjuntos</p>
+                    <ul className="space-y-1">
+                      {solicitudOrigen.archivos_adjuntos.map((a: any, idx: number) => {
+                        const url = typeof a === "string" ? a : a?.url ?? a?.path;
+                        const name = typeof a === "string" ? a : a?.nombre ?? a?.name ?? url;
+                        return (
+                          <li key={idx}>
+                            {url ? <a href={url} target="_blank" rel="noreferrer" className="underline">{name}</a> : <span>{name}</span>}
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div className="flex justify-end gap-2 pt-2">
+                <Button variant="outline" onClick={() => setVerSolicitudOpen(false)}>Cerrar</Button>
+                <Button onClick={() => navigate(`/solicitudes-cotizacion/${solicitudOrigen.id}`)}>
+                  Ir a la solicitud
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Columna izquierda: Datos principales */}
