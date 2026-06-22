@@ -130,21 +130,16 @@ export default function CotizacionNueva() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("solicitudes_cotizacion")
-        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado")
+        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado, archivos_adjuntos, created_at, cliente:clientes(id, razon_social, nombres, apellidos, rut), ubicacion:ubicaciones(id, alias, direccion, comuna)")
         .eq("id", solicitudCotizacionId!)
         .maybeSingle();
       if (error) throw error;
-      return data as {
-        id: string;
-        numero: string;
-        tipo_servicio: string | null;
-        descripcion_necesidad: string | null;
-        fecha_visita_tecnica: string | null;
-        estado: string | null;
-      } | null;
+      return data as any;
     },
     enabled: !!solicitudCotizacionId,
   });
+
+  const [verSolicitudOpen, setVerSolicitudOpen] = useState(false);
 
   // Limpia ubicación si el cliente cambia y la ubicación ya no le pertenece
   useEffect(() => {
