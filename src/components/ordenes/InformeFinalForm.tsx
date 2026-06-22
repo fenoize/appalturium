@@ -187,21 +187,20 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
       toast.error("El resumen técnico es obligatorio");
       return;
     }
-    if (!usandoFirmaPrevia && (!sigRef.current || sigRef.current.isEmpty())) {
-      toast.error("La firma del cliente es obligatoria");
-      return;
-    }
 
     setGuardando(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
-      let firmaUrl = firmaPreviaUrl;
+      // Determinar URL final de firma:
+      // - Si mantiene la firma previa, conservamos firmaPreviaUrl.
+      // - Si capturó firma nueva (firmaDataUrl), la subimos.
+      // - Si no hay ninguna, guardamos null (firma opcional).
+      let firmaUrl: string | null = usandoFirmaPrevia ? firmaPreviaUrl : null;
 
-      if (!usandoFirmaPrevia) {
-        const dataUrl = sigRef.current!.getCanvas().toDataURL("image/png");
-        const blob = dataURLtoBlob(dataUrl);
+      if (!usandoFirmaPrevia && firmaDataUrl) {
+        const blob = dataURLtoBlob(firmaDataUrl);
         const path = `${otId}/${Date.now()}.png`;
         const { error: upErr } = await supabase.storage
           .from("firmas")
