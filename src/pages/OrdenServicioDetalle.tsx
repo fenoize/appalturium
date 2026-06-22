@@ -45,6 +45,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
+import { OrdenServicioTimeline } from "@/components/ordenes/OrdenServicioTimeline";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatCurrency } from "@/lib/formatCurrency";
@@ -324,7 +325,7 @@ export default function OrdenServicioDetalle() {
         </TabsList>
 
         {/* Tab: Resumen */}
-        <TabsContent value="resumen">
+        <TabsContent value="resumen" className="space-y-6">
           <Card>
             <CardContent className="pt-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
@@ -359,6 +360,8 @@ export default function OrdenServicioDetalle() {
               </div>
             </CardContent>
           </Card>
+
+          <OrdenServicioTimeline otId={id!} />
         </TabsContent>
 
         {/* Tab: Comunicaciones */}
