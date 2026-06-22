@@ -384,6 +384,46 @@ export default function CotizacionNueva() {
         </div>
       </div>
 
+      {solicitudOrigen && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardHeader className="pb-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <CardTitle className="text-base">
+                Originada de Solicitud {solicitudOrigen.numero}
+              </CardTitle>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate(`/solicitudes-cotizacion/${solicitudOrigen.id}`)}
+              >
+                Ver solicitud
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Tipo de servicio</p>
+              <p className="font-medium">{solicitudOrigen.tipo_servicio || "—"}</p>
+            </div>
+            <div>
+              <p className="text-xs uppercase text-muted-foreground">Visita técnica</p>
+              <p className="font-medium">
+                {solicitudOrigen.fecha_visita_tecnica
+                  ? format(new Date(solicitudOrigen.fecha_visita_tecnica), "dd/MM/yyyy HH:mm")
+                  : "No programada"}
+              </p>
+            </div>
+            <div className="md:col-span-3">
+              <p className="text-xs uppercase text-muted-foreground">Descripción de la necesidad</p>
+              <p className="whitespace-pre-wrap">
+                {solicitudOrigen.descripcion_necesidad || "—"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Columna izquierda: Datos principales */}
         <div className="lg:col-span-2 space-y-6">
