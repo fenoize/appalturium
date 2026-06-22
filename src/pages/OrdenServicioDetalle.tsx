@@ -47,6 +47,7 @@ import { toast } from "sonner";
 import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const TRANSICIONES_OT: Record<string, string[]> = {
   pendiente: ["en_curso", "cancelado"],
@@ -301,13 +302,13 @@ export default function OrdenServicioDetalle() {
                 <div>
                   <p className="text-sm text-muted-foreground">Costos Estimado</p>
                   <p className="font-medium">
-                    ${ordenServicio.costos_estimado?.toFixed(2) || "0.00"}
+                    {formatCurrency(ordenServicio.costos_estimado ?? 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Costos Real</p>
                   <p className="font-medium">
-                    ${ordenServicio.costos_real?.toFixed(2) || "0.00"}
+                    {formatCurrency(ordenServicio.costos_real ?? 0)}
                   </p>
                 </div>
               </div>

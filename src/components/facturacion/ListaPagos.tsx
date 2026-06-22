@@ -12,6 +12,7 @@ import { Trash2 } from "lucide-react";
 import { Pago } from "@/hooks/usePagos";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface ListaPagosProps {
   pagos: Pago[];
@@ -57,7 +58,7 @@ export function ListaPagos({ pagos, onEliminar, canDelete = false }: ListaPagosP
                   {format(new Date(pago.fecha), "dd/MM/yyyy", { locale: es })}
                 </TableCell>
                 <TableCell className="font-medium">
-                  ${pago.monto.toFixed(2)}
+                  {formatCurrency(pago.monto)}
                 </TableCell>
                 <TableCell>
                   <Badge variant={metodoConfig.variant}>
@@ -87,7 +88,7 @@ export function ListaPagos({ pagos, onEliminar, canDelete = false }: ListaPagosP
         <div className="flex justify-between items-center font-semibold">
           <span>Total Pagado:</span>
           <span className="text-lg">
-            ${pagos.reduce((acc, pago) => acc + pago.monto, 0).toFixed(2)}
+            {formatCurrency(pagos.reduce((acc, pago) => acc + pago.monto, 0))}
           </span>
         </div>
       </div>
