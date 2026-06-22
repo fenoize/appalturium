@@ -73,6 +73,47 @@ export default function OrdenServicioDetalle() {
   const { data: presupuesto, isLoading: loadingPresupuesto } = usePresupuestoOT(id);
   const { data: documentos = [], isLoading: loadingDocumentos } = useDocumentosOT(id);
 
+  // Cotización de origen (si la OT fue generada desde una cotización aceptada)
+  const { data: cotizacionOrigen } = useQuery({
+    queryKey: ["cotizacion_origen_ot", id],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("cotizaciones")
+        .select("id, numero, solicitud_cotizacion_id")
+        .eq("ot_id", id!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as { id: string; numero: string; solicitud_cotizacion_id: string | null } | null;
+    },
+    enabled: !!id,
+  });
+
+  // Presupuesto interno aprobado de la cotización de origen (concepto distinto al presupuesto de OT)
+  const { data: presupuestoCotizacion, isLoading: loadingPresupuestoCot } = useQuery({
+    queryKey: ["presupuesto_interno_cotizacion", cotizacionOrigen?.id, cotizacionOrigen?.solicitud_cotizacion_id],
+    queryFn: async () => {
+      const conds: string[] = [];
+      if (cotizacionOrigen?.id) conds.push(`cotizacion_id.eq.${cotizacionOrigen.id}`);
+      if (cotizacionOrigen?.solicitud_cotizacion_id)
+        conds.push(`solicitud_cotizacion_id.eq.${cotizacionOrigen.solicitud_cotizacion_id}`);
+      if (conds.length === 0) return null;
+      const { data, error } = await (supabase as any)
+        .from("presupuestos")
+        .select("*")
+        .or(conds.join(","))
+        .order("aprobado_ts", { ascending: false, nullsFirst: false })
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!cotizacionOrigen && (!!cotizacionOrigen.id || !!cotizacionOrigen.solicitud_cotizacion_id),
+  });
+
+  const presupuestoInternoAprobado =
+    presupuestoCotizacion && presupuestoCotizacion.estado === "aprobado" ? presupuestoCotizacion : null;
+
   const crearPresupuesto = useCrearPresupuesto();
   const actualizarPresupuesto = useActualizarPresupuesto();
   const cambiarEstadoPresupuesto = useCambiarEstadoPresupuesto();
