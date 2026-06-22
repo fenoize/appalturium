@@ -13,6 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User, MapPin, Users, CreditCard } from "lucide-react";
 import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
+import { REGIONES_COMUNAS, REGIONES } from "@/data/regionesComunas";
 
 export default function ClienteNuevo() {
   const navigate = useNavigate();
