@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, MapPin } from "lucide-react";
 import { REGIONES_COMUNAS, REGIONES } from "@/data/regionesComunas";
 
