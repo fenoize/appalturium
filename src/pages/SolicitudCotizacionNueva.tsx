@@ -580,10 +580,18 @@ export default function SolicitudCotizacionNueva() {
                       </div>
                       <div>
                         <Label>Dirección *</Label>
-                        <Input
+                        <AddressAutocomplete
                           value={nuevaUbic.direccion}
-                          onChange={(e) =>
-                            setNuevaUbic({ ...nuevaUbic, direccion: e.target.value })
+                          onChange={(v) => setNuevaUbic({ ...nuevaUbic, direccion: v })}
+                          onPick={(pick) =>
+                            setNuevaUbic((prev) => ({
+                              ...prev,
+                              direccion: pick.direccion,
+                              region: pick.region ?? prev.region,
+                              comuna: pick.comuna ?? "",
+                              lat: pick.lat,
+                              lng: pick.lng,
+                            }))
                           }
                           placeholder="Ej: Av. Principal"
                         />
