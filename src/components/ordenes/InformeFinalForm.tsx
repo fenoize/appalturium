@@ -57,6 +57,8 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
   const [yaExiste, setYaExiste] = useState(false);
   const [firmaPreviaUrl, setFirmaPreviaUrl] = useState<string | null>(null);
   const [mantenerFirma, setMantenerFirma] = useState(true);
+  const [firmaDialogOpen, setFirmaDialogOpen] = useState(false);
+  const [firmaDataUrl, setFirmaDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
