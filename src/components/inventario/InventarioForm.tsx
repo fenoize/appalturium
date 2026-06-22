@@ -200,11 +200,41 @@ export function InventarioForm({ open, onOpenChange, item }: InventarioFormProps
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {categorias.map((cat) => (
-                          <SelectItem key={cat.id} value={cat.id}>
-                            {cat.nombre}
-                          </SelectItem>
-                        ))}
+                        {(() => {
+                          const padres = categorias.filter(
+                            (c: any) => !c.categoria_padre_id
+                          );
+                          const hijasDe = (padreId: string) =>
+                            categorias.filter(
+                              (c: any) => c.categoria_padre_id === padreId
+                            );
+                          const huerfanas = categorias.filter(
+                            (c: any) =>
+                              c.categoria_padre_id &&
+                              !categorias.some((p: any) => p.id === c.categoria_padre_id)
+                          );
+                          const ordenadas: Array<{ cat: any; nivel: number }> = [];
+                          padres.forEach((p: any) => {
+                            ordenadas.push({ cat: p, nivel: 0 });
+                            hijasDe(p.id).forEach((h: any) =>
+                              ordenadas.push({ cat: h, nivel: 1 })
+                            );
+                          });
+                          huerfanas.forEach((h: any) =>
+                            ordenadas.push({ cat: h, nivel: 1 })
+                          );
+                          return ordenadas.map(({ cat, nivel }) => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              {nivel === 0 ? (
+                                <span className="font-medium">{cat.nombre}</span>
+                              ) : (
+                                <span className="pl-4 text-muted-foreground">
+                                  — {cat.nombre}
+                                </span>
+                              )}
+                            </SelectItem>
+                          ));
+                        })()}
                       </SelectContent>
                     </Select>
                     <FormMessage />
