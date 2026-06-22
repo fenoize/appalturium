@@ -63,6 +63,7 @@ import {
   Film,
   FileText,
 } from "lucide-react";
+import { AddressAutocomplete } from "@/components/ubicacion/AddressAutocomplete";
 
 const TIPOS_SERVICIO = ["Instalación", "Mantención", "Servicio", "Garantía"] as const;
 const BUCKET = "solicitud-adjuntos";
