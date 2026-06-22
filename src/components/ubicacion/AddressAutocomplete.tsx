@@ -82,26 +82,13 @@ export function AddressAutocomplete({ value, onChange, onPick, id, required, pla
     }
     setLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("mapbox-geocode", {
-        method: "GET" as any,
-        // supabase-js no soporta query params directos en invoke; usamos fetch crudo si hace falta.
+      const baseUrl = (import.meta as any).env?.VITE_SUPABASE_URL as string;
+      const anonKey = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+      const url = `${baseUrl}/functions/v1/mapbox-geocode?q=${encodeURIComponent(q)}`;
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey },
       });
-      // Fallback: invocar vía fetch crudo si invoke no respetó params
-      let payload: any = data;
-      if (error || !payload) {
-        const projectId = (import.meta as any).env?.VITE_SUPABASE_PROJECT_ID;
-        const anonKey = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const url = `https://${projectId}.supabase.co/functions/v1/mapbox-geocode?q=${encodeURIComponent(q)}`;
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey } });
-        payload = await res.json();
-      } else {
-        // Re-invocar con q como query param vía fetch (invoke no manda params)
-        const projectId = (import.meta as any).env?.VITE_SUPABASE_PROJECT_ID;
-        const anonKey = (import.meta as any).env?.VITE_SUPABASE_PUBLISHABLE_KEY;
-        const url = `https://${projectId}.supabase.co/functions/v1/mapbox-geocode?q=${encodeURIComponent(q)}`;
-        const res = await fetch(url, { headers: { Authorization: `Bearer ${anonKey}`, apikey: anonKey } });
-        payload = await res.json();
-      }
+      const payload = await res.json();
 
       if (payload?.enabled === false) {
         setEnabled(false);
