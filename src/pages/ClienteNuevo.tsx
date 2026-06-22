@@ -176,6 +176,8 @@ export default function ClienteNuevo() {
         ciudad: formData.ubicacion_ciudad,
         region: formData.ubicacion_region,
         horario_atencion: formData.ubicacion_horario || null,
+        lat: formData.ubicacion_lat,
+        lng: formData.ubicacion_lng,
         es_principal: true,
         activo: true,
       };
