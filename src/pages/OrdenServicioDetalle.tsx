@@ -476,7 +476,12 @@ export default function OrdenServicioDetalle() {
             <h3 className="text-lg font-semibold">Documentos de Venta</h3>
             <Button
               onClick={() => setDialogDocumento(true)}
-              disabled={!presupuesto || presupuesto.estado !== "aprobado"}
+              disabled={
+                !(
+                  (presupuesto && presupuesto.estado === "aprobado") ||
+                  !!presupuestoInternoAprobado
+                )
+              }
             >
               <Receipt className="h-4 w-4 mr-2" />
               Emitir Documento
