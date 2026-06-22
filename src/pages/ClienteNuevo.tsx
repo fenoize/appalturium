@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User, MapPin, Users, CreditCard } from "lucide-react";
 import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
 import { REGIONES_COMUNAS, REGIONES } from "@/data/regionesComunas";
+import { AddressAutocomplete } from "@/components/ubicacion/AddressAutocomplete";
 
 export default function ClienteNuevo() {
   const navigate = useNavigate();
