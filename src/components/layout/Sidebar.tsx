@@ -242,7 +242,7 @@ export function Sidebar({ collapsed, onToggle }: SidebarProps) {
       {/* Footer con versión */}
       {!collapsed && (
         <div className="p-4 border-t border-border text-center">
-          <p className="text-xs text-muted-foreground">Versión 0.0.3</p>
+          <p className="text-xs text-muted-foreground">Versión {APP_VERSION}</p>
           <p className="text-xs text-muted-foreground mt-1">
             Desarrollado por{" "}
             <a 
