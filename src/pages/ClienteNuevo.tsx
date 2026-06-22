@@ -511,10 +511,20 @@ export default function ClienteNuevo() {
 
                 <div className="space-y-2">
                   <Label htmlFor="ubicacion_direccion">Dirección *</Label>
-                  <Input
+                  <AddressAutocomplete
                     id="ubicacion_direccion"
                     value={formData.ubicacion_direccion}
-                    onChange={(e) => setFormData({ ...formData, ubicacion_direccion: e.target.value })}
+                    onChange={(v) => setFormData({ ...formData, ubicacion_direccion: v })}
+                    onPick={(pick) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ubicacion_direccion: pick.direccion,
+                        ubicacion_region: pick.region ?? prev.ubicacion_region,
+                        ubicacion_comuna: pick.comuna ?? "",
+                        ubicacion_lat: pick.lat,
+                        ubicacion_lng: pick.lng,
+                      }))
+                    }
                     placeholder="Calle, número, piso, depto"
                     required
                   />
