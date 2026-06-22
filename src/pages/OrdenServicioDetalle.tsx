@@ -449,16 +449,11 @@ export default function OrdenServicioDetalle() {
         <Dialog open={!!dialogPago} onOpenChange={() => setDialogPago(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
-                Registrar Pago
-                {dialogPago.numeroCuota ? ` — Cuota ${dialogPago.numeroCuota}` : ""}
-              </DialogTitle>
+              <DialogTitle>Registrar Pago</DialogTitle>
             </DialogHeader>
             <PagoForm
               documento={documentos.find((d) => d.id === dialogPago.documentoId)!}
-              defaultMonto={dialogPago.monto}
-              contexto={dialogPago.numeroCuota ? `Cuota ${dialogPago.numeroCuota}` : undefined}
-              onSubmit={(data) => handleRegistrarPago(dialogPago.documentoId, data, dialogPago.cuotaId)}
+              onSubmit={(data) => handleRegistrarPago(dialogPago.documentoId, data)}
               onCancel={() => setDialogPago(null)}
             />
           </DialogContent>
