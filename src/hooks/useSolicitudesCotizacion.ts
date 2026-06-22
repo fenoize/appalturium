@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 
 export type EstadoSolicitud =
+  | "borrador"
   | "nueva"
   | "en_presupuesto"
   | "cotizada"
