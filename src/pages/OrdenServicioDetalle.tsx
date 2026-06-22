@@ -325,7 +325,7 @@ export default function OrdenServicioDetalle() {
         </TabsList>
 
         {/* Tab: Resumen */}
-        <TabsContent value="resumen">
+        <TabsContent value="resumen" className="space-y-6">
           <Card>
             <CardContent className="pt-6 space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
