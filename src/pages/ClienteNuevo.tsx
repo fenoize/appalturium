@@ -605,7 +605,10 @@ export default function ClienteNuevo() {
                   <Input
                     id="contacto_nombre"
                     value={formData.contacto_nombre}
-                    onChange={(e) => setFormData({ ...formData, contacto_nombre: e.target.value })}
+                    onChange={(e) => {
+                      contactoEditado.current.nombre = true;
+                      setFormData({ ...formData, contacto_nombre: e.target.value });
+                    }}
                     required
                   />
                 </div>
@@ -617,7 +620,10 @@ export default function ClienteNuevo() {
                       id="contacto_email"
                       type="email"
                       value={formData.contacto_email}
-                      onChange={(e) => setFormData({ ...formData, contacto_email: e.target.value })}
+                      onChange={(e) => {
+                        contactoEditado.current.email = true;
+                        setFormData({ ...formData, contacto_email: e.target.value });
+                      }}
                       required
                     />
                   </div>
@@ -627,7 +633,10 @@ export default function ClienteNuevo() {
                     <Input
                       id="contacto_telefono"
                       value={formData.contacto_telefono}
-                      onChange={(e) => setFormData({ ...formData, contacto_telefono: e.target.value })}
+                      onChange={(e) => {
+                        contactoEditado.current.telefono = true;
+                        setFormData({ ...formData, contacto_telefono: e.target.value });
+                      }}
                       placeholder="+56 9 1234 5678"
                     />
                   </div>
