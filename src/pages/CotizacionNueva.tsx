@@ -124,6 +124,28 @@ export default function CotizacionNueva() {
     enabled: !!clienteId,
   });
 
+  // Solicitud de cotización de origen (si la cotización se está creando desde una)
+  const { data: solicitudOrigen } = useQuery({
+    queryKey: ["solicitud_origen_cotizacion_nueva", solicitudCotizacionId],
+    queryFn: async () => {
+      const { data, error } = await (supabase as any)
+        .from("solicitudes_cotizacion")
+        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado")
+        .eq("id", solicitudCotizacionId!)
+        .maybeSingle();
+      if (error) throw error;
+      return data as {
+        id: string;
+        numero: string;
+        tipo_servicio: string | null;
+        descripcion_necesidad: string | null;
+        fecha_visita_tecnica: string | null;
+        estado: string | null;
+      } | null;
+    },
+    enabled: !!solicitudCotizacionId,
+  });
+
   // Limpia ubicación si el cliente cambia y la ubicación ya no le pertenece
   useEffect(() => {
     if (!ubicacionesCliente) return;
