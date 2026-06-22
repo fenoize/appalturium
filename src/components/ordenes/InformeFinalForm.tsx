@@ -7,9 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eraser, MapPin, Save, Info, Upload, Trash2, Lock } from "lucide-react";
+import { Eraser, MapPin, Save, Info, Upload, Trash2, Lock, AlertTriangle, PenLine } from "lucide-react";
 import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
 
 interface InformeFinalFormProps {
