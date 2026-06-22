@@ -113,6 +113,20 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
 
   const limpiarFirma = () => sigRef.current?.clear();
 
+  const handleAbrirFirma = () => setFirmaDialogOpen(true);
+
+  const handleGuardarFirma = () => {
+    if (!sigRef.current || sigRef.current.isEmpty()) {
+      toast.error("Dibuja una firma antes de guardar");
+      return;
+    }
+    const dataUrl = sigRef.current.getCanvas().toDataURL("image/png");
+    setFirmaDataUrl(dataUrl);
+    // Si había firma previa, al capturar nueva ya no la mantenemos.
+    if (firmaPreviaUrl) setMantenerFirma(false);
+    setFirmaDialogOpen(false);
+  };
+
   const obtenerUbicacion = (): Promise<{ lat: number; lng: number } | null> =>
     new Promise((resolve) => {
       if (!navigator.geolocation) return resolve(null);
