@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { ArrowLeft, FileQuestion, FileText, Paperclip } from "lucide-react";
 
 const estadoVariant: Record<EstadoSolicitud, "default" | "secondary" | "outline" | "destructive"> = {
+  borrador: "outline",
   nueva: "default",
   en_presupuesto: "secondary",
   cotizada: "secondary",
