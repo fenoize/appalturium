@@ -23,6 +23,7 @@ interface CotizacionPDFInput {
   total: number;
   notas?: string | null;
   condiciones?: string | null;
+  opcionEtiqueta?: string | null;
   cliente?: {
     tipo?: string | null;
     razon_social?: string | null;
@@ -57,6 +58,14 @@ export function generarCotizacionPDF(cotizacion: CotizacionPDFInput) {
   doc.setFont("helvetica", "normal");
   doc.text(cotizacion.numero, pageWidth - margin, y, { align: "right" });
   y += 18;
+
+  if (cotizacion.opcionEtiqueta) {
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Opción ${cotizacion.opcionEtiqueta}`, margin, y);
+    doc.setFont("helvetica", "normal");
+    y += 14;
+  }
 
   doc.setFontSize(9);
   doc.setTextColor(120);

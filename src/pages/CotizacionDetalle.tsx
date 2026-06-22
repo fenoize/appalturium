@@ -138,10 +138,18 @@ export default function CotizacionDetalle() {
     }
   };
 
-  const handleCopiarEnlace = () => {
+  const handleCopiarEnlace = async () => {
     const url = `${window.location.origin}/cotizacion-publica/${cotizacion.token_acceso}`;
-    navigator.clipboard.writeText(url);
-    toast({ title: "Enlace copiado al portapapeles" });
+    try {
+      await navigator.clipboard.writeText(url);
+      toast({ title: "Enlace copiado al portapapeles" });
+    } catch {
+      toast({
+        title: "No se pudo copiar automáticamente",
+        description: url,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleCrearOT = async () => {
