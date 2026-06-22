@@ -319,6 +319,8 @@ export default function SolicitudCotizacionNueva() {
           comuna: nuevaUbic.comuna,
           ciudad: ciudadDefault,
           region: nuevaUbic.region,
+          lat: nuevaUbic.lat,
+          lng: nuevaUbic.lng,
           tipo: "sucursal",
           es_principal: false,
           por_defecto: false,
@@ -330,7 +332,7 @@ export default function SolicitudCotizacionNueva() {
       await refetchUbicaciones();
       setUbicacionId(data.id);
       setShowNuevaUbicacion(false);
-      setNuevaUbic({ alias: "", direccion: "", numeracion: "", region: "", comuna: "" });
+      setNuevaUbic({ alias: "", direccion: "", numeracion: "", region: "", comuna: "", lat: null, lng: null });
       toast({ title: "Ubicación creada" });
     } catch (err: any) {
       toast({
