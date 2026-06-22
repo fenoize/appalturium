@@ -424,7 +424,7 @@ export default function CategoriasInventario() {
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </Dialog>
+      </AlertDialog>
     </div>
   );
 }
