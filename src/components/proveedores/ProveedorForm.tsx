@@ -242,9 +242,18 @@ export function ProveedorForm({ open, onOpenChange, proveedor }: ProveedorFormPr
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Región</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Región" {...field} />
-                    </FormControl>
+                    <Select value={field.value || ""} onValueChange={field.onChange}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una región" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {REGIONES.map((r) => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
