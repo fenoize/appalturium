@@ -130,7 +130,7 @@ export default function CotizacionNueva() {
     queryFn: async () => {
       const { data, error } = await (supabase as any)
         .from("solicitudes_cotizacion")
-        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado, archivos_adjuntos, created_at, cliente:clientes(id, razon_social, nombres, apellidos, rut), ubicacion:ubicaciones(id, alias, direccion, comuna)")
+        .select("id, numero, tipo_servicio, descripcion_necesidad, fecha_visita_tecnica, estado, archivos_adjuntos, detalle_requerimiento, created_at, cliente:clientes(id, razon_social, nombres, apellidos, rut), ubicacion:ubicaciones(id, alias, direccion, comuna)")
         .eq("id", solicitudCotizacionId!)
         .maybeSingle();
       if (error) throw error;
@@ -464,6 +464,42 @@ export default function CotizacionNueva() {
                   <p className="text-xs uppercase text-muted-foreground">Descripción de la necesidad</p>
                   <p className="font-medium whitespace-pre-wrap">{solicitudOrigen.descripcion_necesidad || "—"}</p>
                 </div>
+                {(() => {
+                  const det = (solicitudOrigen.detalle_requerimiento ?? {}) as any;
+                  const items: any[] = Array.isArray(det?.items) ? det.items : [];
+                  if (items.length === 0) return null;
+                  const totalRef = items.reduce(
+                    (acc, it) => acc + (Number(it.cantidad) || 0) * (Number(it.valor_estimado) || 0),
+                    0,
+                  );
+                  return (
+                    <div className="md:col-span-2">
+                      <p className="text-xs uppercase text-muted-foreground mb-1">
+                        Items referenciales ({items.length})
+                      </p>
+                      <div className="border rounded-md divide-y">
+                        {items.map((it, idx) => (
+                          <div key={idx} className="flex justify-between gap-3 p-2 text-sm">
+                            <div className="flex-1">
+                              <p className="font-medium">{it.descripcion || "—"}</p>
+                              <p className="text-xs text-muted-foreground capitalize">{it.tipo}</p>
+                            </div>
+                            <div className="text-right whitespace-nowrap">
+                              <p>{it.cantidad} × ${Number(it.valor_estimado || 0).toLocaleString("es-CL")}</p>
+                              <p className="text-xs text-muted-foreground">
+                                ${((Number(it.cantidad) || 0) * (Number(it.valor_estimado) || 0)).toLocaleString("es-CL")}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                        <div className="flex justify-between p-2 text-sm font-semibold bg-muted/40">
+                          <span>Total referencial</span>
+                          <span>${totalRef.toLocaleString("es-CL")}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
                 {Array.isArray(solicitudOrigen.archivos_adjuntos) && solicitudOrigen.archivos_adjuntos.length > 0 && (
                   <div className="md:col-span-2">
                     <p className="text-xs uppercase text-muted-foreground mb-1">Archivos adjuntos</p>
@@ -484,7 +520,7 @@ export default function CotizacionNueva() {
               <div className="flex justify-end gap-2 pt-2">
                 <Button variant="outline" onClick={() => setVerSolicitudOpen(false)}>Cerrar</Button>
                 <Button onClick={() => navigate(`/solicitudes-cotizacion/${solicitudOrigen.id}`)}>
-                  Ir a la solicitud
+                  Ver solicitud completa
                 </Button>
               </div>
             </div>
