@@ -47,6 +47,9 @@ export default function ClienteNuevo() {
     ubicacion_ciudad: "",
     ubicacion_region: "",
     ubicacion_horario: "",
+    ubicacion_lat: null as number | null,
+    ubicacion_lng: null as number | null,
+    
     
     // Contacto Principal
     contacto_nombre: "",
