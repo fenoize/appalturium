@@ -56,6 +56,7 @@ export function useRegistrarPago() {
     },
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["pagos", data.documento_id] });
+      queryClient.invalidateQueries({ queryKey: ["plan_pagos", data.documento_id] });
       queryClient.invalidateQueries({ queryKey: ["documentos_venta"] });
       toast({
         title: "Pago registrado",
@@ -87,6 +88,7 @@ export function useEliminarPago() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["pagos"] });
+      queryClient.invalidateQueries({ queryKey: ["plan_pagos"] });
       queryClient.invalidateQueries({ queryKey: ["documentos_venta"] });
       toast({
         title: "Pago eliminado",

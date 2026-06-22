@@ -64,20 +64,3 @@ export function useCrearPlanPagos() {
   });
 }
 
-export function useVincularPagoCuota() {
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: async ({ cuotaId, pagoId }: { cuotaId: string; pagoId: string }) => {
-      const { error } = await (supabase as any)
-        .from("plan_pagos")
-        .update({ pago_id: pagoId })
-        .eq("id", cuotaId);
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["plan_pagos"] });
-    },
-    onError: (e: any) =>
-      toast({ title: "Error vinculando pago a cuota", description: e?.message, variant: "destructive" }),
-  });
-}

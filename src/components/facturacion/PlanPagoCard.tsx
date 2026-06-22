@@ -1,13 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CalendarClock, CheckCircle2, CircleDollarSign } from "lucide-react";
+import { CalendarClock, CheckCircle2 } from "lucide-react";
 import { usePlanPagos, type EstadoCuota } from "@/hooks/usePlanPagos";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 interface Props {
   documentoId: string;
   moneda?: string;
-  onRegistrarPagoCuota: (cuota: { id: string; numero_cuota: number; monto_esperado: number }) => void;
 }
 
 const estadoMeta: Record<EstadoCuota, { label: string; variant: "default" | "secondary" | "outline" | "destructive" }> = {
@@ -16,15 +15,13 @@ const estadoMeta: Record<EstadoCuota, { label: string; variant: "default" | "sec
   vencida: { label: "Vencida", variant: "destructive" },
 };
 
-function fmt(monto: number, moneda = "CLP") {
-  return new Intl.NumberFormat("es-CL", { style: "currency", currency: moneda, maximumFractionDigits: 0 }).format(monto);
-}
-
-export function PlanPagoCard({ documentoId, moneda = "CLP", onRegistrarPagoCuota }: Props) {
+export function PlanPagoCard({ documentoId, moneda = "CLP" }: Props) {
   const { data: cuotas, isLoading } = usePlanPagos(documentoId);
 
   if (isLoading) return null;
   if (!cuotas || cuotas.length === 0) return null;
+
+  const monedaSafe = (moneda as "CLP" | "UF" | "USD") || "CLP";
 
   return (
     <Card>
@@ -47,29 +44,14 @@ export function PlanPagoCard({ documentoId, moneda = "CLP", onRegistrarPagoCuota
                   <Badge variant={meta.variant}>{meta.label}</Badge>
                 </div>
                 <div className="text-sm text-muted-foreground mt-1">
-                  {fmt(Number(c.monto_esperado), moneda)}
+                  {formatCurrency(Number(c.monto_esperado), monedaSafe)}
                   {c.fecha_esperada && (
                     <> · Vence {new Date(c.fecha_esperada).toLocaleDateString("es-CL")}</>
                   )}
                 </div>
               </div>
-              {c.estado === "pagada" ? (
+              {c.estado === "pagada" && (
                 <CheckCircle2 className="h-5 w-5 text-green-600" />
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() =>
-                    onRegistrarPagoCuota({
-                      id: c.id,
-                      numero_cuota: c.numero_cuota,
-                      monto_esperado: Number(c.monto_esperado),
-                    })
-                  }
-                >
-                  <CircleDollarSign className="h-4 w-4 mr-1" />
-                  Registrar pago de esta cuota
-                </Button>
               )}
             </div>
           );
