@@ -360,6 +360,8 @@ export default function OrdenServicioDetalle() {
               </div>
             </CardContent>
           </Card>
+
+          <OrdenServicioTimeline otId={id!} />
         </TabsContent>
 
         {/* Tab: Comunicaciones */}
