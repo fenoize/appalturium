@@ -1,0 +1,11 @@
+{
+  "version": "0.0.4",
+  "releasedAt": "2026-06-22",
+  "notes": [
+    "Nuevo modal de 'Nueva Actualización' que avisa cuando hay una versión disponible.",
+    "Importación masiva de materiales Comercializadora FV al inventario.",
+    "Corrección al formulario de edición de productos del inventario.",
+    "Gestión completa (crear, editar, eliminar) de categorías de inventario.",
+    "Detalle de solicitud en flujo de nueva cotización + autocompletado de direcciones (Mapbox)."
+  ]
+}
