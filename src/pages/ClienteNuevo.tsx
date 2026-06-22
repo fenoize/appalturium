@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -69,6 +69,22 @@ export default function ClienteNuevo() {
     noti_whatsapp: false,
     noti_resumen_mensual: false,
   });
+
+  // Para clientes persona (B2C), autocompletar contacto con datos del básico
+  // mientras el usuario no haya editado manualmente esos campos.
+  const contactoEditado = useRef({ nombre: false, email: false, telefono: false });
+
+  useEffect(() => {
+    if (tipo !== "persona") return;
+    setFormData((prev) => {
+      const nombreCompleto = `${prev.nombres} ${prev.apellidos}`.trim();
+      const next = { ...prev };
+      if (!contactoEditado.current.nombre) next.contacto_nombre = nombreCompleto;
+      if (!contactoEditado.current.email) next.contacto_email = prev.email;
+      if (!contactoEditado.current.telefono) next.contacto_telefono = prev.telefono;
+      return next;
+    });
+  }, [tipo, formData.nombres, formData.apellidos, formData.email, formData.telefono]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -589,7 +605,10 @@ export default function ClienteNuevo() {
                   <Input
                     id="contacto_nombre"
                     value={formData.contacto_nombre}
-                    onChange={(e) => setFormData({ ...formData, contacto_nombre: e.target.value })}
+                    onChange={(e) => {
+                      contactoEditado.current.nombre = true;
+                      setFormData({ ...formData, contacto_nombre: e.target.value });
+                    }}
                     required
                   />
                 </div>
@@ -601,7 +620,10 @@ export default function ClienteNuevo() {
                       id="contacto_email"
                       type="email"
                       value={formData.contacto_email}
-                      onChange={(e) => setFormData({ ...formData, contacto_email: e.target.value })}
+                      onChange={(e) => {
+                        contactoEditado.current.email = true;
+                        setFormData({ ...formData, contacto_email: e.target.value });
+                      }}
                       required
                     />
                   </div>
@@ -611,7 +633,10 @@ export default function ClienteNuevo() {
                     <Input
                       id="contacto_telefono"
                       value={formData.contacto_telefono}
-                      onChange={(e) => setFormData({ ...formData, contacto_telefono: e.target.value })}
+                      onChange={(e) => {
+                        contactoEditado.current.telefono = true;
+                        setFormData({ ...formData, contacto_telefono: e.target.value });
+                      }}
                       placeholder="+56 9 1234 5678"
                     />
                   </div>
