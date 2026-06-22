@@ -301,13 +301,13 @@ export default function OrdenServicioDetalle() {
                 <div>
                   <p className="text-sm text-muted-foreground">Costos Estimado</p>
                   <p className="font-medium">
-                    ${ordenServicio.costos_estimado?.toFixed(2) || "0.00"}
+                    {formatCurrency(ordenServicio.costos_estimado ?? 0)}
                   </p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Costos Real</p>
                   <p className="font-medium">
-                    ${ordenServicio.costos_real?.toFixed(2) || "0.00"}
+                    {formatCurrency(ordenServicio.costos_real ?? 0)}
                   </p>
                 </div>
               </div>
