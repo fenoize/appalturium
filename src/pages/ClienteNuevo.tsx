@@ -70,6 +70,22 @@ export default function ClienteNuevo() {
     noti_resumen_mensual: false,
   });
 
+  // Para clientes persona (B2C), autocompletar contacto con datos del básico
+  // mientras el usuario no haya editado manualmente esos campos.
+  const contactoEditado = useRef({ nombre: false, email: false, telefono: false });
+
+  useEffect(() => {
+    if (tipo !== "persona") return;
+    setFormData((prev) => {
+      const nombreCompleto = `${prev.nombres} ${prev.apellidos}`.trim();
+      const next = { ...prev };
+      if (!contactoEditado.current.nombre) next.contacto_nombre = nombreCompleto;
+      if (!contactoEditado.current.email) next.contacto_email = prev.email;
+      if (!contactoEditado.current.telefono) next.contacto_telefono = prev.telefono;
+      return next;
+    });
+  }, [tipo, formData.nombres, formData.apellidos, formData.email, formData.telefono]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
