@@ -511,13 +511,40 @@ export default function ClienteNuevo() {
 
                 <div className="grid grid-cols-3 gap-4">
                   <div className="space-y-2">
+                    <Label htmlFor="ubicacion_region">Región *</Label>
+                    <Select
+                      value={formData.ubicacion_region}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, ubicacion_region: value, ubicacion_comuna: "" })
+                      }
+                    >
+                      <SelectTrigger id="ubicacion_region">
+                        <SelectValue placeholder="Selecciona una región" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {REGIONES.map((r) => (
+                          <SelectItem key={r} value={r}>{r}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
                     <Label htmlFor="ubicacion_comuna">Comuna *</Label>
-                    <Input
-                      id="ubicacion_comuna"
+                    <Select
                       value={formData.ubicacion_comuna}
-                      onChange={(e) => setFormData({ ...formData, ubicacion_comuna: e.target.value })}
-                      required
-                    />
+                      onValueChange={(value) => setFormData({ ...formData, ubicacion_comuna: value })}
+                      disabled={!formData.ubicacion_region}
+                    >
+                      <SelectTrigger id="ubicacion_comuna">
+                        <SelectValue placeholder={formData.ubicacion_region ? "Selecciona una comuna" : "Elige región primero"} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {(REGIONES_COMUNAS[formData.ubicacion_region] ?? []).map((c) => (
+                          <SelectItem key={c} value={c}>{c}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
@@ -526,16 +553,6 @@ export default function ClienteNuevo() {
                       id="ubicacion_ciudad"
                       value={formData.ubicacion_ciudad}
                       onChange={(e) => setFormData({ ...formData, ubicacion_ciudad: e.target.value })}
-                      required
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="ubicacion_region">Región *</Label>
-                    <Input
-                      id="ubicacion_region"
-                      value={formData.ubicacion_region}
-                      onChange={(e) => setFormData({ ...formData, ubicacion_region: e.target.value })}
                       required
                     />
                   </div>
