@@ -79,6 +79,26 @@ export function InventarioForm({ open, onOpenChange, item }: InventarioFormProps
     },
   });
 
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        codigo: item?.codigo || "",
+        nombre: item?.nombre || "",
+        descripcion: item?.descripcion || "",
+        tipo: item?.tipo || "material",
+        categoria_id: item?.categoria_id || undefined,
+        proveedor_id: item?.proveedor_id || undefined,
+        unidad_medida: item?.unidad_medida || "unidad",
+        precio_compra: item?.precio_compra || 0,
+        precio_venta: item?.precio_venta || 0,
+        stock_actual: item?.stock_actual || 0,
+        stock_minimo: item?.stock_minimo || 0,
+        stock_maximo: item?.stock_maximo || undefined,
+        ubicacion_bodega: item?.ubicacion_bodega || "",
+      });
+    }
+  }, [item, open]);
+
   const onSubmit = async (values: FormValues) => {
     const data = {
       codigo: values.codigo,
