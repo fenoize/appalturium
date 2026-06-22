@@ -42,7 +42,7 @@ import { InformeFinalForm } from "@/components/ordenes/InformeFinalForm";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useParametrosSistema } from "@/hooks/useParametrosSistema";
 import { supabase } from "@/integrations/supabase/client";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
