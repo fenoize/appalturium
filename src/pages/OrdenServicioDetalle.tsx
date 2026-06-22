@@ -47,6 +47,7 @@ import { toast } from "sonner";
 import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const TRANSICIONES_OT: Record<string, string[]> = {
   pendiente: ["en_curso", "cancelado"],
