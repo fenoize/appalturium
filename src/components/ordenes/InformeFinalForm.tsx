@@ -7,9 +7,17 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Switch } from "@/components/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Eraser, MapPin, Save, Info, Upload, Trash2, Lock } from "lucide-react";
+import { Eraser, MapPin, Save, Info, Upload, Trash2, Lock, AlertTriangle, PenLine } from "lucide-react";
 import { useCurrentUserRole } from "@/hooks/useCurrentUserRole";
 
 interface InformeFinalFormProps {
@@ -49,6 +57,8 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
   const [yaExiste, setYaExiste] = useState(false);
   const [firmaPreviaUrl, setFirmaPreviaUrl] = useState<string | null>(null);
   const [mantenerFirma, setMantenerFirma] = useState(true);
+  const [firmaDialogOpen, setFirmaDialogOpen] = useState(false);
+  const [firmaDataUrl, setFirmaDataUrl] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -102,6 +112,20 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
   }, [otId]);
 
   const limpiarFirma = () => sigRef.current?.clear();
+
+  const handleAbrirFirma = () => setFirmaDialogOpen(true);
+
+  const handleGuardarFirma = () => {
+    if (!sigRef.current || sigRef.current.isEmpty()) {
+      toast.error("Dibuja una firma antes de guardar");
+      return;
+    }
+    const dataUrl = sigRef.current.getCanvas().toDataURL("image/png");
+    setFirmaDataUrl(dataUrl);
+    // Si había firma previa, al capturar nueva ya no la mantenemos.
+    if (firmaPreviaUrl) setMantenerFirma(false);
+    setFirmaDialogOpen(false);
+  };
 
   const obtenerUbicacion = (): Promise<{ lat: number; lng: number } | null> =>
     new Promise((resolve) => {
@@ -163,21 +187,20 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
       toast.error("El resumen técnico es obligatorio");
       return;
     }
-    if (!usandoFirmaPrevia && (!sigRef.current || sigRef.current.isEmpty())) {
-      toast.error("La firma del cliente es obligatoria");
-      return;
-    }
 
     setGuardando(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("No autenticado");
 
-      let firmaUrl = firmaPreviaUrl;
+      // Determinar URL final de firma:
+      // - Si mantiene la firma previa, conservamos firmaPreviaUrl.
+      // - Si capturó firma nueva (firmaDataUrl), la subimos.
+      // - Si no hay ninguna, guardamos null (firma opcional).
+      let firmaUrl: string | null = usandoFirmaPrevia ? firmaPreviaUrl : null;
 
-      if (!usandoFirmaPrevia) {
-        const dataUrl = sigRef.current!.getCanvas().toDataURL("image/png");
-        const blob = dataURLtoBlob(dataUrl);
+      if (!usandoFirmaPrevia && firmaDataUrl) {
+        const blob = dataURLtoBlob(firmaDataUrl);
         const path = `${otId}/${Date.now()}.png`;
         const { error: upErr } = await supabase.storage
           .from("firmas")
@@ -231,8 +254,15 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         setYaExiste(true);
       }
 
-      if (firmaUrl) setFirmaPreviaUrl(firmaUrl);
+      if (firmaUrl) {
+        setFirmaPreviaUrl(firmaUrl);
+        setMantenerFirma(true);
+      }
+      setFirmaDataUrl(null);
       toast.success(yaExiste ? "Informe actualizado" : "Informe final guardado");
+      if (!firmaUrl) {
+        toast.warning("Informe guardado sin firma del cliente");
+      }
       onSaved?.();
     } catch (err: any) {
       toast.error("Error al guardar informe", { description: err.message });
@@ -414,13 +444,7 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         {/* Firma */}
         <div className="space-y-2 border-t pt-4">
           <div className="flex items-center justify-between">
-            <Label>Firma del cliente *</Label>
-            {!usandoFirmaPrevia && !readOnly && (
-              <Button type="button" variant="ghost" size="sm" onClick={limpiarFirma}>
-                <Eraser className="h-4 w-4 mr-2" />
-                Limpiar
-              </Button>
-            )}
+            <Label>Firma del cliente <span className="text-muted-foreground font-normal">(opcional)</span></Label>
           </div>
 
           {yaExiste && firmaPreviaUrl && !readOnly && (
@@ -435,39 +459,101 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
             </div>
           )}
 
-          {readOnly ? (
-            firmaPreviaUrl ? (
-              <div className="border rounded-md bg-background p-3 flex items-center justify-center">
-                <img
-                  src={firmaPreviaUrl}
-                  alt="Firma del cliente registrada"
-                  className="max-h-48 object-contain"
-                />
+          {(() => {
+            // Decide qué mostrar como firma "actual"
+            const firmaActualUrl = usandoFirmaPrevia
+              ? firmaPreviaUrl
+              : firmaDataUrl
+              ? firmaDataUrl
+              : null;
+
+            if (readOnly) {
+              return firmaPreviaUrl ? (
+                <div className="border rounded-md bg-background p-3 flex items-center justify-center">
+                  <img
+                    src={firmaPreviaUrl}
+                    alt="Firma del cliente registrada"
+                    className="max-h-48 object-contain"
+                  />
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">Sin firma registrada.</p>
+              );
+            }
+
+            return (
+              <div className="space-y-2">
+                {firmaActualUrl ? (
+                  <div className="border rounded-md bg-background p-3 flex items-center justify-center">
+                    <img
+                      src={firmaActualUrl}
+                      alt="Firma del cliente"
+                      className="max-h-32 object-contain"
+                    />
+                  </div>
+                ) : (
+                  <div className="border border-dashed rounded-md p-4 flex items-center gap-2 text-sm text-muted-foreground">
+                    <AlertTriangle className="h-4 w-4 text-amber-500" />
+                    Sin firma del cliente. Puedes guardar el informe igualmente.
+                  </div>
+                )}
+
+                {!usandoFirmaPrevia && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAbrirFirma}
+                  >
+                    <PenLine className="h-4 w-4 mr-2" />
+                    {firmaDataUrl ? "Editar firma" : "Firmar"}
+                  </Button>
+                )}
               </div>
-            ) : (
-              <p className="text-xs text-muted-foreground italic">Sin firma registrada.</p>
-            )
-          ) : usandoFirmaPrevia ? (
-            <div className="border rounded-md bg-background p-3 flex items-center justify-center">
-              <img
-                src={firmaPreviaUrl!}
-                alt="Firma del cliente registrada"
-                className="max-h-48 object-contain"
-              />
-            </div>
-          ) : (
-            <div className="border rounded-md bg-background overflow-hidden">
+            );
+          })()}
+        </div>
+
+        {/* Modal de firma */}
+        <Dialog open={firmaDialogOpen} onOpenChange={setFirmaDialogOpen}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Firma del cliente</DialogTitle>
+              <DialogDescription>
+                Pide al cliente que firme dentro del recuadro. Funciona con mouse o pantalla táctil.
+              </DialogDescription>
+            </DialogHeader>
+            <div
+              className="border rounded-md bg-background overflow-hidden"
+              style={{ touchAction: "none" }}
+            >
               <SignatureCanvas
                 ref={sigRef}
                 penColor="hsl(var(--foreground))"
                 canvasProps={{
-                  className: "w-full touch-none",
-                  style: { width: "100%", height: 200 },
+                  className: "w-full",
+                  style: { width: "100%", height: 300, touchAction: "none" },
                 }}
               />
             </div>
-          )}
-        </div>
+            <DialogFooter className="gap-2 sm:gap-2">
+              <Button type="button" variant="ghost" onClick={limpiarFirma}>
+                <Eraser className="h-4 w-4 mr-2" />
+                Limpiar
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setFirmaDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="button" onClick={handleGuardarFirma}>
+                Guardar firma
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
 
         {(coords.lat ?? null) !== null && (
           <div className="flex items-center text-sm text-muted-foreground gap-2">
