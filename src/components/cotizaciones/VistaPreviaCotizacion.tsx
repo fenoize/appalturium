@@ -1,9 +1,10 @@
 import { Button } from "@/components/ui/button";
-import { Printer } from "lucide-react";
+import { Printer, Download } from "lucide-react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { format } from "date-fns";
 import { useGruposCotizacion } from "@/hooks/useGruposCotizacion";
 import { useConfiguracionEmpresa } from "@/hooks/useConfiguracionEmpresa";
+import { generarCotizacionPDF } from "@/lib/pdf/cotizacionPDF";
 import type { CotizacionOpcion } from "@/hooks/useCotizacionOpciones";
 import type { Cotizacion } from "@/hooks/useCotizaciones";
 
@@ -26,6 +27,30 @@ export function VistaPreviaCotizacion({ cotizacion, opcion }: Props) {
 
   const handlePrint = () => window.print();
 
+  const handleDownloadPDF = () => {
+    generarCotizacionPDF({
+      numero: cotizacion.numero,
+      created_at: cotizacion.created_at,
+      estado: cotizacion.estado,
+      moneda: cotizacion.moneda as any,
+      subtotal: opcion.subtotal,
+      iva: opcion.impuestos,
+      total: opcion.total,
+      notas: cotizacion.notas,
+      condiciones: cotizacion.condiciones,
+      opcionEtiqueta: opcion.etiqueta,
+      cliente: cotizacion.cliente as any,
+      items: (items ?? []).map((it: any) => ({
+        descripcion: it.descripcion,
+        cantidad: Number(it.cantidad) || 0,
+        precio_unitario: Number(it.precio_unitario) || 0,
+        descuento_pct: it.descuento_pct ?? 0,
+        subtotal: Number(it.subtotal) || 0,
+        tipo: it.tipo ?? null,
+      })),
+    });
+  };
+
   const clienteNombre =
     cotizacion.cliente?.tipo === "empresa"
       ? cotizacion.cliente?.razon_social ?? ""
@@ -42,7 +67,10 @@ export function VistaPreviaCotizacion({ cotizacion, opcion }: Props) {
         }
       `}</style>
 
-      <div className="vp-no-print flex justify-end mb-3">
+      <div className="vp-no-print flex justify-end gap-2 mb-3">
+        <Button size="sm" variant="outline" onClick={handleDownloadPDF}>
+          <Download className="h-4 w-4 mr-2" /> Descargar PDF
+        </Button>
         <Button size="sm" onClick={handlePrint}>
           <Printer className="h-4 w-4 mr-2" /> Imprimir
         </Button>
