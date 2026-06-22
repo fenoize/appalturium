@@ -254,8 +254,15 @@ export function InformeFinalForm({ otId, onSaved }: InformeFinalFormProps) {
         setYaExiste(true);
       }
 
-      if (firmaUrl) setFirmaPreviaUrl(firmaUrl);
+      if (firmaUrl) {
+        setFirmaPreviaUrl(firmaUrl);
+        setMantenerFirma(true);
+      }
+      setFirmaDataUrl(null);
       toast.success(yaExiste ? "Informe actualizado" : "Informe final guardado");
+      if (!firmaUrl) {
+        toast.warning("Informe guardado sin firma del cliente");
+      }
       onSaved?.();
     } catch (err: any) {
       toast.error("Error al guardar informe", { description: err.message });
