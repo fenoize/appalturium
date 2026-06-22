@@ -21,6 +21,7 @@ import {
   FormDescription,
 } from "@/components/ui/form";
 import { DocumentoVenta } from "@/hooks/useDocumentosVenta";
+import { formatCurrency } from "@/lib/formatCurrency";
 
 const pagoSchema = z.object({
   fecha: z.string().min(1, "La fecha es requerida"),
@@ -57,7 +58,7 @@ export function PagoForm({ documento, onSubmit, onCancel, defaultMonto, contexto
   const handleSubmit = (data: PagoFormData) => {
     if (data.monto > documento.saldo) {
       form.setError("monto", {
-        message: `El monto no puede exceder el saldo pendiente ($${documento.saldo.toFixed(2)})`,
+        message: `El monto no puede exceder el saldo pendiente (${formatCurrency(documento.saldo, (documento.moneda as any) || "CLP")})`,
       });
       return;
     }
@@ -70,7 +71,7 @@ export function PagoForm({ documento, onSubmit, onCancel, defaultMonto, contexto
         <div className="bg-muted p-3 rounded-lg text-sm">
           <p className="font-medium">Documento: {documento.numero}</p>
           {contexto && <p className="text-primary font-medium">{contexto}</p>}
-          <p className="text-muted-foreground">Saldo pendiente: ${documento.saldo.toFixed(2)}</p>
+          <p className="text-muted-foreground">Saldo pendiente: {formatCurrency(documento.saldo, (documento.moneda as any) || "CLP")}</p>
         </div>
 
         <FormField
@@ -104,7 +105,7 @@ export function PagoForm({ documento, onSubmit, onCancel, defaultMonto, contexto
                 />
               </FormControl>
               <FormDescription>
-                Máximo: ${documento.saldo.toFixed(2)}
+                Máximo: {formatCurrency(documento.saldo, (documento.moneda as any) || "CLP")}
               </FormDescription>
               <FormMessage />
             </FormItem>

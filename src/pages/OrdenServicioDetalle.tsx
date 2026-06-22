@@ -26,7 +26,7 @@ import { DocumentoVentaForm } from "@/components/facturacion/DocumentoVentaForm"
 import { DocumentoVentaCard } from "@/components/facturacion/DocumentoVentaCard";
 import { PagoForm } from "@/components/facturacion/PagoForm";
 import { PlanPagoCard } from "@/components/facturacion/PlanPagoCard";
-import { useCrearPlanPagos, useVincularPagoCuota } from "@/hooks/usePlanPagos";
+import { useCrearPlanPagos } from "@/hooks/usePlanPagos";
 import { ListaPagos } from "@/components/facturacion/ListaPagos";
 import { ResumenFinanciero } from "@/components/facturacion/ResumenFinanciero";
 import { ComunicacionesTimeline } from "@/components/comunicaciones/ComunicacionesTimeline";
@@ -64,7 +64,7 @@ export default function OrdenServicioDetalle() {
   const [dialogPresupuesto, setDialogPresupuesto] = useState(false);
   const [dialogDocumento, setDialogDocumento] = useState(false);
   const [dialogPago, setDialogPago] = useState<
-    | { documentoId: string; cuotaId?: string; numeroCuota?: number; monto?: number }
+    | { documentoId: string }
     | null
   >(null);
 
@@ -79,7 +79,7 @@ export default function OrdenServicioDetalle() {
   const registrarPago = useRegistrarPago();
   const eliminarPago = useEliminarPago();
   const crearPlanPagos = useCrearPlanPagos();
-  const vincularPagoCuota = useVincularPagoCuota();
+  
   const queryClient = useQueryClient();
   const { data: estadosOT } = useParametrosSistema("service_statuses");
   const [cambiandoEstado, setCambiandoEstado] = useState(false);
@@ -185,14 +185,11 @@ export default function OrdenServicioDetalle() {
     );
   };
 
-  const handleRegistrarPago = (documentoId: string, data: any, cuotaId?: string) => {
+  const handleRegistrarPago = (documentoId: string, data: any) => {
     registrarPago.mutate(
       { ...data, documento_id: documentoId },
       {
-        onSuccess: async (pago: any) => {
-          if (cuotaId && pago?.id) {
-            await vincularPagoCuota.mutateAsync({ cuotaId, pagoId: pago.id });
-          }
+        onSuccess: () => {
           setDialogPago(null);
         },
       }
@@ -398,14 +395,6 @@ export default function OrdenServicioDetalle() {
                   <PlanPagoCard
                     documentoId={documento.id}
                     moneda={documento.moneda}
-                    onRegistrarPagoCuota={(cuota) =>
-                      setDialogPago({
-                        documentoId: documento.id,
-                        cuotaId: cuota.id,
-                        numeroCuota: cuota.numero_cuota,
-                        monto: cuota.monto_esperado,
-                      })
-                    }
                   />
                   <ListaPagosDocumento documentoId={documento.id} />
                 </div>
@@ -460,16 +449,11 @@ export default function OrdenServicioDetalle() {
         <Dialog open={!!dialogPago} onOpenChange={() => setDialogPago(null)}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>
-                Registrar Pago
-                {dialogPago.numeroCuota ? ` — Cuota ${dialogPago.numeroCuota}` : ""}
-              </DialogTitle>
+              <DialogTitle>Registrar Pago</DialogTitle>
             </DialogHeader>
             <PagoForm
               documento={documentos.find((d) => d.id === dialogPago.documentoId)!}
-              defaultMonto={dialogPago.monto}
-              contexto={dialogPago.numeroCuota ? `Cuota ${dialogPago.numeroCuota}` : undefined}
-              onSubmit={(data) => handleRegistrarPago(dialogPago.documentoId, data, dialogPago.cuotaId)}
+              onSubmit={(data) => handleRegistrarPago(dialogPago.documentoId, data)}
               onCancel={() => setDialogPago(null)}
             />
           </DialogContent>
