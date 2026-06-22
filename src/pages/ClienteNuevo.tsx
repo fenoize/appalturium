@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, X, Building2, User, MapPin, Users, CreditCard } from "lucide-react";
 import { formatRut, cleanRut, validateRut } from "@/lib/rut-utils";
 import { REGIONES_COMUNAS, REGIONES } from "@/data/regionesComunas";
+import { AddressAutocomplete } from "@/components/ubicacion/AddressAutocomplete";
 
 export default function ClienteNuevo() {
   const navigate = useNavigate();
@@ -47,6 +48,9 @@ export default function ClienteNuevo() {
     ubicacion_ciudad: "",
     ubicacion_region: "",
     ubicacion_horario: "",
+    ubicacion_lat: null as number | null,
+    ubicacion_lng: null as number | null,
+    
     
     // Contacto Principal
     contacto_nombre: "",
@@ -173,6 +177,8 @@ export default function ClienteNuevo() {
         ciudad: formData.ubicacion_ciudad,
         region: formData.ubicacion_region,
         horario_atencion: formData.ubicacion_horario || null,
+        lat: formData.ubicacion_lat,
+        lng: formData.ubicacion_lng,
         es_principal: true,
         activo: true,
       };
@@ -506,10 +512,20 @@ export default function ClienteNuevo() {
 
                 <div className="space-y-2">
                   <Label htmlFor="ubicacion_direccion">Dirección *</Label>
-                  <Input
+                  <AddressAutocomplete
                     id="ubicacion_direccion"
                     value={formData.ubicacion_direccion}
-                    onChange={(e) => setFormData({ ...formData, ubicacion_direccion: e.target.value })}
+                    onChange={(v) => setFormData({ ...formData, ubicacion_direccion: v })}
+                    onPick={(pick) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        ubicacion_direccion: pick.direccion,
+                        ubicacion_region: pick.region ?? prev.ubicacion_region,
+                        ubicacion_comuna: pick.comuna ?? "",
+                        ubicacion_lat: pick.lat,
+                        ubicacion_lng: pick.lng,
+                      }))
+                    }
                     placeholder="Calle, número, piso, depto"
                     required
                   />

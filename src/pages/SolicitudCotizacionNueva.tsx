@@ -63,6 +63,7 @@ import {
   Film,
   FileText,
 } from "lucide-react";
+import { AddressAutocomplete } from "@/components/ubicacion/AddressAutocomplete";
 
 const TIPOS_SERVICIO = ["Instalación", "Mantención", "Servicio", "Garantía"] as const;
 const BUCKET = "solicitud-adjuntos";
@@ -118,6 +119,8 @@ export default function SolicitudCotizacionNueva() {
     numeracion: "",
     region: "",
     comuna: "",
+    lat: null as number | null,
+    lng: null as number | null,
   });
   const [creandoUbicacion, setCreandoUbicacion] = useState(false);
 
@@ -317,6 +320,8 @@ export default function SolicitudCotizacionNueva() {
           comuna: nuevaUbic.comuna,
           ciudad: ciudadDefault,
           region: nuevaUbic.region,
+          lat: nuevaUbic.lat,
+          lng: nuevaUbic.lng,
           tipo: "sucursal",
           es_principal: false,
           por_defecto: false,
@@ -328,7 +333,7 @@ export default function SolicitudCotizacionNueva() {
       await refetchUbicaciones();
       setUbicacionId(data.id);
       setShowNuevaUbicacion(false);
-      setNuevaUbic({ alias: "", direccion: "", numeracion: "", region: "", comuna: "" });
+      setNuevaUbic({ alias: "", direccion: "", numeracion: "", region: "", comuna: "", lat: null, lng: null });
       toast({ title: "Ubicación creada" });
     } catch (err: any) {
       toast({
@@ -576,10 +581,18 @@ export default function SolicitudCotizacionNueva() {
                       </div>
                       <div>
                         <Label>Dirección *</Label>
-                        <Input
+                        <AddressAutocomplete
                           value={nuevaUbic.direccion}
-                          onChange={(e) =>
-                            setNuevaUbic({ ...nuevaUbic, direccion: e.target.value })
+                          onChange={(v) => setNuevaUbic({ ...nuevaUbic, direccion: v })}
+                          onPick={(pick) =>
+                            setNuevaUbic((prev) => ({
+                              ...prev,
+                              direccion: pick.direccion,
+                              region: pick.region ?? prev.region,
+                              comuna: pick.comuna ?? "",
+                              lat: pick.lat,
+                              lng: pick.lng,
+                            }))
                           }
                           placeholder="Ej: Av. Principal"
                         />
