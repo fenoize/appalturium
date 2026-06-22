@@ -45,6 +45,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { AsignacionesPanel } from "@/components/ordenes/AsignacionesPanel";
+import { OrdenServicioTimeline } from "@/components/ordenes/OrdenServicioTimeline";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { formatCurrency } from "@/lib/formatCurrency";
