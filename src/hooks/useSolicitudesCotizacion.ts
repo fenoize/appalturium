@@ -105,6 +105,7 @@ export function useCrearSolicitud() {
 }
 
 export const ESTADO_LABELS: Record<EstadoSolicitud, string> = {
+  borrador: "Borrador",
   nueva: "Nueva",
   en_presupuesto: "En presupuesto",
   cotizada: "Cotizada",
@@ -112,3 +113,30 @@ export const ESTADO_LABELS: Record<EstadoSolicitud, string> = {
   aceptada: "Aceptada",
   cerrada_sin_acuerdo: "Cerrada sin acuerdo",
 };
+
+export function useActualizarSolicitud() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, patch }: { id: string; patch: Partial<CrearSolicitudInput> & { estado?: EstadoSolicitud } }) => {
+      const { data, error } = await (supabase as any)
+        .from("solicitudes_cotizacion")
+        .update(patch)
+        .eq("id", id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as SolicitudCotizacion;
+    },
+    onSuccess: (_data, vars) => {
+      qc.invalidateQueries({ queryKey: ["solicitudes_cotizacion"] });
+      qc.invalidateQueries({ queryKey: ["solicitud_cotizacion", vars.id] });
+      toast({ title: "Solicitud actualizada" });
+    },
+    onError: (e: any) =>
+      toast({
+        title: "Error al actualizar",
+        description: e?.message ?? "Intenta nuevamente",
+        variant: "destructive",
+      }),
+  });
+}
