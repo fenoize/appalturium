@@ -373,7 +373,7 @@ export default function OrdenServicioDetalle() {
 
         {/* Tab: Presupuesto */}
         <TabsContent value="presupuesto" className="space-y-6">
-          {loadingPresupuesto ? (
+          {loadingPresupuesto || loadingPresupuestoCot ? (
             <Card>
               <CardContent className="pt-6">
                 <div className="animate-pulse space-y-4">
@@ -390,6 +390,67 @@ export default function OrdenServicioDetalle() {
               onRechazar={handleRechazarPresupuesto}
               canEdit={true}
             />
+          ) : presupuestoCotizacion ? (
+            <Card>
+              <CardContent className="pt-6 space-y-4">
+                <div className="flex items-center justify-between gap-2 flex-wrap">
+                  <div>
+                    <p className="text-sm text-muted-foreground">
+                      Presupuesto interno de la cotización de origen
+                    </p>
+                    {cotizacionOrigen && (
+                      <button
+                        type="button"
+                        className="text-sm font-medium text-primary hover:underline"
+                        onClick={() => navigate(`/cotizaciones/${cotizacionOrigen.id}`)}
+                      >
+                        Cotización {cotizacionOrigen.numero}
+                      </button>
+                    )}
+                  </div>
+                  <Badge variant={presupuestoCotizacion.estado === "aprobado" ? "default" : "secondary"}>
+                    {presupuestoCotizacion.estado}
+                  </Badge>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Costo total</p>
+                    <p className="font-medium">{formatCurrency(presupuestoCotizacion.costo_total ?? 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Margen</p>
+                    <p className="font-medium">{Number(presupuestoCotizacion.margen_pct ?? 0)}%</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Impuestos</p>
+                    <p className="font-medium">{formatCurrency(presupuestoCotizacion.impuestos ?? 0)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs uppercase text-muted-foreground">Total</p>
+                    <p className="font-semibold">{formatCurrency(presupuestoCotizacion.total ?? 0)}</p>
+                  </div>
+                </div>
+
+                {Array.isArray(presupuestoCotizacion.items) && presupuestoCotizacion.items.length > 0 && (
+                  <div className="border rounded-md divide-y">
+                    {presupuestoCotizacion.items.map((it: any, idx: number) => (
+                      <div key={idx} className="flex items-center justify-between px-3 py-2 text-sm">
+                        <span className="truncate">{it.descripcion || it.nombre || `Ítem ${idx + 1}`}</span>
+                        <span className="text-muted-foreground">
+                          {it.cantidad ? `${it.cantidad} × ` : ""}
+                          {formatCurrency(Number(it.precio_unitario ?? it.costo_unitario ?? 0))}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-xs text-muted-foreground">
+                  Este presupuesto fue aprobado dentro de la cotización antes de generar la OT. Las OT creadas desde el flujo de cotización no requieren un presupuesto adicional a nivel de OT.
+                </p>
+              </CardContent>
+            </Card>
           ) : (
             <Card>
               <CardContent className="pt-6 text-center space-y-4">
